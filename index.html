@@ -419,6 +419,27 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); font-si
       <button class="btn-all" onclick="showAll()">☰ Angalia Zote</button>
     </div>
     <hr class="sb-divider">
+    <div style="padding:0 4px;margin-bottom:8px;">
+      <div class="sb-label">Madini (Metals)</div>
+      <div id="metalList">
+        <div class="coin-btn" style="cursor:default;">
+          <span style="font-size:14px">🥇</span>
+          <span class="coin-sym">XAU/USD</span>
+          <span class="coin-price-sb" id="metal_XAU">—</span>
+        </div>
+        <div class="coin-btn" style="cursor:default;">
+          <span style="font-size:14px">🥈</span>
+          <span class="coin-sym">XAG/USD</span>
+          <span class="coin-price-sb" id="metal_XAG">—</span>
+        </div>
+        <div class="coin-btn" style="cursor:default;">
+          <span style="font-size:14px">🥉</span>
+          <span class="coin-sym">XPT/USD</span>
+          <span class="coin-price-sb" id="metal_XPT">—</span>
+        </div>
+      </div>
+    </div>
+    <hr class="sb-divider">
     <div style="padding:0 4px;">
       <div class="sb-label" style="margin-bottom:6px;">Chart Muda</div>
       <div class="tf-row">
@@ -517,6 +538,25 @@ const COINS = [
 ];
 
 // ════════════════════════════════════════
+//  COINGECKO ID MAP
+// ════════════════════════════════════════
+const GECKO_IDS = {
+  BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', SOL:'solana',
+  XRP:'ripple', DOGE:'dogecoin', ADA:'cardano', AVAX:'avalanche-2',
+  DOT:'polkadot', LINK:'chainlink', TRX:'tron', SHIB:'shiba-inu',
+  LTC:'litecoin', BCH:'bitcoin-cash', UNI:'uniswap', ATOM:'cosmos',
+  NEAR:'near', ARB:'arbitrum', OP:'optimism', INJ:'injective-protocol',
+  SUI:'sui', APT:'aptos', FIL:'filecoin', MATIC:'matic-network',
+  ICP:'internet-computer', RENDER:'render-token', FET:'fetch-ai',
+  PEPE:'pepe', WIF:'dogwifcoin', TON:'the-open-network', XLM:'stellar',
+  ALGO:'algorand', VET:'vechain', HBAR:'hedera-hashgraph', AAVE:'aave',
+  CRV:'curve-dao-token', MKR:'maker', SNX:'havven', GRT:'the-graph',
+  LDO:'lido-dao', SAND:'the-sandbox', MANA:'decentraland', AXS:'axie-infinity',
+  CHZ:'chiliz', EOS:'eos', XMR:'monero', EGLD:'elrond-erd-2',
+  THETA:'theta-token', FTM:'fantom', RUNE:'thorchain',
+};
+
+// ════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════
 const S = {
@@ -535,6 +575,7 @@ const S = {
   ready:     false,
   alerts:    {}, // { 'BTC': targetPrice }
   signalTimers: {}, // validity countdown timers
+  metals:    {}, // { XAU: price, XAG: price, XPT: price }
 };
 
 // ════════════════════════════════════════
@@ -564,80 +605,83 @@ const TF_LABEL    = {'1m':'Dakika 3','5m':'Dakika 15','15m':'Dakika 45','1h':'Ma
 //  BINANCE — REST preload + batched WS
 // ════════════════════════════════════════
 
-// Step 1: REST API — pata bei zote mara moja, na fallback kwa coin moja moja
+// Step 1: Washa app mara moja — WS ndiyo chanzo kikuu
+// REST ni bonus tu (inajaribu background, haizuii loading)
 async function preloadPricesREST() {
-  setWsStatus('wait','⏳ Inapakia bei...');
+  setWsStatus('wait','⏳ Inaungana...');
 
-  // Jaribu batch kwanza (haraka)
-  let batchOk = false;
-  try {
-    const symbols = COINS.map(c => '"'+c.id+'USDT"').join(',');
-    const url = `https://api.binance.com/api/v3/ticker/24hr?symbols=[${encodeURIComponent('['+symbols+']').replace('%5B','[').replace('%5D',']')}]`;
-    const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${symbols}]`,
-      {signal: AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined});
-    if(res.ok){
-      const arr = await res.json();
-      if(Array.isArray(arr) && arr.length > 0){
-        arr.forEach(d => storePrice(d));
-        batchOk = true;
-      }
-    }
-  } catch(e){ /* itajaribu njia ya pili */ }
-
-  // Fallback: pata coin moja moja (polepole lakini inafanya kazi)
-  if(!batchOk){
-    setWsStatus('wait','⏳ Inapakia coin kwa coin...');
-    // Pata BTC kwanza ili render haraka
-    await fetchSinglePrice(S.selected.id);
-    S.ready = true;
-    renderSingle(S.selected);
-    buildSidebar();
-    fetchKlines(S.selected, S.tf);
-    connectKlineWS(S.selected, S.tf);
-    // Pata wengine background
-    for(const coin of COINS){
-      if(coin.id === S.selected.id) continue;
-      fetchSinglePrice(coin.id).catch(()=>{});
-      await new Promise(r=>setTimeout(r,80));
-    }
-  } else {
-    S.ready = true;
-    renderSingle(S.selected);
-    buildSidebar();
-    fetchKlines(S.selected, S.tf);
-    connectKlineWS(S.selected, S.tf);
-  }
-
-  setWsStatus('wait','⏳ WS inaunganika...');
+  // Washa WS MARA MOJA — hii ndiyo itakayoleta data kweli kweli
   connectTickerWSBatched();
+
+  // Jaribu REST background (haitaathiri loading speed)
+  setTimeout(async () => {
+    await tryBinanceREST();
+  }, 500);
+}
+
+async function tryBinanceREST() {
+  // Jaribu coin moja (BTC) kwanza kujua kama Binance inafanya kazi
+  try {
+    const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
+      signal: AbortSignal.timeout(4000)
+    });
+    if(r.ok){
+      // Binance inafanya kazi — pata zote batch
+      try {
+        const symbols = COINS.map(c=>'"'+c.id+'USDT"').join(',');
+        const r2 = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${symbols}]`, {
+          signal: AbortSignal.timeout(8000)
+        });
+        if(r2.ok){
+          const arr = await r2.json();
+          if(Array.isArray(arr) && arr.length>0){
+            arr.forEach(d => storePrice(d));
+            console.log('Binance REST OK: '+arr.length+' coins');
+            // Kama bado haijafunguliwa, fungua sasa
+            if(!S.ready){
+              S.ready = true;
+              renderSingle(S.selected);
+              buildSidebar();
+              fetchKlines(S.selected, S.tf);
+              connectKlineWS(S.selected, S.tf);
+            } else {
+              buildSidebar(); // Sasisha bei zilizopo
+            }
+          }
+        }
+      } catch(e){}
+    }
+  } catch(e){
+    console.log('Binance REST haipatikani (WS inaendelea)');
+  }
 }
 
 function storePrice(d){
   const sym = d.symbol ? d.symbol.replace('USDT','') : d.s ? d.s.replace('USDT','') : null;
   if(!sym) return;
+  const price = parseFloat(d.lastPrice||d.c||0);
+  if(!price) return;
   S.prices[sym] = {
-    price:  parseFloat(d.lastPrice||d.c||0),
-    open:   parseFloat(d.openPrice||d.o||0),
-    high:   parseFloat(d.highPrice||d.h||0),
-    low:    parseFloat(d.lowPrice||d.l||0),
-    close:  parseFloat(d.lastPrice||d.c||0),
-    vol:    parseFloat(d.volume||d.v||0)*parseFloat(d.lastPrice||d.c||1),
+    price,
+    open:   parseFloat(d.openPrice||d.o||price),
+    high:   parseFloat(d.highPrice||d.h||price),
+    low:    parseFloat(d.lowPrice||d.l||price),
+    close:  price,
+    vol:    parseFloat(d.volume||d.v||0)*price,
     chg24h: parseFloat(d.priceChangePercent||d.P||0),
-    bid:    parseFloat(d.bidPrice||d.b||d.lastPrice||d.c||0),
-    ask:    parseFloat(d.askPrice||d.a||d.lastPrice||d.c||0),
+    bid:    parseFloat(d.bidPrice||d.b||price),
+    ask:    parseFloat(d.askPrice||d.a||price),
     trades: parseInt(d.count||d.n||0),
   };
 }
 
 async function fetchSinglePrice(sym){
   try{
-    const r = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}USDT`);
+    const r = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${sym}USDT`,{signal:AbortSignal.timeout(3000)});
     if(!r.ok) return;
-    const d = await r.json();
-    storePrice(d);
-    // Update sidebar bei mara moja
-    const sbEl = document.getElementById('sbp_'+sym);
-    if(sbEl && S.prices[sym]) sbEl.textContent = fP(S.prices[sym].price);
+    storePrice(await r.json());
+    const sbEl=document.getElementById('sbp_'+sym);
+    if(sbEl&&S.prices[sym]) sbEl.textContent=fP(S.prices[sym].price);
   }catch(e){}
 }
 
@@ -658,8 +702,10 @@ function openBatchWS(coins, isPrimary) {
 
   ws.onopen = () => {
     if (isPrimary) {
-      setWsStatus('ok','● Live');
-      if (!S.wsToastShown) { toast('✅ Binance WebSocket — Imeunganishwa!'); S.wsToastShown=true; }
+      setWsStatus('ok','● Live — Inasubiri data...');
+      if (!S.wsToastShown) { toast('✅ WebSocket imeunganishwa — inapokea data...'); S.wsToastShown=true; }
+      // Onyesha sidebar na coins (bila bei bado)
+      buildSidebar();
     }
   };
 
@@ -670,7 +716,7 @@ function openBatchWS(coins, isPrimary) {
     const sym = d.s.replace('USDT','');
     const oldPrice = S.prices[sym]?.price || 0;
     storePrice({...d, symbol: d.s});
-    // Kama app bado haijafunguliwa, fanya render mara ya kwanza
+    // Render mara ya kwanza ikifika data ya coin iliyochaguliwa
     if(!S.ready && sym === S.selected.id){
       S.ready = true;
       renderSingle(S.selected);
@@ -678,6 +724,9 @@ function openBatchWS(coins, isPrimary) {
       fetchKlines(S.selected, S.tf);
       connectKlineWS(S.selected, S.tf);
       setWsStatus('ok','● Live');
+      toast('✅ Data imefika — SadeTrade iko tayari!');
+    } else if(S.ready && sym === S.selected.id && S.view==='single'){
+      updateLivePrice(sym);
     }
     S.tickCount++;
     const tcEl = document.getElementById('tickCount');
@@ -1674,6 +1723,62 @@ Angalia: API Key sahihi, muunganiko wa intaneti, na credit ya xAI account.';
 }
 
 // ════════════════════════════════════════
+//  METAL PRICES (MetalPrice API)
+// ════════════════════════════════════════
+async function fetchMetalPrices(){
+  try{
+    const METAL_KEY = '2952a78c9779331373b7f8dec2d6708d';
+    const url = `https://api.metalpriceapi.com/v1/latest?api_key=${METAL_KEY}&base=USD&currencies=XAU,XAG,XPT`;
+    const res = await fetch(url, {signal: AbortSignal.timeout(8000)});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error?.message||'API error');
+
+    // MetalPrice rates ni inverse (XAU per USD) — tunahitaji USD per XAU
+    const rates = data.rates;
+    const metals = {
+      XAU: rates.USDXAU ? (1/rates.USDXAU) : null,
+      XAG: rates.USDXAG ? (1/rates.USDXAG) : null,
+      XPT: rates.USDXPT ? (1/rates.USDXPT) : null,
+    };
+
+    Object.entries(metals).forEach(([sym, price])=>{
+      if(!price) return;
+      const el = document.getElementById('metal_'+sym);
+      if(el){
+        el.textContent = '$'+price.toFixed(2);
+        el.style.color = 'var(--warn)';
+      }
+    });
+
+    // Hifadhi kwa matumizi mengine
+    S.metals = metals;
+    console.log('Metals OK:', metals);
+  }catch(e){
+    console.warn('MetalPrice error:', e.message);
+    // Jaribu njia mbadala (metalpriceapi.com)
+    tryAltMetalAPI();
+  }
+}
+
+async function tryAltMetalAPI(){
+  try{
+    const METAL_KEY = '2952a78c9779331373b7f8dec2d6708d';
+    // Jaribu endpoint tofauti
+    const url = `https://api.metalpriceapi.com/v1/latest?api_key=${METAL_KEY}&base=XAU&currencies=USD`;
+    const res = await fetch(url, {signal: AbortSignal.timeout(6000)});
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data.success) return;
+    const usdPerXau = data.rates?.USD ? (1/data.rates.USD) : null;
+    if(usdPerXau){
+      const el = document.getElementById('metal_XAU');
+      if(el){ el.textContent='$'+usdPerXau.toFixed(2); el.style.color='var(--warn)'; }
+    }
+  }catch(e){}
+}
+
+// ════════════════════════════════════════
 //  SIDEBAR
 // ════════════════════════════════════════
 function buildSidebar() {
@@ -1793,6 +1898,8 @@ function toast(msg,isErr=false){
 // ════════════════════════════════════════
 buildSidebar();
 preloadPricesREST();
+fetchMetalPrices();
+setInterval(fetchMetalPrices, 5*60*1000); // Refresh kila dakika 5
 </script>
 </body>
 </html>
