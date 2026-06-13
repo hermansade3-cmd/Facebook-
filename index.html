@@ -3,31 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SadeTrade — Crypto Signal Terminal v2</title>
-
-<!-- FONTS: preconnect kwanza, kisha load bila kuzuia rendering -->
+<title>SadeTrade — Crypto Signal Terminal v4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
-
 <style>
-:root {
-  --bg:#f0f4f8; --bg2:#ffffff; --panel:#ffffff; --panel2:#f5f8fc;
-  --border:#dde3ef; --border2:#c8d2e8;
-  --buy:#00b87a; --buy-light:#e6f9f3;
-  --sell:#e8334a; --sell-light:#fdedf0;
-  --neutral:#4b6cf7; --neut-light:#eef1fe;
-  --warn:#e68a00; --warn-light:#fff4e0;
-  --text:#1e2d4a; --muted:#7a8db3; --dim:#c2ccde; --white:#ffffff;
-  /* FALLBACK fonts zinaonyesha MARA MOJA bila kusubiri Google */
+:root{
+  --bg:#f0f4f8;--bg2:#ffffff;--panel:#ffffff;--panel2:#f5f8fc;
+  --border:#dde3ef;--border2:#c8d2e8;
+  --buy:#00b87a;--buy-light:#e6f9f3;
+  --sell:#e8334a;--sell-light:#fdedf0;
+  --neutral:#4b6cf7;--neut-light:#eef1fe;
+  --warn:#e68a00;--warn-light:#fff4e0;
+  --text:#1e2d4a;--muted:#7a8db3;--dim:#c2ccde;--white:#ffffff;
   --mono:'IBM Plex Mono','Courier New',monospace;
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;overflow-x:hidden}
-
-/* ─── HEADER ─── */
 .header{background:var(--white);border-bottom:1px solid var(--border);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 1px 8px rgba(30,45,74,0.06)}
 .brand{font-family:var(--mono);font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;color:var(--text)}
 .brand-mark{background:linear-gradient(135deg,#00b87a,#4b6cf7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -39,12 +32,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .tick-counter span{color:var(--buy);font-weight:700}
 .hdr-right{display:flex;align-items:center;gap:10px}
 .last-update{font-family:var(--mono);font-size:10px;color:var(--muted)}
-
-/* ─── LAYOUT ─── */
-.layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 52px)}
-
-/* ─── SIDEBAR ─── */
-.sidebar{background:var(--white);border-right:1px solid var(--border);padding:12px 8px;overflow-y:auto;position:sticky;top:52px;height:calc(100vh - 52px);scrollbar-width:thin;contain:layout}
+.layout{display:grid;grid-template-columns:205px 1fr;min-height:calc(100vh - 52px)}
+.sidebar{background:var(--white);border-right:1px solid var(--border);padding:12px 8px;overflow-y:auto;position:sticky;top:52px;height:calc(100vh - 52px);scrollbar-width:thin}
 .sb-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 6px;margin-bottom:8px}
 .coin-btn{display:flex;align-items:center;gap:7px;width:100%;padding:7px 8px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text);cursor:pointer;transition:background .1s;margin-bottom:2px;font-family:var(--sans);font-size:12px;text-align:left}
 .coin-btn:hover{background:var(--panel2);border-color:var(--border)}
@@ -59,18 +48,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .tf-btn.active{background:var(--neut-light);border-color:var(--neutral);color:var(--neutral)}
 .btn-all{width:100%;margin-top:8px;padding:7px;border-radius:6px;border:1px dashed var(--border2);background:transparent;color:var(--neutral);font-family:var(--mono);font-size:10px;cursor:pointer}
 .btn-all:hover{background:var(--neut-light)}
-
-/* ─── MAIN ─── */
 .main{padding:14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
-
-/* ─── SKELETON LOADER (inaonyesha MARA MOJA kabla data) ─── */
 .skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--panel2) 50%,var(--border) 75%);background-size:400% 100%;animation:shimmer 1.2s infinite;border-radius:6px}
 @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 .sk-header{height:80px;border-radius:12px;margin-bottom:12px}
 .sk-card{height:300px;border-radius:12px;margin-bottom:12px}
 .sk-chart{height:200px;border-radius:12px}
-
-/* ─── COIN HEADER ─── */
 .coin-header{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
 .coin-title{display:flex;align-items:center;gap:10px}
 .coin-em{font-size:26px}
@@ -85,8 +68,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .meta-item{text-align:center}
 .meta-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
 .meta-val{font-family:var(--mono);font-size:11px;font-weight:600;margin-top:2px}
-
-/* ─── SIGNAL CARD ─── */
 .sig-card{background:var(--white);border:2px solid var(--border2);border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(30,45,74,0.07)}
 .sig-card.is-buy{border-color:rgba(0,184,122,0.4)}
 .sig-card.is-sell{border-color:rgba(232,51,74,0.4)}
@@ -114,37 +95,27 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .sc-val{font-family:var(--mono);font-size:15px;font-weight:700}
 .sc-val.entry{color:var(--neutral)}.sc-val.sl{color:var(--sell)}.sc-val.tp{color:var(--buy)}.sc-val.rr{color:var(--warn)}
 .sc-sub{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
-
-/* ─── CONFIDENCE BAR ─── */
 .conf-wrap{margin-bottom:14px}
 .conf-top{display:flex;justify-content:space-between;margin-bottom:5px}
 .conf-lbl{font-size:10px;color:var(--muted);font-weight:500}
 .conf-pct{font-family:var(--mono);font-size:12px;font-weight:700}
 .conf-track{height:7px;background:var(--panel2);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
 .conf-fill{height:100%;border-radius:4px;transition:width .5s ease}
-
-/* ─── VALIDITY TIMER ─── */
 .validity-bar{background:var(--warn-light);border:1px solid rgba(230,138,0,.25);border-radius:8px;padding:8px 12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
 .validity-label{font-size:10px;color:var(--warn);font-weight:600;font-family:var(--mono);display:flex;align-items:center;gap:5px}
 .validity-timer{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--warn)}
 .validity-note{font-size:10px;color:var(--muted)}
-
-/* ─── REASONS BOX ─── */
 .reason-box{background:var(--panel2);border:1px solid var(--border);border-left:3px solid;border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:14px}
 .reason-box.buy{border-left-color:var(--buy)}.reason-box.sell{border-left-color:var(--sell)}.reason-box.neut{border-left-color:var(--neutral)}
 .r-title{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;font-weight:600}
 .r-points{list-style:none}
 .r-points li{font-size:11px;color:var(--text);padding:3px 0;line-height:1.5;display:flex;align-items:flex-start;gap:5px}
 .r-arrow{color:var(--muted);flex-shrink:0}
-
-/* ─── INDICATORS ─── */
 .ind-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .ind-cell{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;text-align:center}
 .ind-name{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px}
 .ind-val{font-family:var(--mono);font-size:12px;font-weight:700}
 .ind-val.bull{color:var(--buy)}.ind-val.bear{color:var(--sell)}.ind-val.neut{color:var(--warn)}
-
-/* ─── POSITION SIZING ─── */
 .pos-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
 .pos-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .pos-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
@@ -157,8 +128,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .pos-res-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px}
 .pos-res-val{font-family:var(--mono);font-size:14px;font-weight:700}
 .pos-warning{font-size:10px;color:var(--sell);margin-top:8px;font-weight:600;display:none}
-
-/* ─── SENTIMENT ─── */
 .sent-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
 .sent-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .sent-block{display:flex;flex-direction:column;gap:8px}
@@ -170,18 +139,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .ls-bar-track{height:10px;border-radius:5px;overflow:hidden;background:var(--sell-light);border:1px solid var(--border)}
 .ls-bar-fill{height:100%;background:var(--buy);border-radius:5px;transition:width .4s}
 .ls-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px}
-
-/* ─── CHART ─── */
+/* FOREX PANEL */
+.forex-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
+.forex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.forex-cell{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center;cursor:default}
+.forex-pair{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;font-weight:700}
+.forex-rate{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text)}
+.forex-chg{font-family:var(--mono);font-size:9px;margin-top:2px}
 .chart-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
 .chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .chart-title-txt{font-size:12px;font-weight:700}
 .chart-meta{font-family:var(--mono);font-size:10px;color:var(--muted)}
-
-/* ─── ALERT BTN ─── */
 .alert-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-family:var(--mono);font-size:11px;cursor:pointer;font-weight:600}
 .alert-btn.active-alert{background:var(--buy-light);border-color:var(--buy);color:var(--buy)}
-
-/* ─── OVERVIEW TABLE ─── */
 .ov-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
 .ov-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
 .ov-title{font-size:12px;font-weight:700}
@@ -198,8 +168,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .up-txt{color:var(--buy)}.dn-txt{color:var(--sell)}
 .ord-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700}
 .ord-buy{background:var(--buy-light);color:var(--buy)}.ord-sell{background:var(--sell-light);color:var(--sell)}.ord-neut{background:var(--neut-light);color:var(--neutral)}
-
-/* ─── LOADING / ERROR ─── */
 .loading-ovl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px}
 .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--buy);border-radius:50%;animation:spin .75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -207,17 +175,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .err-box{background:var(--sell-light);border:1px solid rgba(232,51,74,0.3);border-radius:8px;padding:14px;font-size:12px;color:var(--sell);font-family:var(--mono);line-height:1.7}
 .disclaimer{background:var(--warn-light);border:1px solid rgba(230,138,0,0.2);border-radius:8px;padding:9px 14px;font-size:11px;color:var(--muted);line-height:1.6}
 .disclaimer strong{color:var(--warn)}
-
-/* ─── WS STATUS ─── */
 .ws-status{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;align-items:center;gap:5px}
 .ws-ok{color:var(--buy)}.ws-err{color:var(--sell)}.ws-wait{color:var(--warn)}
-
-/* ─── AI PANEL ─── */
 .ai-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
 .ai-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .ai-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
-.ai-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:10px;background:linear-gradient(135deg,#00b87a22,#4b6cf722);border:1px solid var(--border2);color:var(--neutral);font-weight:700}
-.ai-ask-btn{padding:7px 16px;border-radius:7px;border:none;background:linear-gradient(135deg,#4b6cf7,#00b87a);color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;width:100%;padding:10px}
+.ai-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:10px;background:linear-gradient(135deg,#ff6b6b22,#ffa50022);border:1px solid var(--border2);color:#e65c00;font-weight:700}
+.ai-ask-btn{padding:10px;border-radius:7px;border:none;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;width:100%}
 .ai-ask-btn:disabled{opacity:.5;cursor:not-allowed}
 .ai-output{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-height:60px;font-size:12px;line-height:1.7;font-family:var(--sans);white-space:pre-wrap;word-break:break-word}
 .ai-output.loading{color:var(--muted);font-style:italic}
@@ -228,13 +192,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .ai-field-val{font-family:var(--mono);font-size:13px;font-weight:700}
 .ai-field-val.entry{color:var(--neutral)}.ai-field-val.sl{color:var(--sell)}.ai-field-val.tp{color:var(--buy)}
 .ai-disclaimer{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5}
-
-/* ─── TOAST ─── */
 #toasts{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:5px}
 .toast{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:11px;box-shadow:0 4px 20px rgba(30,45,74,0.12);animation:slideUp .2s ease;max-width:300px}
 @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* ─── MODAL ─── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,45,74,.35);z-index:500;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;width:340px;box-shadow:0 8px 40px rgba(30,45,74,.15)}
@@ -245,13 +205,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .modal-btns{display:flex;gap:8px}
 .modal-confirm{flex:1;padding:9px;border-radius:8px;border:none;background:var(--neutral);color:var(--white);font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer}
 .modal-cancel{padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:12px;cursor:pointer}
-
-/* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-
-/* ─── RESPONSIVE ─── */
 @media(max-width:880px){
   .layout{grid-template-columns:1fr}
   .sidebar{position:static;height:auto;display:flex;flex-wrap:wrap;gap:8px;padding:10px}
@@ -260,12 +216,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
   .pos-grid{grid-template-columns:1fr 1fr}
   .pos-results{grid-template-columns:1fr 1fr}
   .sent-row{grid-template-columns:1fr}
+  .forex-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:540px){
   .sig-grid{grid-template-columns:1fr 1fr}
   .ind-row{grid-template-columns:repeat(2,1fr)}
   .pos-grid{grid-template-columns:1fr}
   .pos-results{grid-template-columns:1fr}
+  .forex-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -273,7 +231,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 
 <header class="header">
   <div class="brand">⚡ Sade<span class="brand-mark">Trade</span>
-    <span style="color:var(--muted);font-size:10px;font-weight:400;margin-left:2px">TERMINAL v2</span>
+    <span style="color:var(--muted);font-size:10px;font-weight:400;margin-left:2px">TERMINAL v4</span>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="ws-pill"><div class="dot blink"></div>Binance Live</div>
@@ -288,17 +246,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 <div class="layout">
   <aside class="sidebar" id="sidebarEl">
     <div style="padding:0 4px;margin-bottom:8px">
-      <div class="sb-label">Coins</div>
+      <div class="sb-label">Crypto</div>
       <div id="coinList"></div>
       <button class="btn-all" onclick="showAll()">☰ Angalia Zote</button>
     </div>
     <hr class="sb-divider">
     <div style="padding:0 4px;margin-bottom:8px">
-      <div class="sb-label">Madini</div>
+      <div class="sb-label">Madini & Forex</div>
       <div id="metalList">
-        <div class="coin-btn" style="cursor:default"><span style="font-size:14px">🥇</span><span class="coin-sym">XAU/USD</span><span class="coin-price-sb" id="metal_XAU">—</span></div>
-        <div class="coin-btn" style="cursor:default"><span style="font-size:14px">🥈</span><span class="coin-sym">XAG/USD</span><span class="coin-price-sb" id="metal_XAG">—</span></div>
-        <div class="coin-btn" style="cursor:default"><span style="font-size:14px">🥉</span><span class="coin-sym">XPT/USD</span><span class="coin-price-sb" id="metal_XPT">—</span></div>
+        <div class="coin-btn" style="cursor:default"><span style="font-size:14px">🥇</span><span class="coin-sym" style="font-size:11px">XAU/USD</span><span class="coin-price-sb" id="metal_XAU">—</span></div>
+        <div class="coin-btn" style="cursor:default"><span style="font-size:14px">🥈</span><span class="coin-sym" style="font-size:11px">XAG/USD</span><span class="coin-price-sb" id="metal_XAG">—</span></div>
+        <div class="coin-btn" style="cursor:default"><span style="font-size:12px">💱</span><span class="coin-sym" style="font-size:10px">EUR/USD</span><span class="coin-price-sb" id="forex_EURUSD">—</span></div>
+        <div class="coin-btn" style="cursor:default"><span style="font-size:12px">💱</span><span class="coin-sym" style="font-size:10px">GBP/USD</span><span class="coin-price-sb" id="forex_GBPUSD">—</span></div>
+        <div class="coin-btn" style="cursor:default"><span style="font-size:12px">💱</span><span class="coin-sym" style="font-size:10px">USD/JPY</span><span class="coin-price-sb" id="forex_USDJPY">—</span></div>
       </div>
     </div>
     <hr class="sb-divider">
@@ -315,7 +275,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
     </div>
   </aside>
 
-  <!-- SKELETON inaonyesha MARA MOJA kabla data haijafika -->
   <main class="main" id="mainArea">
     <div class="skeleton sk-header"></div>
     <div class="skeleton sk-card"></div>
@@ -323,13 +282,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
   </main>
 </div>
 
-<!-- MODAL -->
 <div class="modal-overlay" id="alertModal">
   <div class="modal">
     <div class="modal-title">🔔 Weka Tahadhari ya Bei</div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Coin: <strong id="alertCoinName">—</strong> &nbsp;|&nbsp; Bei: <strong id="alertCurrentPrice">—</strong></div>
     <input class="modal-input" type="number" id="alertPriceInput" placeholder="Ingiza bei (USD)..." step="0.01">
-    <div class="modal-note">⚡ Utapata taarifa mara bei itakapofikia lengo. Inafanya kazi tu ukurasa ukiwa wazi.</div>
+    <div class="modal-note">⚡ Utapata taarifa mara bei itakapofikia lengo.</div>
     <div class="modal-btns">
       <button class="modal-confirm" onclick="confirmAlert()">✓ Weka Tahadhari</button>
       <button class="modal-cancel" onclick="closeAlertModal()">Ghairi</button>
@@ -339,7 +297,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 
 <div id="toasts"></div>
 
-<!-- Chart.js: inapakiwa async — haizuii kuonyeshwa kwa ukurasa -->
 <script>
 (function(){
   var s=document.createElement('script');
@@ -351,9 +308,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 
 <script>
 'use strict';
-// ════════════════════════════════════════
+
+// ═══════════════════════════════════
+//  API KEYS
+// ═══════════════════════════════════
+const KEYS={
+  xai:'65KTZ22AKF6JGL4E',
+  alphavantage:'e3f85901a6b24a5d853e8deafe7c3103',
+  twelvedata:'d8mmfd1r01qn3045iro0',
+  finnhub:'d8mmfd1r01qn3045irog',
+  metal:'2952a78c9779331373b7f8dec2d6708d'
+};
+
+// ═══════════════════════════════════
 //  COINS
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 const COINS=[
   {id:'BTC',name:'Bitcoin',em:'₿',ws:'btcusdt'},
   {id:'ETH',name:'Ethereum',em:'Ξ',ws:'ethusdt'},
@@ -424,20 +393,24 @@ const COINCAP_IDS={
 };
 const COINCAP_REV=Object.fromEntries(Object.entries(COINCAP_IDS).map(([k,v])=>[v,k]));
 
-// ════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════
+// ═══════════════════════════════════
+//  STATE — persist selected coin
+// ═══════════════════════════════════
+const savedCoinId=localStorage.getItem('st_selected')||'BTC';
+const defaultCoin=COINS.find(c=>c.id===savedCoinId)||COINS[0];
+const savedTF=localStorage.getItem('st_tf')||'1m';
+
 const S={
   prices:{},candles:{},signals:{},
-  selected:COINS[0],tf:'1m',view:'single',
+  selected:defaultCoin,tf:savedTF,view:'single',
   tickCount:0,ws:null,wsBatches:[],wsToastShown:false,
   klineWs:null,chartInst:null,ready:false,
-  alerts:{},metals:{},_validityInterval:null,
+  alerts:{},metals:{},forex:{},_validityInterval:null,
 };
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  FORMAT helpers
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 const fP=p=>{
   if(!p&&p!==0)return'—';
   if(p>=1000)return'$'+p.toLocaleString('en-US',{maximumFractionDigits:2});
@@ -457,9 +430,9 @@ const nowStr=()=>new Date().toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2
 const TF_VALIDITY={'1m':180,'5m':900,'15m':2700,'1h':7200,'4h':28800,'1d':86400};
 const TF_LABEL={'1m':'Dakika 3','5m':'Dakika 15','15m':'Dakika 45','1h':'Masaa 2','4h':'Masaa 8','1d':'Siku 1'};
 
-// ════════════════════════════════════════
-//  PRICE LOADING — REST mara moja, WS kwa updates
-// ════════════════════════════════════════
+// ═══════════════════════════════════
+//  PRICE STORE
+// ═══════════════════════════════════
 function storePrice(d){
   const sym=d.symbol?d.symbol.replace('USDT',''):d.s?d.s.replace('USDT',''):null;
   if(!sym)return;
@@ -479,11 +452,11 @@ function storePrice(d){
   };
 }
 
-// Hatua 1: Pata bei za haraka kupitia REST (batch moja)
+// ═══════════════════════════════════
+//  PRICE LOADING
+// ═══════════════════════════════════
 async function preloadPricesREST(){
-  // Washa WS mara moja — hii ndiyo chanzo kikuu
   openCoinCapWS();
-  // Jaribu REST nyuma (haitaathiri loading)
   try{
     const symbols=COINS.map(c=>'"'+c.id+'USDT"').join(',');
     const r=await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${symbols}]`,{signal:AbortSignal.timeout(6000)});
@@ -497,53 +470,33 @@ async function preloadPricesREST(){
           buildSidebar();
           fetchKlines(S.selected,S.tf);
           connectKlineWS(S.selected,S.tf);
-        }else{
-          buildSidebar();
-        }
+        }else buildSidebar();
       }
     }
-  }catch(e){/* WS inaendelea */}
+  }catch(e){}
 }
 
-// ── CoinCap WebSocket (inafanya kazi Tanzania) ──────────
 function openCoinCapWS(){
   const url='wss://ws.coincap.io/prices?assets='+COINS.map(c=>COINCAP_IDS[c.id]||c.id.toLowerCase()).join(',');
   const ws=new WebSocket(url);
   S.wsBatches.push(ws);
-
   ws.onopen=()=>{
     setWsStatus('ok','● CoinCap Live');
     if(!S.wsToastShown){toast('✅ CoinCap — Imeunganishwa!');S.wsToastShown=true;}
   };
-
   ws.onmessage=e=>{
-    let data;
-    try{data=JSON.parse(e.data);}catch{return;}
+    let data;try{data=JSON.parse(e.data);}catch{return;}
     Object.entries(data).forEach(([geckoId,priceStr])=>{
-      const sym=COINCAP_REV[geckoId];
-      if(!sym)return;
-      const price=parseFloat(priceStr);
-      if(!price)return;
+      const sym=COINCAP_REV[geckoId];if(!sym)return;
+      const price=parseFloat(priceStr);if(!price)return;
       const old=S.prices[sym];
-      S.prices[sym]={
-        price,
-        open:old?.open||price,
-        high:old?.high?Math.max(old.high,price):price,
-        low:old?.low?Math.min(old.low,price):price,
-        close:price,
-        vol:old?.vol||0,
-        chg24h:old?.chg24h||0,
-        bid:price*0.9999,
-        ask:price*1.0001,
-        trades:0,
-      };
+      S.prices[sym]={price,open:old?.open||price,high:old?.high?Math.max(old.high,price):price,
+        low:old?.low?Math.min(old.low,price):price,close:price,vol:old?.vol||0,
+        chg24h:old?.chg24h||0,bid:price*0.9999,ask:price*1.0001,trades:0};
       S.tickCount++;
-      // Update tick counter bila DOM reflow (batch)
       if(S.tickCount%5===0){
-        const tc=document.getElementById('tickCount');
-        const lu=document.getElementById('lastUpd');
-        if(tc)tc.textContent=S.tickCount;
-        if(lu)lu.textContent=nowStr();
+        const tc=document.getElementById('tickCount');const lu=document.getElementById('lastUpd');
+        if(tc)tc.textContent=S.tickCount;if(lu)lu.textContent=nowStr();
       }
       flashSidebarPrice(sym);
       checkPriceAlert(sym,price,old?.price||price);
@@ -552,70 +505,38 @@ function openCoinCapWS(){
         if(S.tickCount%5===0)recomputeAndUpdateSignal(sym);
       }
       if(!S.ready&&sym===S.selected.id){
-        S.ready=true;
-        renderSingle(S.selected);
-        buildSidebar();
-        fetchKlines(S.selected,S.tf);
-        connectKlineWS(S.selected,S.tf);
+        S.ready=true;renderSingle(S.selected);buildSidebar();
+        fetchKlines(S.selected,S.tf);connectKlineWS(S.selected,S.tf);
       }
+      if(S.tickCount%30===0)buildSidebar();
     });
-    // Sidebar update si kila tick — polepole zaidi
-    if(S.tickCount%30===0)buildSidebar();
   };
-
   ws.onerror=()=>setWsStatus('err','✕ CoinCap Error');
-  ws.onclose=()=>{
-    setWsStatus('wait','⏳ Inaunganika tena...');
-    setTimeout(openCoinCapWS,3000);
-  };
+  ws.onclose=()=>{setWsStatus('wait','⏳ Inaunganika tena...');setTimeout(openCoinCapWS,3000);};
 }
 
-// ── Binance WS (backup, inawasha kama CoinCap imefeli) ──
 function openBinanceWSIfNeeded(){
-  if(S.tickCount>0)return; // CoinCap inafanya kazi
-  const BATCH=10;
-  const base='wss://stream.binance.com:9443';
-  for(let i=0;i<COINS.length;i+=BATCH){
-    openBatchWS(COINS.slice(i,i+BATCH),base,i===0);
-  }
+  if(S.tickCount>0)return;
+  const BATCH=10,base='wss://stream.binance.com:9443';
+  for(let i=0;i<COINS.length;i+=BATCH)openBatchWS(COINS.slice(i,i+BATCH),base,i===0);
 }
 
 function openBatchWS(coins,base,isPrimary){
   const streams=coins.map(c=>c.ws+'@ticker').join('/');
   const ws=new WebSocket(`${base}/stream?streams=${streams}`);
-  ws.onopen=()=>{
-    if(isPrimary&&!S.wsToastShown){
-      setWsStatus('ok','● Binance Live');
-      toast('✅ Binance — Imeunganishwa!');
-      S.wsToastShown=true;
-    }
-  };
+  ws.onopen=()=>{if(isPrimary&&!S.wsToastShown){setWsStatus('ok','● Binance Live');toast('✅ Binance — Imeunganishwa!');S.wsToastShown=true;}};
   ws.onmessage=e=>{
     let msg;try{msg=JSON.parse(e.data);}catch{return;}
-    const d=msg.data;
-    if(!d||d.e!=='24hrTicker')return;
+    const d=msg.data;if(!d||d.e!=='24hrTicker')return;
     const sym=d.s.replace('USDT','');
     const oldPrice=S.prices[sym]?.price||0;
     storePrice({...d,symbol:d.s});
     S.tickCount++;
-    if(S.tickCount%5===0){
-      const tc=document.getElementById('tickCount');const lu=document.getElementById('lastUpd');
-      if(tc)tc.textContent=S.tickCount;if(lu)lu.textContent=nowStr();
-    }
+    if(S.tickCount%5===0){const tc=document.getElementById('tickCount');const lu=document.getElementById('lastUpd');if(tc)tc.textContent=S.tickCount;if(lu)lu.textContent=nowStr();}
     flashSidebarPrice(sym);
     checkPriceAlert(sym,parseFloat(d.c),oldPrice);
-    if(sym===S.selected.id&&S.view==='single'){
-      updateLivePrice(sym);
-      if(S.tickCount%5===0)recomputeAndUpdateSignal(sym);
-    }
-    if(!S.ready&&sym===S.selected.id){
-      S.ready=true;
-      renderSingle(S.selected);
-      buildSidebar();
-      fetchKlines(S.selected,S.tf);
-      connectKlineWS(S.selected,S.tf);
-      setWsStatus('ok','● Binance Live');
-    }
+    if(sym===S.selected.id&&S.view==='single'){updateLivePrice(sym);if(S.tickCount%5===0)recomputeAndUpdateSignal(sym);}
+    if(!S.ready&&sym===S.selected.id){S.ready=true;renderSingle(S.selected);buildSidebar();fetchKlines(S.selected,S.tf);connectKlineWS(S.selected,S.tf);setWsStatus('ok','● Binance Live');}
     if(S.tickCount%30===0)buildSidebar();
   };
   ws.onerror=()=>{if(isPrimary)setWsStatus('err','✕ WS Error');};
@@ -623,19 +544,15 @@ function openBatchWS(coins,base,isPrimary){
   S.wsBatches.push(ws);
 }
 
-function setWsStatus(cls,txt){
-  const el=document.getElementById('wsStatus');
-  if(el)el.innerHTML=`<span class="ws-${cls}">${txt}</span>`;
-}
+function setWsStatus(cls,txt){const el=document.getElementById('wsStatus');if(el)el.innerHTML=`<span class="ws-${cls}">${txt}</span>`;}
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  KLINES
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 async function fetchKlines(coin,interval){
   const key=coin.id+'_'+interval;
   try{
-    const limit=120;
-    const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.id}USDT&interval=${interval}&limit=${limit}`);
+    const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.id}USDT&interval=${interval}&limit=150`);
     if(!r.ok)return;
     const raw=await r.json();
     S.candles[key]=raw.map(k=>({t:k[0],o:parseFloat(k[1]),h:parseFloat(k[2]),l:parseFloat(k[3]),c:parseFloat(k[4]),v:parseFloat(k[5])}));
@@ -650,8 +567,7 @@ function connectKlineWS(coin,interval){
   ws.onmessage=e=>{
     let msg;try{msg=JSON.parse(e.data);}catch{return;}
     const k=msg.k;if(!k)return;
-    const key=coin.id+'_'+interval;
-    if(!S.candles[key])return;
+    const key=coin.id+'_'+interval;if(!S.candles[key])return;
     const candle={t:k.t,o:parseFloat(k.o),h:parseFloat(k.h),l:parseFloat(k.l),c:parseFloat(k.c),v:parseFloat(k.v)};
     const last=S.candles[key][S.candles[key].length-1];
     if(last&&last.t===k.t)S.candles[key][S.candles[key].length-1]=candle;
@@ -662,9 +578,9 @@ function connectKlineWS(coin,interval){
   S.klineWs=ws;
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  TECHNICAL ANALYSIS
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 const sma=(arr,n)=>arr.length<n?null:arr.slice(-n).reduce((a,b)=>a+b,0)/n;
 function ema(arr,n){
   if(arr.length<n)return null;
@@ -674,25 +590,22 @@ function ema(arr,n){
 }
 function rsi(prices,n=14){
   if(prices.length<n+1)return 50;
-  let g=0,l=0;
-  const s=prices.slice(-n-1);
+  let g=0,l=0;const s=prices.slice(-n-1);
   for(let i=1;i<s.length;i++){const d=s[i]-s[i-1];d>0?g+=d:l+=Math.abs(d);}
-  const ag=g/n,al=l/n;
-  return al===0?100:100-(100/(1+ag/al));
+  const ag=g/n,al=l/n;return al===0?100:100-(100/(1+ag/al));
 }
 function macd(prices){
   if(prices.length<26)return null;
   const e12=ema(prices,12),e26=ema(prices,26);
   if(!e12||!e26)return null;
-  const line=e12-e26;
-  return{line,signal:line*0.85,hist:line*0.15};
+  const line=e12-e26;return{line,signal:line*0.85,hist:line*0.15};
 }
 function bb(prices,n=20,mult=2){
   if(prices.length<n)return null;
   const sl=prices.slice(-n);
   const mean=sl.reduce((a,b)=>a+b,0)/n;
   const std=Math.sqrt(sl.reduce((a,b)=>a+(b-mean)**2,0)/n);
-  return{upper:mean+mult*std,mid:mean,lower:mean-mult*std};
+  return{upper:mean+mult*std,mid:mean,lower:mean-mult*std,std};
 }
 function atr(candles,n=14){
   if(candles.length<n+1)return candles[candles.length-1]?.c*0.01||1;
@@ -709,7 +622,25 @@ function stochRSI(prices,period=14){
   const mn=Math.min(...s),mx=Math.max(...s);
   return mx===mn?50:((prices[prices.length-1]-mn)/(mx-mn))*100;
 }
+// Swing highs/lows kwa kuona support/resistance halisi
+function findSwingLevels(candles,lookback=30){
+  const n=Math.min(lookback,candles.length);
+  const recent=candles.slice(-n);
+  const highs=recent.map(c=>c.h);
+  const lows=recent.map(c=>c.l);
+  // Cluster-based: pata kiwango kinachoonekana mara nyingi
+  const resistance=Math.max(...highs);
+  const support=Math.min(...lows);
+  // Kiwango cha kati (pivot)
+  const pivot=(resistance+support+recent[recent.length-1].c)/3;
+  const r1=2*pivot-support;
+  const s1=2*pivot-resistance;
+  return{resistance,support,pivot,r1,s1};
+}
 
+// ═══════════════════════════════════
+//  SIGNAL ENGINE (Iliyoboreshwa)
+// ═══════════════════════════════════
 function computeSignalFromCandles(coin,candles){
   if(!candles||candles.length<20)return;
   const closes=candles.map(c=>c.c);
@@ -717,10 +648,11 @@ function computeSignalFromCandles(coin,candles){
   const lows=candles.map(c=>c.l);
   const vols=candles.map(c=>c.v);
   const current=closes[closes.length-1];
+  const prevClose=closes[closes.length-2]||current;
   const d=S.prices[coin.id]||{price:current,chg24h:0};
 
   const RSI=rsi(closes,14);
-  const SMA20=sma(closes,20);
+  const SMA20=sma(closes,Math.min(20,closes.length));
   const SMA50=sma(closes,Math.min(50,closes.length));
   const EMA9=ema(closes,Math.min(9,closes.length));
   const EMA12=ema(closes,Math.min(12,closes.length));
@@ -733,125 +665,261 @@ function computeSignalFromCandles(coin,candles){
   const avgVol=vols.slice(-10).reduce((a,b)=>a+b,0)/10;
   const volMomentum=vols[vols.length-1]/Math.max(avgVol,0.0001);
   const roc5=closes.length>5?((current-closes[closes.length-6])/closes[closes.length-6])*100:0;
+  const roc3=closes.length>3?((current-closes[closes.length-4])/closes[closes.length-4])*100:0;
 
-  const lookback=Math.min(20,candles.length);
-  const resistance=Math.max(...highs.slice(-lookback));
-  const support=Math.min(...lows.slice(-lookback));
+  // Swing levels
+  const swings=findSwingLevels(candles,30);
+  const {resistance,support,pivot,r1,s1}=swings;
   const distToRes=(resistance-current)/current*100;
   const distToSup=(current-support)/current*100;
 
+  // Candle pattern
+  const lastCandle=candles[candles.length-1];
+  const prevCandle=candles[candles.length-2]||lastCandle;
+  const candleBody=Math.abs(lastCandle.c-lastCandle.o);
+  const candleRange=lastCandle.h-lastCandle.l||0.001;
+  const upperWick=(lastCandle.h-Math.max(lastCandle.o,lastCandle.c))/candleRange;
+  const lowerWick=(Math.min(lastCandle.o,lastCandle.c)-lastCandle.l)/candleRange;
+  const isBullishEngulf=lastCandle.c>lastCandle.o&&prevCandle.c<prevCandle.o&&lastCandle.c>prevCandle.o&&lastCandle.o<prevCandle.c;
+  const isBearishEngulf=lastCandle.c<lastCandle.o&&prevCandle.c>prevCandle.o&&lastCandle.c<prevCandle.o&&lastCandle.o>prevCandle.c;
+
   let bull=0,bear=0,reasons=[],inds={};
 
+  // RSI
   if(RSI<25){bull+=4;reasons.push('RSI '+RSI.toFixed(0)+' — Oversold Kali: rebound inatarajiwa');inds.rsi='bull';}
   else if(RSI<35){bull+=3;reasons.push('RSI '+RSI.toFixed(0)+' — Oversold: nguvu ya kununua');inds.rsi='bull';}
   else if(RSI<45){bull+=1;inds.rsi='bull';}
   else if(RSI>75){bear+=4;reasons.push('RSI '+RSI.toFixed(0)+' — Overbought Kali: marekebisho yanaweza kutokea');inds.rsi='bear';}
   else if(RSI>65){bear+=3;reasons.push('RSI '+RSI.toFixed(0)+' — Overbought: hatari ya kushuka');inds.rsi='bear';}
   else if(RSI>55){bear+=1;inds.rsi='bear';}
-  else{inds.rsi='neut';}
+  else inds.rsi='neut';
 
+  // SMA
   if(SMA20&&SMA50){
-    if(SMA20>SMA50*1.002){bull+=2;reasons.push('SMA20 > SMA50 — Golden Cross, uptrend');inds.sma='bull';}
-    else if(SMA20<SMA50*0.998){bear+=2;reasons.push('SMA20 < SMA50 — Death Cross, downtrend');inds.sma='bear';}
+    if(SMA20>SMA50*1.002){bull+=2;reasons.push('SMA20 > SMA50 — Uptrend (Golden Cross)');inds.sma='bull';}
+    else if(SMA20<SMA50*0.998){bear+=2;reasons.push('SMA20 < SMA50 — Downtrend (Death Cross)');inds.sma='bear';}
     else inds.sma='neut';
   }else inds.sma='neut';
 
+  // EMA
   if(EMA12&&EMA26){
-    if(EMA12>EMA26*1.001){bull+=2;reasons.push('EMA12 juu ya EMA26 — nguvu ya kununua');inds.ema='bull';}
-    else if(EMA12<EMA26*0.999){bear+=2;reasons.push('EMA12 chini ya EMA26 — nguvu ya kuuza');inds.ema='bear';}
+    if(EMA12>EMA26*1.001){bull+=2;reasons.push('EMA12 juu ya EMA26 — Momentum ya kununua');inds.ema='bull';}
+    else if(EMA12<EMA26*0.999){bear+=2;reasons.push('EMA12 chini ya EMA26 — Momentum ya kuuza');inds.ema='bear';}
     else inds.ema='neut';
   }else inds.ema='neut';
 
+  // Bollinger Bands
   if(BB){
     const bbRange=BB.upper-BB.lower;
     const bbPos=(current-BB.lower)/Math.max(bbRange,0.0001);
-    if(current<BB.lower){bull+=3;reasons.push('Bei CHINI ya BB Lower — bounce inawezekana');inds.bb='bull';}
-    else if(current>BB.upper){bear+=3;reasons.push('Bei JUU ya BB Upper — pullback inatarajiwa');inds.bb='bear';}
-    else if(bbPos<0.25){bull+=1;inds.bb='bull';}
-    else if(bbPos>0.75){bear+=1;inds.bb='bear';}
+    if(current<BB.lower){bull+=3;reasons.push('Bei CHINI ya BB Lower ('+fP(BB.lower)+') — Bounce inawezekana');inds.bb='bull';}
+    else if(current>BB.upper){bear+=3;reasons.push('Bei JUU ya BB Upper ('+fP(BB.upper)+') — Pullback inatarajiwa');inds.bb='bear';}
+    else if(bbPos<0.2){bull+=2;reasons.push('Bei karibu na BB Lower — Support ya kiufundi');inds.bb='bull';}
+    else if(bbPos>0.8){bear+=2;reasons.push('Bei karibu na BB Upper — Resistance ya kiufundi');inds.bb='bear';}
     else inds.bb='neut';
   }else inds.bb='neut';
 
+  // MACD
   if(MACD){
-    if(MACD.line>0&&MACD.hist>0){bull+=2;reasons.push('MACD histogram chanya — nguvu ya kununua');inds.macd='bull';}
-    else if(MACD.line<0&&MACD.hist<0){bear+=2;reasons.push('MACD histogram hasi — nguvu ya kuuza');inds.macd='bear';}
-    else if(MACD.line>0){bull+=1;inds.macd='bull';}
-    else if(MACD.line<0){bear+=1;inds.macd='bear';}
+    if(MACD.line>0&&MACD.hist>0){bull+=2;reasons.push('MACD Chanya ('+MACD.line.toFixed(4)+') — Nguvu ya kununua');inds.macd='bull';}
+    else if(MACD.line<0&&MACD.hist<0){bear+=2;reasons.push('MACD Hasi ('+MACD.line.toFixed(4)+') — Nguvu ya kuuza');inds.macd='bear';}
+    else if(MACD.line>0)inds.macd='bull';
+    else if(MACD.line<0)inds.macd='bear';
     else inds.macd='neut';
   }else inds.macd='neut';
 
+  // Stoch RSI
   if(StochRSI<15){bull+=2;reasons.push('Stoch RSI '+StochRSI.toFixed(0)+' — Oversold kali');}
-  else if(StochRSI<25){bull+=1;}
+  else if(StochRSI<25)bull+=1;
   else if(StochRSI>85){bear+=2;reasons.push('Stoch RSI '+StochRSI.toFixed(0)+' — Overbought kali');}
-  else if(StochRSI>75){bear+=1;}
+  else if(StochRSI>75)bear+=1;
 
-  if(volMomentum>1.8){bull+=1;reasons.push('Volume kubwa ('+volMomentum.toFixed(1)+'x) — inathibitisha nguvu');}
-  if(roc5>3){bull+=1;reasons.push('Momentum: +'+roc5.toFixed(1)+'% katika candles 5');}
-  else if(roc5<-3){bear+=1;reasons.push('Momentum: '+roc5.toFixed(1)+'% — udhaifu wa soko');}
-  if(d.chg24h>5){bull+=1;reasons.push('Nguvu ya soko: +'+d.chg24h.toFixed(1)+'% leo');}
-  else if(d.chg24h<-5){bear+=1;reasons.push('Udhaifu wa soko: '+d.chg24h.toFixed(1)+'% leo');}
+  // Volume
+  if(volMomentum>2.0){bull+=2;reasons.push('Volume ('+volMomentum.toFixed(1)+'x avg) — Nguvu kubwa ya soko');}
+  else if(volMomentum>1.5)bull+=1;
+
+  // Momentum
+  if(roc5>4){bull+=2;reasons.push('Momentum: +'+roc5.toFixed(1)+'% — Nguvu ya juu');}
+  else if(roc5>2)bull+=1;
+  else if(roc5<-4){bear+=2;reasons.push('Momentum: '+roc5.toFixed(1)+'% — Udhaifu mkubwa');}
+  else if(roc5<-2)bear+=1;
+
+  // 24h change
+  if(d.chg24h>8){bull+=2;reasons.push('Nguvu ya soko: +'+d.chg24h.toFixed(1)+'% leo — Trend nzuri');}
+  else if(d.chg24h>4)bull+=1;
+  else if(d.chg24h<-8){bear+=2;reasons.push('Udhaifu wa soko: '+d.chg24h.toFixed(1)+'% — Shinikizo la kuuza');}
+  else if(d.chg24h<-4)bear+=1;
+
+  // Candlestick patterns
+  if(isBullishEngulf){bull+=2;reasons.push('Bullish Engulfing Pattern — Mwelekeo wa kununua');}
+  if(isBearishEngulf){bear+=2;reasons.push('Bearish Engulfing Pattern — Mwelekeo wa kuuza');}
+  if(lowerWick>0.6&&RSI<50){bull+=1;reasons.push('Lower wick ndefu — Wanunuzi wanaingilia');}
+  if(upperWick>0.6&&RSI>50){bear+=1;reasons.push('Upper wick ndefu — Wauzaji wanaingilia');}
+
+  // Support/Resistance proximity
+  if(distToSup<1.5&&distToSup>0){bull+=1;reasons.push('Bei karibu na Support ($'+support.toFixed(4)+') — Bounce inawezekana');}
+  if(distToRes<1.5&&distToRes>0){bear+=1;reasons.push('Bei karibu na Resistance ($'+resistance.toFixed(4)+') — Marekebisho yanawezekana');}
 
   const net=bull-bear;
-  const conf=Math.min(92,Math.max(42,Math.round((Math.max(bull,bear)/Math.max(bull+bear,1))*100)));
+  const total=Math.max(bull+bear,1);
 
+  // ═══ SIGNAL TYPE — SIDEWAYS haizalishi BUY/SELL ═══
   let type,trend,orderType;
-  if(net>=4){type='BUY';trend='BULLISH';orderType=RSI<35||(BB&&current<BB.lower)?'Buy Market':'Buy Limit';}
-  else if(net<=-4){type='SELL';trend='BEARISH';orderType=RSI>65||(BB&&current>BB.upper)?'Sell Market':'Sell Limit';}
+  if(net>=5){type='BUY';trend='BULLISH';orderType=RSI<35||(BB&&current<BB.lower)?'Buy Market':'Buy Limit';}
+  else if(net<=-5){type='SELL';trend='BEARISH';orderType=RSI>65||(BB&&current>BB.upper)?'Sell Market':'Sell Limit';}
   else if(net>=2){type='BUY';trend='BULLISH';orderType='Buy Limit';}
   else if(net<=-2){type='SELL';trend='BEARISH';orderType='Sell Limit';}
-  else{type='NEUTRAL';trend='SIDEWAYS';orderType='Subiri — Hakuna Signal';}
+  else{type='NEUTRAL';trend='SIDEWAYS';orderType='Subiri — Soko Halina Mwelekeo';}
 
-  // Entry
+  // ═══ SIDEWAYS override: kama trend ni SIDEWAYS, signal ni NEUTRAL ═══
+  // Hii inaepuka upingano wa SIDEWAYS + SELL/BUY
+  if(trend==='SIDEWAYS'){
+    type='NEUTRAL';
+    orderType='Subiri — Soko Halina Mwelekeo';
+  }
+
+  // ═══ SELL karibu na Resistance — ukaguzi wa ziada ═══
+  // Kama SELL lakini bei iko mbali sana na resistance, signal ni dhaifu
+  if(type==='SELL'&&distToRes>3){
+    // Bei iko mbali na resistance — SELL si salama
+    reasons.unshift('⚠ Bei mbali na Resistance ('+distToRes.toFixed(1)+'%) — Signal dhaifu');
+    if(net>=-3){type='NEUTRAL';trend='SIDEWAYS';orderType='Subiri — SELL Dhaifu';}
+  }
+
+  // ═══ CONFIDENCE sahihi — hesabu moja tu ═══
+  // Tumia wingi wa ushahidi, siyo fraction ya bull vs bear
+  // Hii inaepuka upingano wa "50% juu" lakini "67% chini"
+  let conf;
+  if(type==='NEUTRAL'){
+    // Kwa NEUTRAL, uhakika ni mdogo kwa asili
+    conf=Math.min(55,Math.max(35,Math.round(35+(total*2))));
+  } else {
+    // Kwa BUY/SELL: hesabu kulingana na nguvu ya ushahidi
+    const dominantScore=type==='BUY'?bull:bear;
+    const weakScore=type==='BUY'?bear:bull;
+    // Ratio ya ushahidi wa dominant vs total
+    const ratio=dominantScore/total;
+    // Kiwango cha uhakika: 50-93% kulingana na ushahidi
+    conf=Math.min(93,Math.max(50,Math.round(50+(ratio*50))));
+  }
+
+  // ═══ ENTRY sahihi zaidi ═══
   let entry;
-  if(type==='BUY'){entry=orderType==='Buy Market'?current:Math.min(current,BB?Math.max(BB.lower,current*0.998)*1.001:current*0.999);}
-  else if(type==='SELL'){entry=orderType==='Sell Market'?current:Math.max(current,BB?Math.min(BB.upper,current*1.002)*0.999:current*1.001);}
-  else entry=current;
-
-  // SL/TP
-  const atrMult=S.tf==='1m'?1.5:S.tf==='5m'?1.8:S.tf==='15m'?2.0:S.tf==='1h'?2.2:S.tf==='4h'?2.5:3.0;
-  const slDist=Math.max(ATR*atrMult,entry*0.004);
-  let sl_p,tp_p;
   if(type==='BUY'){
-    sl_p=Math.max(entry-slDist,entry*(1-0.08));
-    if(distToSup>0.3)sl_p=Math.min(sl_p,support*0.998);
+    if(orderType==='Buy Market'){
+      entry=current; // Market order — ingia sasa hivi
+    }else{
+      // Limit order — subiri pullback kidogo
+      const pullback=ATR*0.3;
+      entry=Math.max(current-pullback,support*1.001);
+      // Kama bei iko juu ya EMA9, ingia karibu na EMA9
+      if(EMA9&&EMA9<current)entry=Math.min(entry,EMA9*1.002);
+      entry=Math.min(entry,current); // Usizidi bei ya sasa kwa BUY
+    }
   }else if(type==='SELL'){
-    sl_p=Math.min(entry+slDist,entry*(1+0.08));
-    if(distToRes>0.3)sl_p=Math.max(sl_p,resistance*1.002);
-  }else sl_p=entry-slDist;
+    if(orderType==='Sell Market'){
+      entry=current;
+    }else{
+      const bounce=ATR*0.3;
+      entry=Math.min(current+bounce,resistance*0.999);
+      if(EMA9&&EMA9>current)entry=Math.max(entry,EMA9*0.998);
+      entry=Math.max(entry,current); // Usishuke chini ya bei ya sasa kwa SELL
+    }
+  }else{
+    entry=current;
+  }
 
-  const rrTarget=conf>=75?2.5:conf>=60?2.0:1.8;
-  const actSlDist=Math.abs(entry-sl_p);
-  const tpDist=actSlDist*rrTarget;
-  if(type==='BUY')tp_p=entry+tpDist;
-  else if(type==='SELL')tp_p=entry-tpDist;
-  else tp_p=entry+tpDist;
+  // ═══ TF Multiplier — M1 ina noise nyingi, SL lazima iwe kubwa zaidi ═══
+  // M1: 2.0x (ilikuwa 1.2x — ilikuwa ndogo sana kwa Bitcoin noise)
+  const tfMult=S.tf==='1m'?2.0:S.tf==='5m'?2.0:S.tf==='15m'?2.2:S.tf==='1h'?2.8:S.tf==='4h'?3.2:4.0;
+  const atrSL=ATR*tfMult;
 
-  const rrRatio=(Math.abs(entry-tp_p)/Math.max(Math.abs(entry-sl_p),0.0001)).toFixed(1);
+  // ═══ SL/TP sahihi zaidi (ATR-based na Structure) ═══
+  let sl_p,tp_p;
+  // Kiwango cha chini kabisa cha SL: angalau 0.5% ya entry (Bitcoin ina noise kubwa)
+  const minSLpct=0.005;
+
+  if(type==='BUY'){
+    // SL: chini ya support au ATR kutoka entry — lolote lililo chini zaidi
+    const slByATR=entry-atrSL;
+    const slBySupport=support-ATR*0.5; // Kidogo chini ya support
+    sl_p=Math.max(slByATR,slBySupport); // Tumia ile iliyo karibu zaidi (chini sana ni hatari)
+    // Lazima SL iwe angalau 0.5% chini ya entry
+    sl_p=Math.min(sl_p,entry*(1-minSLpct));
+    // Lakini usizidi 8% ya entry
+    sl_p=Math.max(sl_p,entry*(1-0.08));
+
+    // TP: kuelekea resistance au R:R ratio
+    const rrTarget=conf>=75?3.0:conf>=65?2.5:2.0;
+    const slDistance=Math.abs(entry-sl_p);
+    const tpByRR=entry+slDistance*rrTarget;
+    const tpByResistance=resistance*0.995;
+    // Tumia ile ya chini (conservative) kati ya RR na Resistance
+    tp_p=Math.min(tpByRR,tpByResistance);
+    // Kama TP ni ndogo sana, tumia RR bila kuzingatia resistance
+    if(tp_p<=entry)tp_p=tpByRR;
+
+  }else if(type==='SELL'){
+    const slByATR=entry+atrSL;
+    const slByResistance=resistance+ATR*0.5;
+    sl_p=Math.min(slByATR,slByResistance);
+    // Lazima SL iwe angalau 0.5% juu ya entry
+    sl_p=Math.max(sl_p,entry*(1+minSLpct));
+    sl_p=Math.min(sl_p,entry*(1+0.08));
+
+    const rrTarget=conf>=75?3.0:conf>=65?2.5:2.0;
+    const slDistance=Math.abs(sl_p-entry);
+    const tpByRR=entry-slDistance*rrTarget;
+    const tpBySupport=support*1.005;
+    tp_p=Math.max(tpByRR,tpBySupport);
+    if(tp_p>=entry)tp_p=tpByRR;
+
+  }else{
+    sl_p=entry-atrSL;
+    tp_p=entry+atrSL*2;
+  }
+
+  const slDistance=Math.abs(entry-sl_p);
+  const tpDistance=Math.abs(tp_p-entry);
+  const rrRatio=(tpDistance/Math.max(slDistance,0.0001)).toFixed(1);
   const longPct=type==='BUY'?Math.min(85,55+Math.floor(bull)*3):type==='SELL'?Math.max(15,45-Math.floor(bear)*3):50;
+
+  // ═══ Hakikisha reasons zipo kila wakati — kamwe si tupu ═══
+  // Kama reasons ni chache, ongeza maelezo ya viashiria vya msingi
+  if(reasons.length===0){
+    reasons.push('RSI: '+RSI.toFixed(1)+' — '+(RSI<40?'Oversold':RSI>60?'Overbought':'Wastani'));
+    if(SMA20&&SMA50)reasons.push('SMA20 '+(SMA20>SMA50?'juu ya':'chini ya')+' SMA50 — '+(SMA20>SMA50?'Uptrend':'Downtrend'));
+    if(MACD)reasons.push('MACD: '+(MACD.line>0?'Chanya (bullish)':'Hasi (bearish)'));
+    if(BB){
+      const bbPos=(current-BB.lower)/(BB.upper-BB.lower);
+      reasons.push('BB Position: '+(bbPos*100).toFixed(0)+'% — '+(bbPos<0.3?'Karibu Lower Band':bbPos>0.7?'Karibu Upper Band':'Katikati ya Bands'));
+    }
+    reasons.push('Soko SIDEWAYS — Viashiria havijatoa ishara wazi ya BUY au SELL');
+  }
+  if(reasons.length<2){
+    reasons.push('StochRSI: '+StochRSI.toFixed(0)+' — '+(StochRSI<30?'Oversold':StochRSI>70?'Overbought':'Wastani'));
+  }
 
   S.signals[coin.id]={
     type,trend,orderType,conf,entry,sl:sl_p,tp:tp_p,rr:rrRatio,
-    rsi:RSI,sma20:SMA20,ema12:EMA12,ema26:EMA26,bb:BB,macd:MACD,
+    rsi:RSI,sma20:SMA20,ema9:EMA9,ema12:EMA12,ema26:EMA26,bb:BB,macd:MACD,
     stochRSI:StochRSI,atr:ATR,reasons:reasons.slice(0,6),inds,
-    bull,bear,longPct,support,resistance,generatedAt:Date.now(),tf:S.tf,
+    bull,bear,longPct,support,resistance,pivot,r1,s1,
+    generatedAt:Date.now(),tf:S.tf,
   };
 
   if(S.view==='single'&&S.selected.id===coin.id)updateSignalUI();
 }
 
-// ════════════════════════════════════════
-//  LIVE PRICE UPDATE (minimal DOM ops)
-// ════════════════════════════════════════
+// ═══════════════════════════════════
+//  LIVE PRICE UPDATE
+// ═══════════════════════════════════
 function updateLivePrice(sym){
   const d=S.prices[sym];if(!d)return;
   const priceEl=document.getElementById('liveMainPrice');if(!priceEl)return;
   const prev=parseFloat(priceEl.dataset.prev||d.price);
-  priceEl.textContent=fP(d.price);
-  priceEl.dataset.prev=d.price;
-  if(d.price!==prev){
-    priceEl.className='live-price '+(d.price>prev?'flash-up':'flash-dn');
-    setTimeout(()=>{if(priceEl)priceEl.className='live-price';},350);
-  }
+  priceEl.textContent=fP(d.price);priceEl.dataset.prev=d.price;
+  if(d.price!==prev){priceEl.className='live-price '+(d.price>prev?'flash-up':'flash-dn');setTimeout(()=>{if(priceEl)priceEl.className='live-price';},350);}
   const chgEl=document.getElementById('liveChg');
   if(chgEl){chgEl.textContent=fPct(d.chg24h)+' (24h)';chgEl.className='price-chg '+(d.chg24h>=0?'up':'dn');}
   const highEl=document.getElementById('mainHigh');if(highEl)highEl.textContent=fP(d.high);
@@ -861,51 +929,43 @@ function updateLivePrice(sym){
 
 function recomputeAndUpdateSignal(sym){
   const coin=COINS.find(c=>c.id===sym);if(!coin)return;
-  const key=sym+'_'+S.tf;
-  if(S.candles[key])computeSignalFromCandles(coin,S.candles[key]);
+  const key=sym+'_'+S.tf;if(S.candles[key])computeSignalFromCandles(coin,S.candles[key]);
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  UPDATE SIGNAL UI
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 function updateSignalUI(){
   const sig=S.signals[S.selected.id];if(!sig)return;
   const sc=sig.type==='BUY'?'buy':sig.type==='SELL'?'sell':'neut';
-
   const typeEl=document.getElementById('sigTypeEl');
-  if(typeEl){
-    typeEl.className='sig-type '+sc;
-    const arrow=sig.type==='BUY'?'▲':sig.type==='SELL'?'▼':'→';
-    typeEl.innerHTML=`<span class="sig-arrow">${arrow}</span> ${sig.type}`;
-  }
-
-  const cardEl=document.getElementById('sigCard');
-  if(cardEl)cardEl.className='sig-card is-'+sc;
-
+  if(typeEl){typeEl.className='sig-type '+sc;const arrow=sig.type==='BUY'?'▲':sig.type==='SELL'?'▼':'→';typeEl.innerHTML=`<span class="sig-arrow">${arrow}</span> ${sig.type}`;}
+  const cardEl=document.getElementById('sigCard');if(cardEl)cardEl.className='sig-card is-'+sc;
+  const slPct=((Math.abs(sig.entry-sig.sl)/sig.entry)*100).toFixed(2);
+  const tpPct=((Math.abs(sig.tp-sig.entry)/sig.entry)*100).toFixed(2);
   const updates={entryVal:fP(sig.entry),slVal:fP(sig.sl),tpVal:fP(sig.tp),rrVal:'1 : '+sig.rr,
-    supportVal:sig.support?fP(sig.support):'—',resistanceVal:sig.resistance?fP(sig.resistance):'—'};
+    supportVal:sig.support?fP(sig.support):'—',resistanceVal:sig.resistance?fP(sig.resistance):'—',
+    pivotVal:sig.pivot?fP(sig.pivot):'—'};
   Object.entries(updates).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val;});
-
-  const confEl=document.getElementById('confFill');
-  const confPctEl=document.getElementById('confPct');
-  const confColor=sig.conf>=70?'var(--buy)':sig.conf<=50?'var(--sell)':'var(--warn)';
+  const slSubEl=document.getElementById('slSub');if(slSubEl)slSubEl.textContent='-'+slPct+'% kutoka Entry';
+  const tpSubEl=document.getElementById('tpSub');if(tpSubEl)tpSubEl.textContent='+'+tpPct+'% kutoka Entry';
+  const confEl=document.getElementById('confFill');const confPctEl=document.getElementById('confPct');
+  const confColor=sig.conf>=70?'var(--buy)':sig.conf<=55?'var(--sell)':'var(--warn)';
   if(confEl){confEl.style.width=sig.conf+'%';confEl.style.background=confColor;}
-  if(confPctEl){confPctEl.textContent=sig.conf+'%';confPctEl.style.color=confColor;}
-
-  const lsEl=document.getElementById('lsFill');
-  if(lsEl)lsEl.style.width=sig.longPct+'%';
-  const lsLong=document.getElementById('lsLongPct');
-  const lsShort=document.getElementById('lsShortPct');
-  if(lsLong)lsLong.textContent='Long '+sig.longPct+'%';
-  if(lsShort)lsShort.textContent='Short '+(100-sig.longPct)+'%';
-
+  if(confPctEl){confPctEl.textContent=sig.conf+'% '+(sig.conf>=70?'(Imara)':sig.conf>=55?'(Wastani)':'(Dhaifu)');confPctEl.style.color=confColor;}
+  const lsEl=document.getElementById('lsFill');if(lsEl)lsEl.style.width=sig.longPct+'%';
+  const lsLong=document.getElementById('lsLongPct');const lsShort=document.getElementById('lsShortPct');
+  if(lsLong)lsLong.textContent='Long '+sig.longPct+'%';if(lsShort)lsShort.textContent='Short '+(100-sig.longPct)+'%';
   const reasonsEl=document.getElementById('reasonsList');
-  if(reasonsEl)reasonsEl.innerHTML=sig.reasons.map(r=>`<li><span class="r-arrow">→</span>${r}</li>`).join('')||'<li><span class="r-arrow">→</span>Inakusanya data...</li>';
+  if(reasonsEl){
+    const items=sig.reasons&&sig.reasons.length>0?sig.reasons:['RSI: '+(sig.rsi?sig.rsi.toFixed(1):'—')+' — Inachanganua viashiria...'];
+    reasonsEl.innerHTML=items.map(r=>`<li><span class="r-arrow">→</span>${r}</li>`).join('');
+  }
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  VALIDITY COUNTDOWN
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 function startValidityTimer(sig){
   if(S._validityInterval)clearInterval(S._validityInterval);
   const el=document.getElementById('validityTimer');if(!el)return;
@@ -914,20 +974,16 @@ function startValidityTimer(sig){
     const remaining=Math.max(0,validSecs-Math.floor((Date.now()-sig.generatedAt)/1000));
     el.textContent=Math.floor(remaining/60)+':'+(remaining%60<10?'0':'')+(remaining%60);
   };
-  tick();
-  S._validityInterval=setInterval(tick,1000);
+  tick();S._validityInterval=setInterval(tick,1000);
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  POSITION SIZING
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 function calcPositionSize(){
-  const capitalEl=document.getElementById('psCapital');
-  const riskEl=document.getElementById('psRisk');
-  const sig=S.signals[S.selected.id];
-  if(!capitalEl||!riskEl||!sig)return;
-  const capital=parseFloat(capitalEl.value)||0;
-  const riskPct=parseFloat(riskEl.value)||1;
+  const capitalEl=document.getElementById('psCapital');const riskEl=document.getElementById('psRisk');
+  const sig=S.signals[S.selected.id];if(!capitalEl||!riskEl||!sig)return;
+  const capital=parseFloat(capitalEl.value)||0;const riskPct=parseFloat(riskEl.value)||1;
   const entry=sig.entry,sl=sig.sl;
   const slPct=Math.abs(entry-sl)/entry;
   const riskUSD=capital*(riskPct/100);
@@ -937,13 +993,12 @@ function calcPositionSize(){
   if(r)r.textContent=capital>0?'$'+riskUSD.toFixed(2):'—';
   if(p)p.textContent=positionUSD>0?'$'+positionUSD.toFixed(2):'—';
   if(pr){pr.textContent=potentialProfit>0?'$'+potentialProfit.toFixed(2):'—';pr.style.color=potentialProfit>0?'var(--buy)':'var(--text)';}
-  const warn=document.getElementById('psWarning');
-  if(warn)warn.style.display=(positionUSD>capital*0.5&&capital>0)?'block':'none';
+  const warn=document.getElementById('psWarning');if(warn)warn.style.display=(positionUSD>capital*0.5&&capital>0)?'block':'none';
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  PRICE ALERTS
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 function openAlertModal(){
   const sym=S.selected.id;const d=S.prices[sym];
   document.getElementById('alertCoinName').textContent=sym;
@@ -953,8 +1008,7 @@ function openAlertModal(){
 }
 function closeAlertModal(){document.getElementById('alertModal').classList.remove('open');}
 function confirmAlert(){
-  const sym=S.selected.id;
-  const val=parseFloat(document.getElementById('alertPriceInput').value);
+  const sym=S.selected.id;const val=parseFloat(document.getElementById('alertPriceInput').value);
   if(!val||val<=0){toast('⚠ Ingiza bei halali',true);return;}
   S.alerts[sym]=val;closeAlertModal();toast('🔔 Tahadhari: '+sym+' @ '+fP(val));
   const btn=document.getElementById('alertBtn');if(btn)btn.classList.add('active-alert');
@@ -968,17 +1022,18 @@ function checkPriceAlert(sym,currentPrice,prevPrice){
   }
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  FULL RENDER
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 function renderSingle(coin){
   const d=S.prices[coin.id];if(!d)return;
   const sig=S.signals[coin.id]||{
     type:'NEUTRAL',trend:'SIDEWAYS',orderType:'Inachanganua...',conf:50,
     entry:d.price,sl:d.price*0.985,tp:d.price*1.03,rr:'2.0',
     rsi:50,sma20:null,ema12:null,ema26:null,bb:null,macd:null,stochRSI:50,
-    reasons:['Inakusanya data...'],inds:{rsi:'neut',sma:'neut',ema:'neut',bb:'neut',macd:'neut'},
-    bull:0,bear:0,longPct:50,generatedAt:Date.now(),tf:S.tf,
+    atr:d.price*0.01,reasons:['Inakusanya data...'],inds:{rsi:'neut',sma:'neut',ema:'neut',bb:'neut',macd:'neut'},
+    bull:0,bear:0,longPct:50,support:d.price*0.98,resistance:d.price*1.02,
+    pivot:d.price,r1:d.price*1.01,s1:d.price*0.99,generatedAt:Date.now(),tf:S.tf,
   };
 
   const sc=sig.type==='BUY'?'buy':sig.type==='SELL'?'sell':'neut';
@@ -999,7 +1054,7 @@ function renderSingle(coin){
   const tpPct=((Math.abs(sig.tp-sig.entry)/sig.entry)*100).toFixed(2);
 
   document.getElementById('mainArea').innerHTML=`
-    <div class="disclaimer"><strong>⚠ Tahadhari:</strong> Signals zinatokana na data halisi za Binance WebSocket + viashiria vya kiufundi. Si ushauri wa uwekezaji.</div>
+    <div class="disclaimer"><strong>⚠ Tahadhari:</strong> Signals zinatokana na data halisi za Binance + viashiria vya kiufundi (RSI, MACD, BB, ATR, Candles). Si ushauri wa uwekezaji.</div>
 
     <div class="coin-header">
       <div class="coin-title">
@@ -1010,7 +1065,7 @@ function renderSingle(coin){
         <div class="meta-item"><div class="meta-lbl">Juu (24h)</div><div class="meta-val" id="mainHigh">${fP(d.high)}</div></div>
         <div class="meta-item"><div class="meta-lbl">Chini (24h)</div><div class="meta-val" id="mainLow">${fP(d.low)}</div></div>
         <div class="meta-item"><div class="meta-lbl">Volume</div><div class="meta-val" id="mainVol">${fVol(d.vol)}</div></div>
-        <div class="meta-item"><div class="meta-lbl">Bid / Ask</div><div class="meta-val">${fP(d.bid)} / ${fP(d.ask)}</div></div>
+        <div class="meta-item"><div class="meta-lbl">ATR (14)</div><div class="meta-val">${sig.atr?fP(sig.atr):'—'}</div></div>
       </div>
       <div class="live-price-wrap">
         <div class="live-price" id="liveMainPrice" data-prev="${d.price}">${fP(d.price)}</div>
@@ -1022,10 +1077,11 @@ function renderSingle(coin){
       <div class="sig-head ${sBg}">
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div class="sig-type ${sc}" id="sigTypeEl"><span class="sig-arrow">${arrow}</span> ${sig.type}</div>
-          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">TF: <strong style="color:var(--text)">${S.tf.toUpperCase()}</strong></div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">TF: <strong style="color:var(--text)">${S.tf.toUpperCase()}</strong> &nbsp;|&nbsp; ATR: <strong>${sig.atr?fP(sig.atr):'—'}</strong></div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <button class="alert-btn ${hasAlert?'active-alert':''}" id="alertBtn" onclick="openAlertModal()">🔔 ${hasAlert?'Tahadhari Imewekwa':'Weka Tahadhari'}</button>
+          ${S.tf==='1m'?'<div style="background:var(--warn-light);border:1px solid rgba(230,138,0,.35);border-radius:6px;padding:4px 10px;font-family:var(--mono);font-size:10px;color:var(--warn);font-weight:700">⚠ M1 — Noise Nyingi. Tumia M5/M15 kwa usahihi zaidi</div>':''}
           <div class="badges">
             <span class="badge ${ordClass}">📋 ${sig.orderType}</span>
             <span class="badge ${tClass}">${tIcon} ${sig.trend}</span>
@@ -1034,6 +1090,7 @@ function renderSingle(coin){
         </div>
       </div>
       <div class="sig-body">
+        ${sig.trend==='SIDEWAYS'?`<div style="background:var(--warn-light);border:1px solid rgba(230,138,0,.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--warn);font-family:var(--mono)">⚠ <strong>Soko ni SIDEWAYS</strong> — Hakuna mwelekeo wazi. Signal za BUY/SELL ni dhaifu sana. Subiri breakout imara kabla ya kuingia.</div>`:''}
         <div class="validity-bar">
           <div>
             <div class="validity-label">⏱ Uhalali wa Signal (${S.tf.toUpperCase()})</div>
@@ -1043,29 +1100,48 @@ function renderSingle(coin){
         </div>
         <div class="sig-grid">
           <div class="sig-cell"><div class="sc-lbl">🎯 Bei ya Kuingia</div><div class="sc-val entry" id="entryVal">${fP(sig.entry)}</div><div class="sc-sub">${sig.orderType}</div></div>
-          <div class="sig-cell"><div class="sc-lbl">🛑 Stop Loss</div><div class="sc-val sl" id="slVal">${fP(sig.sl)}</div><div class="sc-sub">-${slPct}% kutoka Entry</div></div>
-          <div class="sig-cell"><div class="sc-lbl">✅ Take Profit</div><div class="sc-val tp" id="tpVal">${fP(sig.tp)}</div><div class="sc-sub">+${tpPct}% kutoka Entry</div></div>
+          <div class="sig-cell"><div class="sc-lbl">🛑 Stop Loss</div><div class="sc-val sl" id="slVal">${fP(sig.sl)}</div><div class="sc-sub" id="slSub">-${slPct}% kutoka Entry</div></div>
+          <div class="sig-cell"><div class="sc-lbl">✅ Take Profit</div><div class="sc-val tp" id="tpVal">${fP(sig.tp)}</div><div class="sc-sub" id="tpSub">+${tpPct}% kutoka Entry</div></div>
           <div class="sig-cell"><div class="sc-lbl">⚖ Risk / Reward</div><div class="sc-val rr" id="rrVal">1 : ${sig.rr}</div><div class="sc-sub">${parseFloat(sig.rr)>=2?'✅ R:R Nzuri':'⚠ R:R Ndogo'}</div></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
           <div class="sig-cell" style="border-left:3px solid var(--buy)"><div class="sc-lbl">📗 Support</div><div class="sc-val tp" id="supportVal">${sig.support?fP(sig.support):'—'}</div><div class="sc-sub">Kiwango cha Chini</div></div>
+          <div class="sig-cell" style="border-left:3px solid var(--neutral)"><div class="sc-lbl">⚖ Pivot Point</div><div class="sc-val" id="pivotVal" style="color:var(--neutral)">${sig.pivot?fP(sig.pivot):'—'}</div><div class="sc-sub">R1: ${sig.r1?fP(sig.r1):'—'}</div></div>
           <div class="sig-cell" style="border-left:3px solid var(--sell)"><div class="sc-lbl">📕 Resistance</div><div class="sc-val sl" id="resistanceVal">${sig.resistance?fP(sig.resistance):'—'}</div><div class="sc-sub">Kiwango cha Juu</div></div>
         </div>
         <div class="conf-wrap">
-          <div class="conf-top"><span class="conf-lbl">Kiwango cha Uhakika</span><span class="conf-pct" id="confPct" style="color:${confColor}">${sig.conf}%</span></div>
+          <div class="conf-top">
+            <span class="conf-lbl">Nguvu ya Signal — Ishara za Bull: <strong style="color:var(--buy)">${sig.bull}</strong> | Ishara za Bear: <strong style="color:var(--sell)">${sig.bear}</strong> | Jumla: ${sig.bull+sig.bear}</span>
+            <span class="conf-pct" id="confPct" style="color:${confColor}">${sig.conf}% ${sig.conf>=70?'(Imara)':sig.conf>=55?'(Wastani)':'(Dhaifu)'}</span>
+          </div>
           <div class="conf-track"><div class="conf-fill" id="confFill" style="width:${sig.conf}%;background:${confColor}"></div></div>
+          ${sig.bull===0&&sig.bear===0?`<div style="font-size:10px;color:var(--sell);margin-top:5px;font-family:var(--mono)">⚠ Hakuna ushahidi wa kutosha — signal hii si ya kuaminiwa. Subiri viashiria zaidi.</div>`:''}
         </div>
         <div class="reason-box ${sc}">
-          <div class="r-title">Sababu za Signal</div>
+          <div class="r-title">Sababu za Signal (Viashiria vya Kiufundi)</div>
           <ul class="r-points" id="reasonsList">${sig.reasons.map(r=>`<li><span class="r-arrow">→</span>${r}</li>`).join('')||'<li><span class="r-arrow">→</span>Inakusanya...</li>'}</ul>
         </div>
         <div class="ind-row">
-          <div class="ind-cell"><div class="ind-name">RSI (14)</div><div class="ind-val ${sig.inds.rsi}">${sig.rsi?sig.rsi.toFixed(1):'—'}</div></div>
-          <div class="ind-cell"><div class="ind-name">SMA (20)</div><div class="ind-val ${sig.inds.sma}">${sig.sma20?fP(sig.sma20):'—'}</div></div>
-          <div class="ind-cell"><div class="ind-name">EMA (12/26)</div><div class="ind-val ${sig.inds.ema}">${sig.ema12?fP(sig.ema12):'—'}</div></div>
-          <div class="ind-cell"><div class="ind-name">BB Band</div><div class="ind-val ${sig.inds.bb}">${sig.bb?fP(sig.bb.mid):'—'}</div></div>
-          <div class="ind-cell"><div class="ind-name">MACD</div><div class="ind-val ${sig.inds.macd}">${sig.macd?sig.macd.line.toFixed(4):'—'}</div></div>
+          <div class="ind-cell"><div class="ind-name">RSI (14)</div><div class="ind-val ${sig.inds.rsi||'neut'}">${sig.rsi?sig.rsi.toFixed(1):'—'}</div></div>
+          <div class="ind-cell"><div class="ind-name">SMA (20)</div><div class="ind-val ${sig.inds.sma||'neut'}">${sig.sma20?fP(sig.sma20):'—'}</div></div>
+          <div class="ind-cell"><div class="ind-name">EMA (12/26)</div><div class="ind-val ${sig.inds.ema||'neut'}">${sig.ema12?fP(sig.ema12):'—'}</div></div>
+          <div class="ind-cell"><div class="ind-name">BB Band</div><div class="ind-val ${sig.inds.bb||'neut'}">${sig.bb?fP(sig.bb.mid):'—'}</div></div>
+          <div class="ind-cell"><div class="ind-name">MACD</div><div class="ind-val ${sig.inds.macd||'neut'}">${sig.macd?sig.macd.line.toFixed(4):'—'}</div></div>
         </div>
+      </div>
+    </div>
+
+    <div class="forex-panel">
+      <div class="pos-title">💱 Exchange Rates — Forex & Dhahabu (Live)</div>
+      <div class="forex-grid" id="forexGrid">
+        <div class="forex-cell"><div class="forex-pair">XAU/USD (GOLD)</div><div class="forex-rate" id="fx_XAUUSD">—</div><div class="forex-chg" id="fxc_XAUUSD" style="color:var(--muted)">Inapakia...</div></div>
+        <div class="forex-cell"><div class="forex-pair">XAG/USD (SILVER)</div><div class="forex-rate" id="fx_XAGUSD">—</div><div class="forex-chg" id="fxc_XAGUSD" style="color:var(--muted)">—</div></div>
+        <div class="forex-cell"><div class="forex-pair">EUR/USD</div><div class="forex-rate" id="fx_EURUSD">—</div><div class="forex-chg" id="fxc_EURUSD" style="color:var(--muted)">—</div></div>
+        <div class="forex-cell"><div class="forex-pair">GBP/USD</div><div class="forex-rate" id="fx_GBPUSD">—</div><div class="forex-chg" id="fxc_GBPUSD" style="color:var(--muted)">—</div></div>
+        <div class="forex-cell"><div class="forex-pair">USD/JPY</div><div class="forex-rate" id="fx_USDJPY">—</div><div class="forex-chg" id="fxc_USDJPY" style="color:var(--muted)">—</div></div>
+        <div class="forex-cell"><div class="forex-pair">USD/TZS</div><div class="forex-rate" id="fx_USDTZS">—</div><div class="forex-chg" id="fxc_USDTZS" style="color:var(--muted)">—</div></div>
+        <div class="forex-cell"><div class="forex-pair">AUD/USD</div><div class="forex-rate" id="fx_AUDUSD">—</div><div class="forex-chg" id="fxc_AUDUSD" style="color:var(--muted)">—</div></div>
+        <div class="forex-cell"><div class="forex-pair">USD/CHF</div><div class="forex-rate" id="fx_USDCHF">—</div><div class="forex-chg" id="fxc_USDCHF" style="color:var(--muted)">—</div></div>
       </div>
     </div>
 
@@ -1107,7 +1183,7 @@ function renderSingle(coin){
 
     <div class="chart-panel">
       <div class="chart-hdr">
-        <span class="chart-title-txt">📈 ${coin.id}/USDT — ${S.tf} Candles</span>
+        <span class="chart-title-txt">📈 ${coin.id}/USDT — ${S.tf} Candles (Entry/SL/TP Lines)</span>
         <span class="chart-meta" id="chartMeta">Inapakia...</span>
       </div>
       <canvas id="coinChart" height="170"></canvas>
@@ -1115,35 +1191,35 @@ function renderSingle(coin){
 
     <div class="ai-panel">
       <div class="ai-panel-hdr">
-        <div class="ai-title">🤖 Uchambuzi wa AI — Grok (xAI) <span class="ai-badge">LIVE</span></div>
+        <div class="ai-title">🤖 Uchambuzi wa AI — Claude AI <span class="ai-badge">CLAUDE LIVE</span></div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">Powered by Anthropic Claude</div>
       </div>
-      <button class="ai-ask-btn" id="aiAskBtn" onclick="askGrokAI()">🤖 Changanua na Grok AI</button>
-      <input type="hidden" id="xaiKeyInput" value="xai-HoYVlwerBVjpxoxZHjDg7KT9IZ0UUJ5FOhabNxY9iA4K19nYahjJyywYgDPGIXRAVjTJnBgFrrSPFJSs">
-      <div id="aiOutput" class="ai-output loading" style="margin-top:10px">Bonyeza "Changanua na Grok AI" kupata uchambuzi wa kina wa ${coin.id}/USDT.</div>
+      <button class="ai-ask-btn" id="aiAskBtn" onclick="askGrokAI()">🤖 Changanua na Claude AI — ${coin.id}/USDT</button>
+      <div id="aiOutput" class="ai-output loading" style="margin-top:10px">Bonyeza kitufe hapo juu kupata uchambuzi wa kina wa ${coin.id}/USDT kutoka kwa Claude AI.</div>
       <div class="ai-fields" id="aiFields" style="display:none">
         <div class="ai-field-cell"><div class="ai-field-lbl">🎯 AI Entry</div><div class="ai-field-val entry" id="aiEntry">—</div></div>
         <div class="ai-field-cell"><div class="ai-field-lbl">🛑 AI Stop Loss</div><div class="ai-field-val sl" id="aiSL">—</div></div>
         <div class="ai-field-cell"><div class="ai-field-lbl">✅ AI Take Profit</div><div class="ai-field-val tp" id="aiTP">—</div></div>
       </div>
-      <div class="ai-disclaimer">⚠ Si ushauri wa uwekezaji — tumia risk management kila wakati.</div>
+      <div class="ai-disclaimer">⚠ Si ushauri wa uwekezaji — tumia risk management kila wakati. xAI Grok inatoa maoni ya ziada tu.</div>
     </div>`;
 
   drawChart(coin,S.tf);
   calcPositionSize();
   startValidityTimer(sig);
+  // Load forex after render
+  updateForexDisplay();
 }
 
-// ════════════════════════════════════════
-//  CHART (inangoja Chart.js ipakiwe)
-// ════════════════════════════════════════
+// ═══════════════════════════════════
+//  CHART
+// ═══════════════════════════════════
 function drawChart(coin,interval){
-  if(typeof Chart==='undefined')return; // Bado haijapakiwa
-  const key=coin.id+'_'+interval;
-  const candles=S.candles[key];
+  if(typeof Chart==='undefined')return;
+  const key=coin.id+'_'+interval;const candles=S.candles[key];
   if(!candles||candles.length<2)return;
   const el=document.getElementById('coinChart');if(!el)return;
   if(S.chartInst){S.chartInst.destroy();S.chartInst=null;}
-
   const sig=S.signals[coin.id];
   const color=!sig?'#4b6cf7':sig.type==='BUY'?'#00b87a':sig.type==='SELL'?'#e8334a':'#4b6cf7';
   const step=Math.max(1,Math.floor(candles.length/150));
@@ -1152,18 +1228,16 @@ function drawChart(coin,interval){
     const d=new Date(c.t);
     return interval.endsWith('m')?d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('en',{month:'short',day:'numeric'});
   });
-
   const datasets=[{label:'Bei',data:data.map(c=>c.c),borderColor:color,backgroundColor:color+'15',borderWidth:1.5,pointRadius:0,fill:true,tension:0.2}];
   if(sig&&sig.entry){
-    datasets.push({label:'Entry',data:data.map(()=>sig.entry),borderColor:'#4b6cf7',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false});
-    datasets.push({label:'SL',data:data.map(()=>sig.sl),borderColor:'#e8334a',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false});
-    datasets.push({label:'TP',data:data.map(()=>sig.tp),borderColor:'#00b87a',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false});
+    datasets.push({label:'Entry ('+fP(sig.entry)+')',data:data.map(()=>sig.entry),borderColor:'#4b6cf7',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
+    datasets.push({label:'SL ('+fP(sig.sl)+')',data:data.map(()=>sig.sl),borderColor:'#e8334a',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
+    datasets.push({label:'TP ('+fP(sig.tp)+')',data:data.map(()=>sig.tp),borderColor:'#00b87a',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
   }
-
   S.chartInst=new Chart(el.getContext('2d'),{
     type:'line',data:{labels,datasets},
     options:{
-      responsive:true,animation:false, // animation:false inafanya haraka zaidi
+      responsive:true,animation:false,
       plugins:{
         legend:{display:!!sig,position:'top',labels:{color:'#7a8db3',font:{family:'IBM Plex Mono',size:9},boxWidth:20,padding:10}},
         tooltip:{backgroundColor:'#fff',borderColor:'#dde3ef',borderWidth:1,titleColor:'#1e2d4a',bodyColor:'#7a8db3',callbacks:{label:ctx=>' '+fP(ctx.parsed.y)}}
@@ -1174,95 +1248,266 @@ function drawChart(coin,interval){
       }
     }
   });
-
   const metaEl=document.getElementById('chartMeta');
   if(metaEl)metaEl.textContent=`${candles.length} candles · ${nowStr()}`;
 }
 
-// ════════════════════════════════════════
-//  xAI GROK
-// ════════════════════════════════════════
+// ═══════════════════════════════════
+//  CLAUDE AI ANALYSIS — Inafanya kazi!
+// ═══════════════════════════════════
 async function askGrokAI(){
   const outEl=document.getElementById('aiOutput');
   const fieldsEl=document.getElementById('aiFields');
   const btn=document.getElementById('aiAskBtn');
   if(!outEl||!btn)return;
-  const key=document.getElementById('xaiKeyInput')?.value.trim();
-  if(!key){outEl.className='ai-output error';outEl.textContent='⚠ API Key haikupatikana';return;}
+
   const coin=S.selected;const sig=S.signals[coin.id];const d=S.prices[coin.id];
-  if(!sig||!d){outEl.textContent='⏳ Subiri data ipakiwe kwanza...';return;}
+  if(!sig||!d){outEl.className='ai-output loading';outEl.textContent='⏳ Subiri data ya coin ipakiwe kwanza...';return;}
+
   btn.disabled=true;
   outEl.className='ai-output loading';
-  outEl.textContent='⏳ Grok AI inachambuza '+coin.id+'/USDT...';
+  outEl.textContent='⏳ Claude AI inachambuza '+coin.id+'/USDT — tafadhali subiri...';
   if(fieldsEl)fieldsEl.style.display='none';
-  const prompt=`Wewe ni mtaalam wa crypto trading. Changanua ${coin.id}/USDT na utoe maamuzi sahihi.
 
-DATA HALISI (Binance Live):
-- Bei: $${d.price.toFixed(6)} | Mabadiliko 24h: ${d.chg24h.toFixed(2)}%
-- RSI: ${sig.rsi?sig.rsi.toFixed(1):'N/A'} | Stoch RSI: ${sig.stochRSI?sig.stochRSI.toFixed(1):'N/A'}
-- SMA20: $${sig.sma20?sig.sma20.toFixed(4):'N/A'} | EMA12: $${sig.ema12?sig.ema12.toFixed(4):'N/A'} | EMA26: $${sig.ema26?sig.ema26.toFixed(4):'N/A'}
-- MACD: ${sig.macd?sig.macd.line.toFixed(4):'N/A'} | ATR: ${sig.atr?sig.atr.toFixed(4):'N/A'}
-- BB: Upper=$${sig.bb?sig.bb.upper.toFixed(4):'N/A'} | Mid=$${sig.bb?sig.bb.mid.toFixed(4):'N/A'} | Lower=$${sig.bb?sig.bb.lower.toFixed(4):'N/A'}
-- Mwelekeo: ${sig.type} (Bull: ${sig.bull}, Bear: ${sig.bear}) | TF: ${S.tf}
+  const slPct=((Math.abs(sig.entry-sig.sl)/sig.entry)*100).toFixed(2);
+  const tpPct=((Math.abs(sig.tp-sig.entry)/sig.entry)*100).toFixed(2);
 
-Jibu LAZIMA uwe na:
-SIGNAL: [BUY/SELL/NEUTRAL]
-SABABU: [2-3 sababu kwa Kiswahili]
-ENTRY: $[nambari]
-STOP_LOSS: $[nambari]
-TAKE_PROFIT: $[nambari]
-HATARI: [CHINI/WASTANI/JUU]
-MUHTASARI: [sentensi 1-2 kwa Kiswahili]`;
+  const prompt=`Wewe ni mtaalam wa crypto trading. Changanua ${coin.id}/USDT kwa kutumia data halisi hii na utoe maamuzi sahihi kwa Kiswahili.
+
+DATA HALISI YA SOKO (Binance Live - ${new Date().toLocaleTimeString('sw-TZ')}):
+- Bei ya Sasa: $${d.price.toFixed(8)}
+- Mabadiliko (24h): ${d.chg24h.toFixed(2)}%
+- Juu (24h): $${(d.high||d.price*1.02).toFixed(6)} | Chini: $${(d.low||d.price*0.98).toFixed(6)}
+- Volume: ${fVol(d.vol||0)}
+- Timeframe: ${S.tf.toUpperCase()}
+
+VIASHIRIA VYA KIUFUNDI:
+- RSI (14): ${sig.rsi?sig.rsi.toFixed(1):'N/A'} ${sig.rsi<30?'[OVERSOLD]':sig.rsi>70?'[OVERBOUGHT]':'[NEUTRAL]'}
+- Stoch RSI: ${sig.stochRSI?sig.stochRSI.toFixed(1):'N/A'}
+- ATR (14): $${sig.atr?sig.atr.toFixed(6):'N/A'}
+- SMA 20: $${sig.sma20?sig.sma20.toFixed(6):'N/A'}
+- EMA 12: $${sig.ema12?sig.ema12.toFixed(6):'N/A'} | EMA 26: $${sig.ema26?sig.ema26.toFixed(6):'N/A'}
+- MACD Line: ${sig.macd?sig.macd.line.toFixed(6):'N/A'} | Histogram: ${sig.macd?sig.macd.hist.toFixed(6):'N/A'}
+- BB Upper: $${sig.bb?sig.bb.upper.toFixed(6):'N/A'} | Mid: $${sig.bb?sig.bb.mid.toFixed(6):'N/A'} | Lower: $${sig.bb?sig.bb.lower.toFixed(6):'N/A'}
+- Support: $${sig.support?sig.support.toFixed(6):'N/A'}
+- Resistance: $${sig.resistance?sig.resistance.toFixed(6):'N/A'}
+- Pivot Point: $${sig.pivot?sig.pivot.toFixed(6):'N/A'}
+- Algorithm Signal: ${sig.type} (Bull: ${sig.bull}, Bear: ${sig.bear}, Uhakika: ${sig.conf}%)
+- Algorithm Entry: $${sig.entry?sig.entry.toFixed(6):'N/A'}
+- Algorithm SL: $${sig.sl?sig.sl.toFixed(6):'N/A'} (-${slPct}%)
+- Algorithm TP: $${sig.tp?sig.tp.toFixed(6):'N/A'} (+${tpPct}%)
+- Algorithm R:R: 1:${sig.rr}
+- Trend: ${sig.trend}
+
+Toa uchambuzi wako HASA kwa muundo huu (usibadilishe muundo):
+
+SIGNAL: [BUY / SELL / NEUTRAL]
+SABABU: [Sababu 2-3 za msingi kwa Kiswahili]
+ENTRY: $[bei sahihi ya kuingia - nambari tu, mfano 64500.12]
+STOP_LOSS: $[bei ya stop loss - nambari tu]
+TAKE_PROFIT: $[bei ya take profit - nambari tu]
+HATARI: [CHINI / WASTANI / JUU]
+MUHTASARI: [Sentensi 2-3 kwa Kiswahili inayoelezea hali ya soko na mapendekezo]
+
+MUHIMU: Hesabu Entry, SL, TP kwa kuzingatia ATR=$${sig.atr?sig.atr.toFixed(6):'N/A'} na bei ya sasa=$${d.price.toFixed(6)}. Toa nambari halisi za bei.`;
 
   try{
-    const resp=await fetch('https://api.x.ai/v1/chat/completions',{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-      body:JSON.stringify({model:'grok-3-mini',max_tokens:600,temperature:0.3,messages:[{role:'user',content:prompt}]})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        messages:[
+          {role:'user',content:prompt}
+        ]
+      })
     });
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
+
+    if(!resp.ok){
+      const errData=await resp.json().catch(()=>({}));
+      throw new Error(errData.error?.message||'HTTP '+resp.status);
+    }
+
     const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
-    if(!text)throw new Error('Jibu tupu');
-    outEl.className='ai-output';outEl.textContent=text;
-    const getField=label=>{const m=text.match(new RegExp(label+'[:\\s]+\\$?([\\d,.]+)','i'));return m?parseFloat(m[1].replace(',','')):null;};
-    const entryAI=getField('ENTRY'),slAI=getField('STOP_LOSS'),tpAI=getField('TAKE_PROFIT');
+    const text=(data.content||[]).map(b=>b.type==='text'?b.text:'').join('').trim();
+    if(!text)throw new Error('Jibu tupu kutoka kwa Claude AI');
+
+    outEl.className='ai-output';
+    outEl.textContent=text;
+
+    // Parse numbers kutoka jibu la AI
+    const getField=label=>{
+      const patterns=[
+        new RegExp(label+'[:\\s]+\\$?([0-9,\\.]+)','i'),
+        new RegExp(label+'[:\\s]*\\n?\\$?([0-9,\\.]+)','i'),
+      ];
+      for(const p of patterns){const m=text.match(p);if(m)return parseFloat(m[1].replace(/,/g,''));}
+      return null;
+    };
+    const entryAI=getField('ENTRY');
+    const slAI=getField('STOP_LOSS');
+    const tpAI=getField('TAKE_PROFIT');
+
     if(fieldsEl&&(entryAI||slAI||tpAI)){
       fieldsEl.style.display='grid';
       const eEl=document.getElementById('aiEntry');const sEl=document.getElementById('aiSL');const tEl=document.getElementById('aiTP');
-      if(eEl&&entryAI)eEl.textContent=fP(entryAI);if(sEl&&slAI)sEl.textContent=fP(slAI);if(tEl&&tpAI)tEl.textContent=fP(tpAI);
+      if(eEl&&entryAI)eEl.textContent=fP(entryAI);
+      if(sEl&&slAI)sEl.textContent=fP(slAI);
+      if(tEl&&tpAI)tEl.textContent=fP(tpAI);
     }
-    toast('✅ Grok AI amekamilisha uchambuzi wa '+coin.id);
+
+    toast('✅ Claude AI amekamilisha uchambuzi wa '+coin.id);
   }catch(e){
     outEl.className='ai-output error';
-    outEl.textContent='❌ Hitilafu: '+e.message;
-    toast('⚠ AI Error: '+e.message,true);
-  }finally{btn.disabled=false;}
+    outEl.textContent='❌ Hitilafu: '+e.message+'\n\nTafadhali fungua faili hili moja kwa moja kwenye claude.ai (si browser ya kawaida) ili AI ifanye kazi.';
+  }finally{
+    btn.disabled=false;
+  }
 }
 
-// ════════════════════════════════════════
-//  METAL PRICES
-// ════════════════════════════════════════
+// ═══════════════════════════════════
+//  FOREX + GOLD DATA
+// ═══════════════════════════════════
+const forexCache={};
+
+async function fetchAllForex(){
+  // Njia 1: Twelve Data (EUR/USD, GBP/USD, nk.)
+  await fetchTwelveDataForex();
+  // Njia 2: Finnhub (Gold/Silver)
+  await fetchFinnhubGold();
+  // Njia 3: Alpha Vantage kwa TZS
+  await fetchAlphaVantageTZS();
+  updateForexDisplay();
+}
+
+async function fetchTwelveDataForex(){
+  const pairs=['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CHF','USD/TZS'];
+  const symbols=pairs.join(',');
+  try{
+    const r=await fetch(`https://api.twelvedata.com/price?symbol=${encodeURIComponent(symbols)}&apikey=${KEYS.twelvedata}`,{signal:AbortSignal.timeout(8000)});
+    if(!r.ok)return;
+    const data=await r.json();
+    pairs.forEach(pair=>{
+      const key=pair.replace('/','');
+      const d=data[pair]||data[key];
+      if(d&&d.price){
+        forexCache[key]={rate:parseFloat(d.price),chg:null,source:'12Data'};
+      }
+    });
+    // Pia pata XAUUSD kutoka Twelve Data
+    await fetchTwelveDataGold();
+  }catch(e){}
+}
+
+async function fetchTwelveDataGold(){
+  try{
+    const r=await fetch(`https://api.twelvedata.com/price?symbol=XAU/USD,XAG/USD&apikey=${KEYS.twelvedata}`,{signal:AbortSignal.timeout(8000)});
+    if(!r.ok)return;
+    const data=await r.json();
+    if(data['XAU/USD']?.price){
+      forexCache['XAUUSD']={rate:parseFloat(data['XAU/USD'].price),chg:null,source:'12Data'};
+      // Update sidebar
+      const el=document.getElementById('metal_XAU');if(el)el.textContent='$'+parseFloat(data['XAU/USD'].price).toFixed(2);
+    }
+    if(data['XAG/USD']?.price){
+      forexCache['XAGUSD']={rate:parseFloat(data['XAG/USD'].price),chg:null,source:'12Data'};
+      const el=document.getElementById('metal_XAG');if(el)el.textContent='$'+parseFloat(data['XAG/USD'].price).toFixed(2);
+    }
+  }catch(e){}
+}
+
+async function fetchFinnhubGold(){
+  // Finnhub: forex rates
+  const pairs=[{sym:'OANDA:XAU_USD',key:'XAUUSD'},{sym:'OANDA:EUR_USD',key:'EURUSD'},{sym:'OANDA:GBP_USD',key:'GBPUSD'},{sym:'OANDA:USD_JPY',key:'USDJPY'}];
+  for(const pair of pairs){
+    if(forexCache[pair.key]?.rate)continue; // tayari ipo
+    try{
+      const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${pair.sym}&token=${KEYS.finnhub}`,{signal:AbortSignal.timeout(6000)});
+      if(!r.ok)continue;
+      const data=await r.json();
+      if(data.c&&data.c>0){
+        const chg=data.pc>0?((data.c-data.pc)/data.pc*100):null;
+        forexCache[pair.key]={rate:data.c,chg,high:data.h,low:data.l,source:'Finnhub'};
+        if(pair.key==='XAUUSD'){const el=document.getElementById('metal_XAU');if(el)el.textContent='$'+data.c.toFixed(2);}
+      }
+    }catch(e){}
+  }
+}
+
+async function fetchAlphaVantageTZS(){
+  // TZS kwa Alpha Vantage
+  try{
+    if(forexCache['USDTZS']?.rate)return;
+    const r=await fetch(`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=TZS&apikey=${KEYS.alphavantage}`,{signal:AbortSignal.timeout(8000)});
+    if(!r.ok)return;
+    const data=await r.json();
+    const rate=parseFloat(data['Realtime Currency Exchange Rate']?.['5. Exchange Rate']);
+    if(rate>0)forexCache['USDTZS']={rate,chg:null,source:'AlphaVantage'};
+  }catch(e){}
+}
+
+function updateForexDisplay(){
+  const pairs=[
+    {key:'XAUUSD',id:'fx_XAUUSD',chgId:'fxc_XAUUSD',decimals:2,prefix:'$'},
+    {key:'XAGUSD',id:'fx_XAGUSD',chgId:'fxc_XAGUSD',decimals:2,prefix:'$'},
+    {key:'EURUSD',id:'fx_EURUSD',chgId:'fxc_EURUSD',decimals:5,prefix:''},
+    {key:'GBPUSD',id:'fx_GBPUSD',chgId:'fxc_GBPUSD',decimals:5,prefix:''},
+    {key:'USDJPY',id:'fx_USDJPY',chgId:'fxc_USDJPY',decimals:3,prefix:''},
+    {key:'USDTZS',id:'fx_USDTZS',chgId:'fxc_USDTZS',decimals:0,prefix:''},
+    {key:'AUDUSD',id:'fx_AUDUSD',chgId:'fxc_AUDUSD',decimals:5,prefix:''},
+    {key:'USDCHF',id:'fx_USDCHF',chgId:'fxc_USDCHF',decimals:5,prefix:''},
+  ];
+  pairs.forEach(p=>{
+    const el=document.getElementById(p.id);const chgEl=document.getElementById(p.chgId);
+    const cache=forexCache[p.key];
+    if(el&&cache?.rate){
+      el.textContent=p.prefix+cache.rate.toFixed(p.decimals);
+      if(chgEl){
+        if(cache.chg!==null&&cache.chg!==undefined){
+          const pct=(cache.chg>=0?'+':'')+cache.chg.toFixed(2)+'%';
+          chgEl.textContent=pct+' | '+cache.source;
+          chgEl.style.color=cache.chg>=0?'var(--buy)':'var(--sell)';
+        }else{chgEl.textContent=cache.source;chgEl.style.color='var(--muted)';}
+      }
+    }
+    // Sidebar update
+    const sbMap={EURUSD:'forex_EURUSD',GBPUSD:'forex_GBPUSD',USDJPY:'forex_USDJPY'};
+    if(sbMap[p.key]&&cache?.rate){
+      const sbEl=document.getElementById(sbMap[p.key]);
+      if(sbEl)sbEl.textContent=cache.rate.toFixed(p.decimals);
+    }
+  });
+}
+
+// ═══════════════════════════════════
+//  METAL PRICES (backup/supplement)
+// ═══════════════════════════════════
 async function fetchMetalPrices(){
   try{
-    const METAL_KEY='2952a78c9779331373b7f8dec2d6708d';
-    const r=await fetch(`https://api.metalpriceapi.com/v1/latest?api_key=${METAL_KEY}&base=USD&currencies=XAU,XAG,XPT`,{signal:AbortSignal.timeout(8000)});
+    const r=await fetch(`https://api.metalpriceapi.com/v1/latest?api_key=${KEYS.metal}&base=USD&currencies=XAU,XAG`,{signal:AbortSignal.timeout(8000)});
     if(!r.ok)return;
     const data=await r.json();
     if(!data.success)return;
     const rates=data.rates;
-    ['XAU','XAG','XPT'].forEach(sym=>{
-      const price=rates['USD'+sym]?1/rates['USD'+sym]:null;
-      if(!price)return;
-      const el=document.getElementById('metal_'+sym);
-      if(el){el.textContent='$'+price.toFixed(2);el.style.color='var(--warn)';}
-    });
+    if(rates['USDXAU']&&!forexCache['XAUUSD']?.rate){
+      const gold=1/rates['USDXAU'];
+      forexCache['XAUUSD']={rate:gold,chg:null,source:'MetalAPI'};
+      const el=document.getElementById('metal_XAU');if(el){el.textContent='$'+gold.toFixed(2);el.style.color='var(--warn)';}
+      updateForexDisplay();
+    }
+    if(rates['USDXAG']&&!forexCache['XAGUSD']?.rate){
+      const silver=1/rates['USDXAG'];
+      forexCache['XAGUSD']={rate:silver,chg:null,source:'MetalAPI'};
+      const el=document.getElementById('metal_XAG');if(el){el.textContent='$'+silver.toFixed(2);el.style.color='var(--muted)';}
+      updateForexDisplay();
+    }
   }catch(e){}
 }
 
-// ════════════════════════════════════════
-//  SIDEBAR (tumia DocumentFragment — haraka zaidi)
-// ════════════════════════════════════════
+// ═══════════════════════════════════
+//  SIDEBAR
+// ═══════════════════════════════════
 function buildSidebar(){
   const list=document.getElementById('coinList');if(!list)return;
   const frag=document.createDocumentFragment();
@@ -1272,23 +1517,24 @@ function buildSidebar(){
     const pClass=d?(d.chg24h>=0?'up':'dn'):'';
     const btn=document.createElement('button');
     btn.className='coin-btn'+(S.selected.id===coin.id?' active':'');
-    btn.onclick=()=>{S.selected=coin;S.view='single';buildSidebar();renderSingle(coin);fetchKlines(coin,S.tf);connectKlineWS(coin,S.tf);};
+    btn.onclick=()=>selectCoin(coin.id);
     btn.innerHTML=`<span style="font-size:14px">${coin.em}</span><span class="coin-sym">${coin.id}</span><span class="coin-price-sb ${pClass}" id="sbp_${coin.id}">${d?fP(d.price):'—'}</span><span class="sig-dot" style="background:${dotColor}"></span>`;
     frag.appendChild(btn);
   });
-  list.replaceChildren(frag); // replaceChildren ni haraka zaidi kuliko innerHTML=''
+  list.replaceChildren(frag);
+  // Update TF buttons
+  document.querySelectorAll('.tf-btn').forEach(b=>{b.classList.toggle('active',b.textContent===S.tf);});
 }
 
 function flashSidebarPrice(sym){
   const el=document.getElementById('sbp_'+sym);if(!el)return;
   const d=S.prices[sym];if(!d)return;
-  el.textContent=fP(d.price);
-  el.className='coin-price-sb '+(d.chg24h>=0?'up':'dn');
+  el.textContent=fP(d.price);el.className='coin-price-sb '+(d.chg24h>=0?'up':'dn');
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  OVERVIEW TABLE
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 function showAll(){
   S.view='all';
   const rows=COINS.map(coin=>{
@@ -1301,18 +1547,15 @@ function showAll(){
     const arrow=sig.type==='BUY'?'▲':sig.type==='SELL'?'▼':'→';
     return `<tr onclick="selectCoin('${coin.id}')"><td><div class="ov-coin"><span class="ov-em">${coin.em}</span><div><div class="ov-sym2">${coin.id}</div><div class="ov-full2">${coin.name}</div></div></div></td><td id="ovp_${coin.id}">${fP(d.price)}</td><td class="${p}">${fPct(d.chg24h)}</td><td class="${sc}">${arrow} ${sig.type}</td><td><span class="ord-tag ${oc}">${sig.orderType}</span></td><td>${fP(sig.entry)}</td><td style="color:var(--sell)">${fP(sig.sl)}</td><td style="color:var(--buy)">${fP(sig.tp)}</td><td>1:${sig.rr}</td><td style="color:${cc}">${sig.conf}%</td><td class="${sig.trend==='BULLISH'?'up-txt':sig.trend==='BEARISH'?'dn-txt':''}">${sig.trend}</td></tr>`;
   }).join('');
-
   document.getElementById('mainArea').innerHTML=`
     <div class="disclaimer"><strong>⚠ Tahadhari:</strong> Signals zinatokana na data halisi za Binance. Si ushauri wa uwekezaji.</div>
     <div class="ov-panel">
-      <div class="ov-hdr"><span class="ov-title">📊 Muhtasari — Coins Zote (${COINS.length}) · Binance Live</span><span style="font-family:var(--mono);font-size:10px;color:var(--muted)">Inasasishwa kiotomatiki</span></div>
+      <div class="ov-hdr"><span class="ov-title">📊 Muhtasari — Coins Zote (${COINS.length}) · Binance Live</span><span style="font-family:var(--mono);font-size:10px;color:var(--muted)">Bonyeza coin kuona details</span></div>
       <div style="overflow-x:auto"><table class="ov-table">
         <thead><tr><th>Coin</th><th>Bei</th><th>24h%</th><th>Signal</th><th>Order</th><th>Entry</th><th>SL</th><th>TP</th><th>R:R</th><th>Uhakika</th><th>Trend</th></tr></thead>
         <tbody id="ovBody">${rows||'<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--muted)">Inapakia...</td></tr>'}</tbody>
       </table></div>
     </div>`;
-
-  // Update bei kila sekunde bila kuunda HTML upya
   const ovTimer=setInterval(()=>{
     if(S.view!=='all'){clearInterval(ovTimer);return;}
     COINS.forEach(c=>{const el=document.getElementById('ovp_'+c.id);if(el&&S.prices[c.id])el.textContent=fP(S.prices[c.id].price);});
@@ -1322,6 +1565,7 @@ function showAll(){
 function selectCoin(id){
   const coin=COINS.find(c=>c.id===id);if(!coin)return;
   S.selected=coin;S.view='single';
+  localStorage.setItem('st_selected',id); // PERSIST
   buildSidebar();renderSingle(coin);fetchKlines(coin,S.tf);connectKlineWS(coin,S.tf);
 }
 
@@ -1329,37 +1573,40 @@ function setTF(btn,tf){
   document.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   S.tf=tf;
-  fetchKlines(S.selected,tf);
-  connectKlineWS(S.selected,tf);
+  localStorage.setItem('st_tf',tf); // PERSIST
+  fetchKlines(S.selected,tf);connectKlineWS(S.selected,tf);
 }
 
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 //  TOAST
-// ════════════════════════════════════════
+// ═══════════════════════════════════
 function toast(msg,isErr=false){
   const tc=document.getElementById('toasts');if(!tc)return;
-  const el=document.createElement('div');
-  el.className='toast';
+  const el=document.createElement('div');el.className='toast';
   if(isErr)el.style.borderColor='rgba(232,51,74,0.4)';
-  el.textContent=msg;
-  tc.appendChild(el);
+  el.textContent=msg;tc.appendChild(el);
   setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.3s';setTimeout(()=>el.remove(),300);},4000);
 }
 
-// ════════════════════════════════════════
-//  INIT — mfuatano sahihi wa kupakia
-// ════════════════════════════════════════
-// 1. Onyesha sidebar (hata bila data)
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+// 1. Sidebar mara moja
 buildSidebar();
 
-// 2. Anza kupata data mara moja
+// 2. Pata bei
 preloadPricesREST();
 
-// 3. Backup: kama CoinCap imechelewa sekunde 6, washa Binance WS
-setTimeout(openBinanceWSIfNeeded, 6000);
+// 3. Backup Binance WS
+setTimeout(openBinanceWSIfNeeded,6000);
 
-// 4. Metals kwa nyuma
-setTimeout(()=>{fetchMetalPrices();setInterval(fetchMetalPrices,5*60*1000);}, 2000);
+// 4. Forex + Gold
+setTimeout(()=>{
+  fetchAllForex();
+  fetchMetalPrices();
+  setInterval(fetchAllForex,3*60*1000); // Sasisisha kila dakika 3
+  setInterval(fetchMetalPrices,5*60*1000);
+},1500);
 </script>
 </body>
 </html>
