@@ -980,6 +980,9 @@
 </head>
 <body>
 
+<!-- Blank background shown while checking session -->
+<div id="authCheck" style="position:fixed; inset:0; background:#050a0f; z-index:9999;"></div>
+
 <!-- HEADER -->
 <header>
   <div class="logo">
@@ -1032,6 +1035,7 @@
   <a class="tab" href="xausd.html">🏅 XAU/USD</a>
   <a class="tab" href="forex-dashboard.html">📋 Forex Dashboard</a>
   <a class="tab" href="prediction.html">🔮 Prediction</a>
+  <a class="tab" href="account.html" style="margin-left:auto;">👤 Akaunti</a>
 </div>
   
 
@@ -1813,6 +1817,31 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
+</script>
+
+<!-- Firebase Auth Guard -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCF3NcUqw0fxh14iew-zYXDwp3aoomo8Ag",
+    authDomain: "sadetrade-6cce2.firebaseapp.com",
+    projectId: "sadetrade-6cce2",
+    storageBucket: "sadetrade-6cce2.firebasestorage.app",
+    messagingSenderId: "7070568393",
+    appId: "1:7070568393:web:89443b14b08f1f36c3e218",
+    measurementId: "G-8KW59X2V2J"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  auth.onAuthStateChanged((user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      document.getElementById('authCheck').style.display = 'none';
+    }
+  });
 </script>
 </body>
 </html>
