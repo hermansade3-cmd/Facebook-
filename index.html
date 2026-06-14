@@ -1026,6 +1026,7 @@
   <div class="tab" onclick="switchTab('forex')">💱 Forex</div>
   <div class="tab" onclick="switchTab('overview')">🌐 Muhtasari</div>
   <div class="tab" onclick="switchTab('chat')">🤖 AI Assistant</div>
+  <a class="tab" href="Prediction.html" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">🔮 Prediction</a>
 </div>
 
 <!-- MAIN LAYOUT -->
@@ -1209,8 +1210,8 @@
 <div id="toast"></div>
 
 <script>
-const CMC_API_KEY = '497d054cebe44b7fb8e877a60812bd06';
-const GROK_API_KEY = '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';
+const CMC_API_KEY = 'WEKA_CMC_KEY_MPYA_HAPA';
+const GROK_API_KEY = 'WEKA_GROQ_KEY_MPYA_HAPA';
 const CMC_PROXY = 'https://pro-api.coinmarketcap.com/v1';
 
 let allCoins = [];
@@ -1552,11 +1553,13 @@ Toa jibu kwa JSON tu (bila maelezo ya ziada, bila markdown backticks):
         model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 500,
-        temperature: 0.3
+        temperature: 0.3,
+        response_format: { type: 'json_object' }
       })
     });
 
     const data = await response.json();
+    if (data.error) throw new Error(data.error.message || 'Groq API error');
     let text = data.choices[0].message.content.trim();
 
     // Clean JSON
@@ -1569,6 +1572,7 @@ Toa jibu kwa JSON tu (bila maelezo ya ziada, bila markdown backticks):
     displayPrediction(result, price);
 
   } catch(e) {
+    console.error(e);
     // Fallback prediction
     const signal = chg > 2 ? 'BUY' : chg < -2 ? 'SELL' : 'NEUTRAL';
     displayPrediction({
@@ -1580,7 +1584,7 @@ Toa jibu kwa JSON tu (bila maelezo ya ziada, bila markdown backticks):
       risk_reward: '1:1.6',
       reasoning: 'Uchambuzi wa msingi unaonyesha hali ya soko. Tafadhali kagua viashiria zaidi kabla ya kufanya uamuzi.'
     }, price);
-    showToast('Kutumia uchambuzi wa msingi (API limit)');
+    showToast('AI haifanyi kazi: ' + e.message);
   }
 
   btn.disabled = false;
@@ -1693,11 +1697,13 @@ async function runChat(userMsg, messagesId, btnId) {
     });
 
     const data = await response.json();
+    if (data.error) throw new Error(data.error.message || 'Groq API error');
     const reply = data.choices[0].message.content;
 
     document.getElementById(typingId).innerHTML = `<div class="sender">🤖 GROK AI</div>${reply.replace(/\n/g, '<br>')}`;
   } catch(e) {
-    document.getElementById(typingId).innerHTML = `<div class="sender">🤖 GROK AI</div>Samahani, kuna tatizo la muunganiko. Jaribu tena baadaye. ❌`;
+    console.error(e);
+    document.getElementById(typingId).innerHTML = `<div class="sender">🤖 GROK AI</div>Hitilafu: ${e.message} ❌`;
   }
 
   messages.scrollTop = messages.scrollHeight;
