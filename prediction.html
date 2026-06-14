@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sade Prediction — Ishara za Soko</title>
+<style>
+  :root{
+    --bg: #0a0e14;
+    --panel: #11161f;
+    --panel2: #161d29;
+    --line: #232b3a;
+    --text: #e7ecf3;
+    --muted: #7c8aa0;
+    --buy: #00d3a7;
+    --sell: #ff5470;
+    --gold: #ffb648;
+    --accent: #5b8cff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: radial-gradient(circle at 50% 0%, #121a28 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+  header{
+    padding: 18px 16px 14px;
+    text-align:center;
+    border-bottom: 1px solid var(--line);
+  }
+  header h1{
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+    background: linear-gradient(90deg, var(--accent), var(--buy));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 800;
+  }
+  header p{ color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+
+  .tabs{
+    display:flex;
+    gap: 8px;
+    padding: 14px 16px 0;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding: 10px 0;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor:pointer;
+    transition: all .2s;
+  }
+  .tab.active{
+    color: var(--bg);
+    background: linear-gradient(90deg, var(--accent), var(--buy));
+    border-color: transparent;
+  }
+
+  main{
+    max-width: 480px;
+    margin: 14px auto 0;
+    padding: 0 16px;
+  }
+
+  .selector{
+    display:flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+  }
+  .selector::-webkit-scrollbar{ height: 4px; }
+  .selector::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 4px; }
+  .chip{
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .chip.active{
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .price-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .price-card .pair{
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .price-card .price{
+    font-size: 2rem;
+    font-weight: 800;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+  .price-card .change{
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .change.up{ color: var(--buy); }
+  .change.down{ color: var(--sell); }
+
+  .signal-card{
+    background: linear-gradient(160deg, var(--panel2), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .signal-card::before{
+    content:'';
+    position:absolute;
+    top:-50%; right:-30%;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(91,140,255,0.12), transparent 70%);
+  }
+  .signal-label{
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+  }
+  .signal-badge{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin: 8px 0 4px;
+  }
+  .signal-badge.buy{ color: var(--buy); }
+  .signal-badge.sell{ color: var(--sell); }
+  .signal-badge.wait{ color: var(--gold); }
+
+  .confidence{
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .confidence b{ color: var(--text); }
+
+  .ladder{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    position: relative;
+  }
+  .rung{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 8px 0;
+    font-size: 0.9rem;
+  }
+  .rung:not(:last-child){ border-bottom: 1px dashed var(--line); }
+  .rung .lab{
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+  .rung .val{ font-weight: 700; font-family: 'Consolas', monospace; }
+  .lab.tp{ background: rgba(0,211,167,0.15); color: var(--buy); }
+  .lab.entry{ background: rgba(91,140,255,0.15); color: var(--accent); }
+  .lab.sl{ background: rgba(255,84,112,0.15); color: var(--sell); }
+
+  .arrow-track{
+    text-align:center;
+    font-size: 1.4rem;
+    color: var(--muted);
+    margin: 6px 0;
+    letter-spacing: 4px;
+  }
+
+  .ai-box{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .ai-box .ai-title{
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .btn{
+    width:100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(90deg, var(--accent), var(--buy));
+    color: var(--bg);
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .btn:disabled{ opacity: 0.6; }
+  .btn:active{ transform: scale(0.98); }
+
+  .status{
+    text-align:center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    padding: 10px 0;
+  }
+
+  .disclaimer{
+    text-align:center;
+    color: var(--muted);
+    font-size: 0.7rem;
+    margin-top: 18px;
+    padding: 0 8px;
+    line-height: 1.5;
+  }
+
+  .spinner{
+    width: 18px; height:18px;
+    border: 2px solid var(--line);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    display:inline-block;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SADE PREDICTION</h1>
+  <p>Ishara za Soko — Crypto &amp; Forex (AI-Powered)</p>
+</header>
+
+<main>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="crypto">🪙 Crypto</div>
+    <div class="tab" data-tab="forex">💱 Forex</div>
+  </div>
+
+  <!-- CRYPTO PANEL -->
+  <div id="panel-crypto">
+    <div class="selector" id="cryptoSelector"></div>
+
+    <div class="price-card">
+      <div class="pair" id="cryptoPairName">—</div>
+      <div class="price" id="cryptoPrice">$0.00</div>
+      <div class="change" id="cryptoChange">--%</div>
+    </div>
+
+    <div id="cryptoSignalArea"></div>
+  </div>
+
+  <!-- FOREX PANEL -->
+  <div id="panel-forex" class="hidden">
+    <div class="selector" id="forexSelector"></div>
+
+    <div class="price-card">
+      <div class="pair" id="forexPairName">—</div>
+      <div class="price" id="forexPrice">0.0000</div>
+      <div class="change" id="forexChange">Bei ya soko</div>
+    </div>
+
+    <div id="forexSignalArea"></div>
+  </div>
+
+  <button class="btn" id="generateBtn">Pata Ishara (Signal) na AI</button>
+  <div class="status" id="statusLine"></div>
+
+  <div class="disclaimer">
+    Hii si ushauri wa kifedha. Ishara zinatengenezwa na AI kwa kutumia data ya bei pekee — fanya utafiti wako kabla ya kufanya biashara. Trading ina hatari ya kupoteza fedha.
+  </div>
+
+</main>
+
+<script>
+  // ====== WEKA API KEYS HAPA ======
+  const GROQ_API_KEY = "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";
+  // =================================
+
+  const BINANCE_BASE = "https://api.binance.com/api/v3";
+
+  const cryptoList = [
+    {symbol:"BTC", binance:"BTCUSDT", name:"Bitcoin"},
+    {symbol:"ETH", binance:"ETHUSDT", name:"Ethereum"},
+    {symbol:"BNB", binance:"BNBUSDT", name:"BNB"},
+    {symbol:"SOL", binance:"SOLUSDT", name:"Solana"},
+    {symbol:"XRP", binance:"XRPUSDT", name:"XRP"},
+    {symbol:"DOGE", binance:"DOGEUSDT", name:"Dogecoin"},
+    {symbol:"ADA", binance:"ADAUSDT", name:"Cardano"}
+  ];
+
+  const forexList = [
+    {base:"EUR", quote:"USD"},
+    {base:"GBP", quote:"USD"},
+    {base:"USD", quote:"JPY"},
+    {base:"USD", quote:"ZAR"},
+    {base:"AUD", quote:"USD"},
+    {base:"USD", quote:"CHF"}
+  ];
+
+  let activeTab = "crypto";
+  let selectedCrypto = cryptoList[0];
+  let selectedForex = forexList[0];
+  let lastCryptoData = null;
+  let lastForexData = null;
+
+  // ---------- TAB SWITCHING ----------
+  document.querySelectorAll(".tab").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+      tab.classList.add("active");
+      activeTab = tab.dataset.tab;
+      document.getElementById("panel-crypto").classList.toggle("hidden", activeTab!=="crypto");
+      document.getElementById("panel-forex").classList.toggle("hidden", activeTab!=="forex");
+      setStatus("");
+    });
+  });
+
+  // ---------- BUILD SELECTORS ----------
+  function buildSelectors(){
+    const cSel = document.getElementById("cryptoSelector");
+    cryptoList.forEach((c,i)=>{
+      const chip = document.createElement("div");
+      chip.className = "chip" + (i===0 ? " active" : "");
+      chip.textContent = c.symbol;
+      chip.addEventListener("click", ()=>{
+        document.querySelectorAll("#cryptoSelector .chip").forEach(x=>x.classList.remove("active"));
+        chip.classList.add("active");
+        selectedCrypto = c;
+        fetchCryptoPrice();
+      });
+      cSel.appendChild(chip);
+    });
+
+    const fSel = document.getElementById("forexSelector");
+    forexList.forEach((f,i)=>{
+      const chip = document.createElement("div");
+      chip.className = "chip" + (i===0 ? " active" : "");
+      chip.textContent = f.base + "/" + f.quote;
+      chip.addEventListener("click", ()=>{
+        document.querySelectorAll("#forexSelector .chip").forEach(x=>x.classList.remove("active"));
+        chip.classList.add("active");
+        selectedForex = f;
+        fetchForexPrice();
+      });
+      fSel.appendChild(chip);
+    });
+  }
+
+  // ---------- CRYPTO PRICE (Binance) ----------
+  async function fetchCryptoPrice(){
+    setStatus("Inapakua bei ya " + selectedCrypto.symbol + "...");
+    document.getElementById("cryptoPairName").textContent = selectedCrypto.symbol + " / USDT";
+
+    try{
+      // 24hr ticker stats: price, 24h change %, volume
+      const tickerRes = await fetch(BINANCE_BASE + "/ticker/24hr?symbol=" + selectedCrypto.binance);
+      const ticker = await tickerRes.json();
+
+      const price = parseFloat(ticker.lastPrice);
+      const change24h = parseFloat(ticker.priceChangePercent);
+      const volume24h = parseFloat(ticker.quoteVolume);
+
+      // 1h change from klines
+      let change1h = 0, change7d = 0;
+      try{
+        const k1hRes = await fetch(BINANCE_BASE + "/klines?symbol=" + selectedCrypto.binance + "&interval=1h&limit=2");
+        const k1h = await k1hRes.json();
+        const open1h = parseFloat(k1h[0][1]);
+        change1h = ((price - open1h) / open1h) * 100;
+
+        const k7dRes = await fetch(BINANCE_BASE + "/klines?symbol=" + selectedCrypto.binance + "&interval=1d&limit=8");
+        const k7d = await k7dRes.json();
+        const open7d = parseFloat(k7d[0][1]);
+        change7d = ((price - open7d) / open7d) * 100;
+      }catch(e){ /* non-fatal, use 0 */ }
+
+      lastCryptoData = {
+        symbol: selectedCrypto.symbol,
+        price: price,
+        change1h: change1h,
+        change24h: change24h,
+        change7d: change7d,
+        volume24h: volume24h,
+        marketCap: 0
+      };
+
+      document.getElementById("cryptoPrice").textContent = "$" + formatNum(price);
+      const chEl = document.getElementById("cryptoChange");
+      chEl.textContent = (change24h >= 0 ? "▲ +" : "▼ ") + change24h.toFixed(2) + "% (24h)";
+      chEl.className = "change " + (change24h >= 0 ? "up" : "down");
+
+      setStatus("");
+    }catch(err){
+      setStatus("⚠️ Imeshindikana kupakua bei. Angalia mtandao.");
+      console.error(err);
+    }
+  }
+
+  // ---------- FOREX PRICE (Frankfurter API) ----------
+  async function fetchForexPrice(){
+    setStatus("Inapakua bei ya " + selectedForex.base + "/" + selectedForex.quote + "...");
+    document.getElementById("forexPairName").textContent = selectedForex.base + " / " + selectedForex.quote;
+
+    try{
+      const url = "https://api.frankfurter.app/latest?from=" + selectedForex.base + "&to=" + selectedForex.quote;
+      const res = await fetch(url);
+      const data = await res.json();
+      const rate = data.rates[selectedForex.quote];
+
+      // Get yesterday's rate for trend
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 2);
+      const yStr = yesterday.toISOString().split("T")[0];
+
+      let prevRate = rate;
+      try{
+        const histRes = await fetch("https://api.frankfurter.app/" + yStr + "?from=" + selectedForex.base + "&to=" + selectedForex.quote);
+        const histData = await histRes.json();
+        prevRate = histData.rates[selectedForex.quote];
+      }catch(e){ /* ignore, fallback to same rate */ }
+
+      const pctChange = ((rate - prevRate) / prevRate) * 100;
+
+      lastForexData = {
+        pair: selectedForex.base + "/" + selectedForex.quote,
+        rate: rate,
+        prevRate: prevRate,
+        pctChange: pctChange
+      };
+
+      document.getElementById("forexPrice").textContent = rate.toFixed(4);
+      const chEl = document.getElementById("forexChange");
+      chEl.textContent = (pctChange >= 0 ? "▲ +" : "▼ ") + pctChange.toFixed(3) + "% (siku 2 zilizopita)";
+      chEl.className = "change " + (pctChange >= 0 ? "up" : "down");
+
+      setStatus("");
+    }catch(err){
+      setStatus("⚠️ Imeshindikana kupakua bei ya forex. Angalia mtandao.");
+      console.error(err);
+    }
+  }
+
+  // ---------- GROQ AI SIGNAL ----------
+  document.getElementById("generateBtn").addEventListener("click", generateSignal);
+
+  async function generateSignal(){
+    const btn = document.getElementById("generateBtn");
+    btn.disabled = true;
+    setStatus("");
+    btn.innerHTML = '<span class="spinner"></span> AI inachambua soko...';
+
+    try{
+      let promptData, pairLabel, currentPrice;
+
+      if(activeTab === "crypto"){
+        if(!lastCryptoData) await fetchCryptoPrice();
+        pairLabel = lastCryptoData.symbol + "/USD";
+        currentPrice = lastCryptoData.price;
+        promptData = `Jozi: ${pairLabel}
+Bei ya sasa: $${currentPrice}
+Mabadiliko ya 1h: ${lastCryptoData.change1h.toFixed(2)}%
+Mabadiliko ya 24h: ${lastCryptoData.change24h.toFixed(2)}%
+Mabadiliko ya 7d: ${lastCryptoData.change7d.toFixed(2)}%
+Volume 24h: $${formatNum(lastCryptoData.volume24h)}
+Market Cap: $${formatNum(lastCryptoData.marketCap)}`;
+      }else{
+        if(!lastForexData) await fetchForexPrice();
+        pairLabel = lastForexData.pair;
+        currentPrice = lastForexData.rate;
+        promptData = `Jozi: ${pairLabel}
+Bei ya sasa: ${currentPrice}
+Bei ya siku 2 zilizopita: ${lastForexData.prevRate}
+Mabadiliko: ${lastForexData.pctChange.toFixed(3)}%`;
+      }
+
+      const systemPrompt = `Wewe ni mchambuzi wa soko la fedha (trading analyst) mwenye uzoefu mkubwa. Kazi yako ni kuchambua data ya bei uliyopewa na kutoa ISHARA (signal) ya kibiashara.
+
+Jibu LAZIMA liwe JSON safi tu, bila maandishi mengine yoyote, bila markdown, bila backticks. Muundo wa JSON:
+
+{
+  "action": "BUY" au "SELL" au "WAIT",
+  "confidence": namba kati ya 1-100,
+  "entry": namba ya bei ya kuingia (sawa na bei ya sasa au karibu nayo),
+  "stop_loss": namba ya bei ya SL (Stop Loss),
+  "take_profit": namba ya bei ya TP (Take Profit),
+  "reason": "maelezo mafupi kwa Kiswahili (sentensi 2-4) yanayoeleza kwa nini ishara hii imetolewa, ukitumia data ya mabadiliko ya bei na volume",
+  "risk_note": "tahadhari fupi kwa Kiswahili kuhusu hatari ya biashara hii"
+}
+
+Kanuni za kuhesabu SL na TP:
+- Kwa BUY: stop_loss iwe chini ya entry, take_profit iwe juu ya entry (risk:reward angalau 1:1.5)
+- Kwa SELL: stop_loss iwe juu ya entry, take_profit iwe chini ya entry (risk:reward angalau 1:1.5)
+- Kwa WAIT: entry, stop_loss, take_profit zote ziwe sawa na bei ya sasa
+- Tumia asilimia ndogo (0.5% - 3%) kuhesabu umbali wa SL/TP kutoka entry, kulingana na "volatility" ya data uliyopewa.`;
+
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + GROQ_API_KEY
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: promptData }
+          ],
+          temperature: 0.4,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        throw new Error(data.error.message || JSON.stringify(data.error));
+      }
+
+      let raw = data.choices[0].message.content.trim();
+      raw = raw.replace(/```json|```/g, "").trim();
+      const signal = JSON.parse(raw);
+
+      renderSignal(signal, pairLabel, currentPrice);
+      setStatus("✅ Ishara imetengenezwa — " + new Date().toLocaleTimeString("sw-TZ"));
+
+    }catch(err){
+      console.error(err);
+      setStatus("⚠️ Hitilafu: " + err.message);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = "Pata Ishara (Signal) na AI";
+  }
+
+  // ---------- RENDER SIGNAL CARD ----------
+  function renderSignal(signal, pairLabel, currentPrice){
+    const action = (signal.action || "WAIT").toUpperCase();
+    const cls = action === "BUY" ? "buy" : (action === "SELL" ? "sell" : "wait");
+    const icon = action === "BUY" ? "📈" : (action === "SELL" ? "📉" : "⏸️");
+
+    const decimals = currentPrice < 10 ? 4 : 2;
+
+    const html = `
+      <div class="signal-card">
+        <div class="signal-label">Ishara ya ${pairLabel}</div>
+        <div class="signal-badge ${cls}">${icon} ${action}</div>
+        <div class="confidence">Uhakika (Confidence): <b>${signal.confidence}%</b></div>
+
+        <div class="arrow-track">${action === "BUY" ? "▲▲▲" : (action === "SELL" ? "▼▼▼" : "⏸ ⏸ ⏸")}</div>
+
+        <div class="ladder">
+          <div class="rung">
+            <span class="lab tp">TP</span>
+            <span class="val">${Number(signal.take_profit).toFixed(decimals)}</span>
+          </div>
+          <div class="rung">
+            <span class="lab entry">ENTRY</span>
+            <span class="val">${Number(signal.entry).toFixed(decimals)}</span>
+          </div>
+          <div class="rung">
+            <span class="lab sl">SL</span>
+            <span class="val">${Number(signal.stop_loss).toFixed(decimals)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-box">
+        <div class="ai-title">🤖 Uchambuzi wa AI</div>
+        ${signal.reason || ""}
+      </div>
+
+      <div class="ai-box" style="border-left-color: var(--gold);">
+        <div class="ai-title" style="color: var(--gold);">⚠️ Tahadhari</div>
+        ${signal.risk_note || "Trading ina hatari. Tumia fedha unazoweza kumudu kupoteza."}
+      </div>
+    `;
+
+    const target = activeTab === "crypto" ? "cryptoSignalArea" : "forexSignalArea";
+    document.getElementById(target).innerHTML = html;
+  }
+
+  // ---------- HELPERS ----------
+  function setStatus(msg){
+    document.getElementById("statusLine").textContent = msg;
+  }
+
+  function formatNum(n){
+    if(n === undefined || n === null) return "0";
+    if(n >= 1e9) return (n/1e9).toFixed(2) + "B";
+    if(n >= 1e6) return (n/1e6).toFixed(2) + "M";
+    if(n >= 1e3) return (n/1e3).toFixed(2) + "K";
+    if(n < 1) return n.toFixed(6);
+    return n.toFixed(2);
+  }
+
+  // ---------- INIT ----------
+  buildSelectors();
+  fetchCryptoPrice();
+</script>
+
+</body>
+</html>
