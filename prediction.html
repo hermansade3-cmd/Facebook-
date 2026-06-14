@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sade Prediction — Ishara za Soko</title>
+<title>Sade Prediction — Ishara za Soko (Crypto & Forex)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
     --bg: #0a0e14;
@@ -16,8 +17,10 @@
     --sell: #ff5470;
     --gold: #ffb648;
     --accent: #5b8cff;
+    --purple: #b07cff;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ height:100%; }
   body{
     background: radial-gradient(circle at 50% 0%, #121a28 0%, var(--bg) 55%);
     color: var(--text);
@@ -25,13 +28,20 @@
     min-height: 100vh;
     padding-bottom: 40px;
   }
+
+  /* ================= HEADER ================= */
   header{
-    padding: 18px 16px 14px;
+    padding: 18px 24px 14px;
     text-align:center;
     border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: rgba(10,14,20,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 50;
   }
   header h1{
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     letter-spacing: 0.5px;
     background: linear-gradient(90deg, var(--accent), var(--buy));
     -webkit-background-clip: text;
@@ -39,12 +49,12 @@
     color: transparent;
     font-weight: 800;
   }
-  header p{ color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+  header p{ color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
 
   .tabs{
     display:flex;
     gap: 8px;
-    padding: 14px 16px 0;
+    padding: 14px 0 0;
     max-width: 480px;
     margin: 0 auto;
   }
@@ -67,71 +77,216 @@
     border-color: transparent;
   }
 
-  main{
-    max-width: 480px;
-    margin: 14px auto 0;
-    padding: 0 16px;
+  /* ================= LAYOUT ================= */
+  .layout{
+    max-width: 1400px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 220px 1fr 340px;
+    gap: 18px;
+    align-items: start;
   }
 
+  /* SIDEBAR (left) */
+  .sidebar{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+    position: sticky;
+    top: 90px;
+  }
+  .sidebar h3{
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
   .selector{
     display:flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .selector.row{
+    flex-direction: row;
     overflow-x: auto;
     padding-bottom: 6px;
-    margin-bottom: 14px;
   }
-  .selector::-webkit-scrollbar{ height: 4px; }
+  .selector::-webkit-scrollbar{ height: 4px; width:4px; }
   .selector::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 4px; }
   .chip{
     flex: 0 0 auto;
-    padding: 8px 14px;
-    border-radius: 20px;
+    padding: 10px 14px;
+    border-radius: 10px;
     border: 1px solid var(--line);
-    background: var(--panel);
+    background: var(--panel2);
     color: var(--muted);
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    transition: all .15s;
   }
+  .chip:hover{ border-color: var(--accent); color: var(--text); }
   .chip.active{
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
+    background: linear-gradient(90deg, var(--accent), var(--buy));
+    color: #06121f;
+    border-color: transparent;
   }
+  .chip .mini-price{
+    font-size: 0.7rem;
+    font-family: 'Consolas', monospace;
+    opacity: 0.8;
+  }
+
+  /* CENTER COLUMN */
+  .center-col{ display:flex; flex-direction: column; gap: 16px; }
 
   .price-card{
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 14px;
+    padding: 18px 22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap: wrap;
+    gap: 12px;
   }
   .price-card .pair{
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--muted);
     font-weight: 600;
   }
   .price-card .price{
-    font-size: 2rem;
+    font-size: 2.4rem;
     font-weight: 800;
     margin-top: 4px;
     letter-spacing: 0.5px;
   }
   .price-card .change{
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     margin-top: 4px;
   }
   .change.up{ color: var(--buy); }
   .change.down{ color: var(--sell); }
 
+  .stat-row{
+    display:flex;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+  .stat-item{
+    text-align: right;
+  }
+  .stat-item .lbl{ font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;}
+  .stat-item .val{ font-size: 0.95rem; font-weight: 700; font-family:'Consolas', monospace; margin-top:2px;}
+
+  /* CHART CARD */
+  .chart-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .chart-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom: 10px;
+  }
+  .chart-head h3{
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .tf-selector{ display:flex; gap:6px; }
+  .tf-btn{
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--panel2);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .tf-btn.active{
+    background: var(--accent);
+    color:#fff;
+    border-color: var(--accent);
+  }
+  .chart-wrap{ height: 320px; position: relative; }
+  .chart-wrap.small{ height: 140px; }
+
+  /* INDICATOR GRID */
+  .indicators-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .indicators-card h3{
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+  .ind-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .ind-box{
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .ind-box .ind-name{
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .ind-box .ind-val{
+    font-size: 1.05rem;
+    font-weight: 800;
+    font-family: 'Consolas', monospace;
+  }
+  .ind-box .ind-tag{
+    display:inline-block;
+    margin-top: 4px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+    letter-spacing: 0.5px;
+  }
+  .tag-buy{ background: rgba(0,211,167,0.15); color: var(--buy); }
+  .tag-sell{ background: rgba(255,84,112,0.15); color: var(--sell); }
+  .tag-neutral{ background: rgba(124,138,160,0.18); color: var(--muted); }
+  .tag-overbought{ background: rgba(255,84,112,0.15); color: var(--sell); }
+  .tag-oversold{ background: rgba(0,211,167,0.15); color: var(--buy); }
+
+  /* RIGHT COLUMN - AI SIGNAL */
+  .right-col{ display:flex; flex-direction: column; gap: 16px; position: sticky; top: 90px; }
+
   .signal-card{
     background: linear-gradient(160deg, var(--panel2), var(--panel));
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 18px;
-    margin-bottom: 14px;
     position: relative;
     overflow: hidden;
   }
@@ -169,6 +324,18 @@
     margin-bottom: 14px;
   }
   .confidence b{ color: var(--text); }
+  .conf-bar{
+    height: 6px;
+    border-radius: 4px;
+    background: var(--line);
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .conf-bar-fill{
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--buy));
+  }
 
   .ladder{
     background: var(--bg);
@@ -211,7 +378,6 @@
     border-left: 3px solid var(--accent);
     border-radius: 10px;
     padding: 14px;
-    margin-bottom: 14px;
     font-size: 0.85rem;
     line-height: 1.6;
   }
@@ -235,7 +401,6 @@
     font-size: 0.95rem;
     letter-spacing: 0.5px;
     cursor: pointer;
-    margin-bottom: 10px;
   }
   .btn:disabled{ opacity: 0.6; }
   .btn:active{ transform: scale(0.98); }
@@ -244,15 +409,16 @@
     text-align:center;
     color: var(--muted);
     font-size: 0.8rem;
-    padding: 10px 0;
+    padding: 4px 0;
   }
 
   .disclaimer{
     text-align:center;
     color: var(--muted);
-    font-size: 0.7rem;
-    margin-top: 18px;
-    padding: 0 8px;
+    font-size: 0.72rem;
+    margin: 18px auto 0;
+    max-width: 1400px;
+    padding: 0 24px;
     line-height: 1.5;
   }
 
@@ -269,59 +435,142 @@
   @keyframes spin{ to{ transform: rotate(360deg); } }
 
   .hidden{ display:none !important; }
+
+  /* SUMMARY BAR */
+  .summary-bar{
+    display:flex;
+    gap:10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 16px;
+    overflow-x:auto;
+  }
+  .summary-pill{
+    flex: 1 0 auto;
+    min-width: 120px;
+    text-align:center;
+    padding: 8px 6px;
+    border-radius: 10px;
+    background: var(--panel2);
+  }
+  .summary-pill .s-name{ font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;}
+  .summary-pill .s-val{ font-size: 0.95rem; font-weight: 800; margin-top: 4px; }
+  .summary-pill.buy .s-val{ color: var(--buy); }
+  .summary-pill.sell .s-val{ color: var(--sell); }
+  .summary-pill.neutral .s-val{ color: var(--muted); }
+  .overall-pill{
+    flex: 1.4 0 auto;
+    border: 1px solid var(--line);
+  }
+  .overall-pill .s-val{ font-size: 1.2rem; }
+
+  /* ================= RESPONSIVE (mobile fallback) ================= */
+  @media (max-width: 1100px){
+    .layout{
+      grid-template-columns: 1fr;
+    }
+    .sidebar{ position: static; }
+    .selector{ flex-direction: row; overflow-x:auto; }
+    .right-col{ position: static; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>SADE PREDICTION</h1>
-  <p>Ishara za Soko — Crypto &amp; Forex (AI-Powered)</p>
-</header>
-
-<main>
-
+  <p>Ishara za Soko — Crypto &amp; Forex (AI-Powered) • Indicators za Kiteknolojia</p>
   <div class="tabs">
     <div class="tab active" data-tab="crypto">🪙 Crypto</div>
     <div class="tab" data-tab="forex">💱 Forex</div>
   </div>
+</header>
 
-  <!-- CRYPTO PANEL -->
-  <div id="panel-crypto">
+<div class="layout">
+
+  <!-- ============ LEFT SIDEBAR: PAIR SELECTOR ============ -->
+  <aside class="sidebar">
+    <h3 id="sidebarTitle">Chagua Sarafu (Coins)</h3>
     <div class="selector" id="cryptoSelector"></div>
+    <div class="selector hidden" id="forexSelector"></div>
+  </aside>
+
+  <!-- ============ CENTER: PRICE, CHART, INDICATORS ============ -->
+  <div class="center-col">
 
     <div class="price-card">
-      <div class="pair" id="cryptoPairName">—</div>
-      <div class="price" id="cryptoPrice">$0.00</div>
-      <div class="change" id="cryptoChange">--%</div>
+      <div>
+        <div class="pair" id="pairName">—</div>
+        <div class="price" id="pairPrice">$0.00</div>
+        <div class="change" id="pairChange">--%</div>
+      </div>
+      <div class="stat-row" id="statRow"></div>
     </div>
 
-    <div id="cryptoSignalArea"></div>
-  </div>
+    <!-- OVERALL SIGNAL SUMMARY -->
+    <div class="summary-bar" id="summaryBar"></div>
 
-  <!-- FOREX PANEL -->
-  <div id="panel-forex" class="hidden">
-    <div class="selector" id="forexSelector"></div>
-
-    <div class="price-card">
-      <div class="pair" id="forexPairName">—</div>
-      <div class="price" id="forexPrice">0.0000</div>
-      <div class="change" id="forexChange">Bei ya soko</div>
+    <!-- PRICE CHART -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <h3>Chati ya Bei (Price Chart)</h3>
+        <div class="tf-selector" id="tfSelector">
+          <div class="tf-btn" data-tf="15m">15m</div>
+          <div class="tf-btn active" data-tf="1h">1h</div>
+          <div class="tf-btn" data-tf="4h">4h</div>
+          <div class="tf-btn" data-tf="1d">1d</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
     </div>
 
-    <div id="forexSignalArea"></div>
+    <!-- RSI + MACD CHARTS -->
+    <div class="chart-card">
+      <div class="chart-head"><h3>RSI (14)</h3></div>
+      <div class="chart-wrap small"><canvas id="rsiChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head"><h3>MACD (12, 26, 9)</h3></div>
+      <div class="chart-wrap small"><canvas id="macdChart"></canvas></div>
+    </div>
+
+    <!-- INDICATOR GRID -->
+    <div class="indicators-card">
+      <h3>Vipimo vya Kiufundi (Technical Indicators)</h3>
+      <div class="ind-grid" id="indicatorGrid">
+        <div class="ind-box"><div class="ind-name">Inapakia...</div></div>
+      </div>
+    </div>
+
   </div>
 
-  <button class="btn" id="generateBtn">Pata Ishara (Signal) na AI</button>
-  <div class="status" id="statusLine"></div>
+  <!-- ============ RIGHT: AI SIGNAL ============ -->
+  <div class="right-col">
 
-  <div class="disclaimer">
-    Hii si ushauri wa kifedha. Ishara zinatengenezwa na AI kwa kutumia data ya bei pekee — fanya utafiti wako kabla ya kufanya biashara. Trading ina hatari ya kupoteza fedha.
+    <button class="btn" id="generateBtn">🤖 Pata Ishara (Signal) na AI</button>
+    <div class="status" id="statusLine"></div>
+
+    <div id="signalArea">
+      <div class="signal-card">
+        <div class="signal-label">Ishara</div>
+        <div class="signal-badge wait">⏸️ —</div>
+        <div class="confidence">Bonyeza kitufe juu kupata ishara ya AI.</div>
+      </div>
+    </div>
+
   </div>
 
-</main>
+</div>
+
+<div class="disclaimer">
+  Hii si ushauri wa kifedha. Ishara na vipimo vinatengenezwa kwa data ya bei na hesabu za kiufundi (RSI, MACD, EMA, Bollinger Bands, Stochastic, ATR, Support/Resistance) — fanya utafiti wako kabla ya kufanya biashara. Trading ina hatari kubwa ya kupoteza fedha.
+</div>
 
 <script>
   // ====== WEKA API KEYS HAPA ======
+  const FINNHUB_API_KEY = "d8mmfd1r01qn3045iro0d8mmfd1r01qn3045irog";
   const GROQ_API_KEY = "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";
   // =================================
 
@@ -334,48 +583,110 @@
     {symbol:"SOL", binance:"SOLUSDT", name:"Solana"},
     {symbol:"XRP", binance:"XRPUSDT", name:"XRP"},
     {symbol:"DOGE", binance:"DOGEUSDT", name:"Dogecoin"},
-    {symbol:"ADA", binance:"ADAUSDT", name:"Cardano"}
+    {symbol:"ADA", binance:"ADAUSDT", name:"Cardano"},
+    {symbol:"TON", binance:"TONUSDT", name:"Toncoin"},
+    {symbol:"AVAX", binance:"AVAXUSDT", name:"Avalanche"},
+    {symbol:"LINK", binance:"LINKUSDT", name:"Chainlink"},
+    {symbol:"DOT", binance:"DOTUSDT", name:"Polkadot"},
+    {symbol:"MATIC", binance:"MATICUSDT", name:"Polygon"},
+    {symbol:"LTC", binance:"LTCUSDT", name:"Litecoin"},
+    {symbol:"TRX", binance:"TRXUSDT", name:"TRON"},
+    {symbol:"SHIB", binance:"SHIBUSDT", name:"Shiba Inu"},
+    {symbol:"NEAR", binance:"NEARUSDT", name:"NEAR Protocol"},
+    {symbol:"ATOM", binance:"ATOMUSDT", name:"Cosmos"},
+    {symbol:"UNI", binance:"UNIUSDT", name:"Uniswap"},
+    {symbol:"XLM", binance:"XLMUSDT", name:"Stellar"},
+    {symbol:"APT", binance:"APTUSDT", name:"Aptos"}
   ];
 
   const forexList = [
     {base:"EUR", quote:"USD"},
     {base:"GBP", quote:"USD"},
     {base:"USD", quote:"JPY"},
-    {base:"USD", quote:"ZAR"},
+    {base:"USD", quote:"TZS"},
+    {base:"USD", quote:"KES"},
     {base:"AUD", quote:"USD"},
-    {base:"USD", quote:"CHF"}
+    {base:"USD", quote:"CHF"},
+    {base:"USD", quote:"CAD"},
+    {base:"NZD", quote:"USD"},
+    {base:"EUR", quote:"GBP"},
+    {base:"EUR", quote:"JPY"},
+    {base:"GBP", quote:"JPY"}
   ];
+
+  const TF_MAP = {
+    "15m": {interval:"15m", limit:120},
+    "1h":  {interval:"1h",  limit:150},
+    "4h":  {interval:"4h",  limit:150},
+    "1d":  {interval:"1d",  limit:150}
+  };
 
   let activeTab = "crypto";
   let selectedCrypto = cryptoList[0];
   let selectedForex = forexList[0];
+  let activeTF = "1h";
+
   let lastCryptoData = null;
   let lastForexData = null;
+  let lastIndicators = null;
+  let candles = []; // {time, open, high, low, close, volume}
 
-  // ---------- TAB SWITCHING ----------
+  let priceChart, rsiChart, macdChart;
+
+  // ================= INIT =================
+  buildSelectors();
+  initCharts();
+  loadAll();
+
+  // ================= TAB SWITCHING =================
   document.querySelectorAll(".tab").forEach(tab=>{
     tab.addEventListener("click", ()=>{
       document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
       tab.classList.add("active");
       activeTab = tab.dataset.tab;
-      document.getElementById("panel-crypto").classList.toggle("hidden", activeTab!=="crypto");
-      document.getElementById("panel-forex").classList.toggle("hidden", activeTab!=="forex");
+
+      document.getElementById("cryptoSelector").classList.toggle("hidden", activeTab!=="crypto");
+      document.getElementById("forexSelector").classList.toggle("hidden", activeTab!=="forex");
+      document.getElementById("sidebarTitle").textContent = activeTab === "crypto" ? "Chagua Sarafu (Coins)" : "Chagua Jozi (Forex Pairs)";
+
+      document.getElementById("signalArea").innerHTML = `
+        <div class="signal-card">
+          <div class="signal-label">Ishara</div>
+          <div class="signal-badge wait">⏸️ —</div>
+          <div class="confidence">Bonyeza kitufe juu kupata ishara ya AI.</div>
+        </div>`;
+
       setStatus("");
+      loadAll();
     });
   });
 
-  // ---------- BUILD SELECTORS ----------
+  // ================= TIMEFRAME SWITCHING =================
+  document.querySelectorAll(".tf-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(activeTab !== "crypto"){
+        setStatus("⚠️ Chati ya muda (timeframe) inafanya kazi kwa Crypto pekee kwa sasa.");
+        return;
+      }
+      document.querySelectorAll(".tf-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      activeTF = btn.dataset.tf;
+      loadAll();
+    });
+  });
+
+  // ================= BUILD SELECTORS =================
   function buildSelectors(){
     const cSel = document.getElementById("cryptoSelector");
     cryptoList.forEach((c,i)=>{
       const chip = document.createElement("div");
       chip.className = "chip" + (i===0 ? " active" : "");
-      chip.textContent = c.symbol;
+      chip.innerHTML = `<span>${c.symbol}</span><span class="mini-price" id="mini-${c.symbol}">...</span>`;
       chip.addEventListener("click", ()=>{
         document.querySelectorAll("#cryptoSelector .chip").forEach(x=>x.classList.remove("active"));
         chip.classList.add("active");
         selectedCrypto = c;
-        fetchCryptoPrice();
+        loadAll();
       });
       cSel.appendChild(chip);
     });
@@ -384,113 +695,601 @@
     forexList.forEach((f,i)=>{
       const chip = document.createElement("div");
       chip.className = "chip" + (i===0 ? " active" : "");
-      chip.textContent = f.base + "/" + f.quote;
+      chip.innerHTML = `<span>${f.base}/${f.quote}</span>`;
       chip.addEventListener("click", ()=>{
         document.querySelectorAll("#forexSelector .chip").forEach(x=>x.classList.remove("active"));
         chip.classList.add("active");
         selectedForex = f;
-        fetchForexPrice();
+        loadAll();
       });
       fSel.appendChild(chip);
     });
   }
 
-  // ---------- CRYPTO PRICE (Binance) ----------
-  async function fetchCryptoPrice(){
-    setStatus("Inapakua bei ya " + selectedCrypto.symbol + "...");
-    document.getElementById("cryptoPairName").textContent = selectedCrypto.symbol + " / USDT";
+  // ================= LOAD ALL =================
+  async function loadAll(){
+    if(activeTab === "crypto"){
+      await fetchCryptoCandles();
+      renderCryptoUI();
+    }else{
+      await fetchForexPrice();
+      renderForexUI();
+    }
+  }
+
+  // ================= CHART INIT =================
+  function initCharts(){
+    const ctx1 = document.getElementById("priceChart").getContext("2d");
+    priceChart = new Chart(ctx1, {
+      type: "line",
+      data: { labels: [], datasets: [
+        { label:"Bei", data:[], borderColor:"#5b8cff", backgroundColor:"rgba(91,140,255,0.08)", borderWidth:2, pointRadius:0, fill:true, tension:0.15, yAxisID:"y" },
+        { label:"EMA20", data:[], borderColor:"#ffb648", borderWidth:1.5, pointRadius:0, tension:0.15, yAxisID:"y" },
+        { label:"EMA50", data:[], borderColor:"#b07cff", borderWidth:1.5, pointRadius:0, tension:0.15, yAxisID:"y" },
+        { label:"BB Upper", data:[], borderColor:"rgba(124,138,160,0.5)", borderDash:[4,4], borderWidth:1, pointRadius:0, tension:0.15, yAxisID:"y" },
+        { label:"BB Lower", data:[], borderColor:"rgba(124,138,160,0.5)", borderDash:[4,4], borderWidth:1, pointRadius:0, tension:0.15, yAxisID:"y" }
+      ]},
+      options: chartOptions(true)
+    });
+
+    const ctx2 = document.getElementById("rsiChart").getContext("2d");
+    rsiChart = new Chart(ctx2, {
+      type:"line",
+      data:{ labels:[], datasets:[
+        { label:"RSI", data:[], borderColor:"#00d3a7", borderWidth:2, pointRadius:0, tension:0.15 }
+      ]},
+      options: chartOptions(false, {min:0, max:100, ticks:{stepSize:25}})
+    });
+
+    const ctx3 = document.getElementById("macdChart").getContext("2d");
+    macdChart = new Chart(ctx3, {
+      type:"bar",
+      data:{ labels:[], datasets:[
+        { type:"bar", label:"Histogram", data:[], backgroundColor: ctxColor },
+        { type:"line", label:"MACD", data:[], borderColor:"#5b8cff", borderWidth:2, pointRadius:0, tension:0.1 },
+        { type:"line", label:"Signal", data:[], borderColor:"#ffb648", borderWidth:2, pointRadius:0, tension:0.1 }
+      ]},
+      options: chartOptions(false)
+    });
+  }
+
+  function ctxColor(context){
+    const v = context.raw;
+    return v >= 0 ? "rgba(0,211,167,0.6)" : "rgba(255,84,112,0.6)";
+  }
+
+  function chartOptions(showLegend, yOverride){
+    return {
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ display: showLegend, labels:{ color:"#7c8aa0", boxWidth:12, font:{size:10} } },
+        tooltip:{ mode:"index", intersect:false }
+      },
+      scales:{
+        x:{ ticks:{ color:"#7c8aa0", maxRotation:0, autoSkip:true, font:{size:9} }, grid:{ color:"rgba(35,43,58,0.5)" } },
+        y:Object.assign({ ticks:{ color:"#7c8aa0", font:{size:9} }, grid:{ color:"rgba(35,43,58,0.5)" } }, yOverride||{})
+      }
+    };
+  }
+
+  // ================= FETCH CRYPTO CANDLES =================
+  async function fetchCryptoCandles(){
+    setStatus("Inapakua data ya " + selectedCrypto.symbol + " (" + activeTF + ")...");
+    document.getElementById("pairName").textContent = selectedCrypto.symbol + " / USDT";
 
     try{
-      // 24hr ticker stats: price, 24h change %, volume
+      const tf = TF_MAP[activeTF];
+      const klRes = await fetch(BINANCE_BASE + "/klines?symbol=" + selectedCrypto.binance + "&interval=" + tf.interval + "&limit=" + tf.limit);
+      const kl = await klRes.json();
+
+      candles = kl.map(k => ({
+        time: k[0],
+        open: parseFloat(k[1]),
+        high: parseFloat(k[2]),
+        low: parseFloat(k[3]),
+        close: parseFloat(k[4]),
+        volume: parseFloat(k[5])
+      }));
+
       const tickerRes = await fetch(BINANCE_BASE + "/ticker/24hr?symbol=" + selectedCrypto.binance);
       const ticker = await tickerRes.json();
 
       const price = parseFloat(ticker.lastPrice);
       const change24h = parseFloat(ticker.priceChangePercent);
       const volume24h = parseFloat(ticker.quoteVolume);
+      const high24h = parseFloat(ticker.highPrice);
+      const low24h = parseFloat(ticker.lowPrice);
 
-      // 1h change from klines
       let change1h = 0, change7d = 0;
       try{
-        const k1hRes = await fetch(BINANCE_BASE + "/klines?symbol=" + selectedCrypto.binance + "&interval=1h&limit=2");
-        const k1h = await k1hRes.json();
-        const open1h = parseFloat(k1h[0][1]);
-        change1h = ((price - open1h) / open1h) * 100;
-
+        const closes = candles.map(c=>c.close);
+        if(activeTF === "1h" && candles.length>1){
+          change1h = ((price - candles[candles.length-2].open) / candles[candles.length-2].open) * 100;
+        }else{
+          const k1hRes = await fetch(BINANCE_BASE + "/klines?symbol=" + selectedCrypto.binance + "&interval=1h&limit=2");
+          const k1h = await k1hRes.json();
+          const open1h = parseFloat(k1h[0][1]);
+          change1h = ((price - open1h) / open1h) * 100;
+        }
         const k7dRes = await fetch(BINANCE_BASE + "/klines?symbol=" + selectedCrypto.binance + "&interval=1d&limit=8");
         const k7d = await k7dRes.json();
         const open7d = parseFloat(k7d[0][1]);
         change7d = ((price - open7d) / open7d) * 100;
-      }catch(e){ /* non-fatal, use 0 */ }
+      }catch(e){ /* non-fatal */ }
 
       lastCryptoData = {
         symbol: selectedCrypto.symbol,
-        price: price,
-        change1h: change1h,
-        change24h: change24h,
-        change7d: change7d,
-        volume24h: volume24h,
-        marketCap: 0
+        price, change1h, change24h, change7d, volume24h, high24h, low24h
       };
 
-      document.getElementById("cryptoPrice").textContent = "$" + formatNum(price);
-      const chEl = document.getElementById("cryptoChange");
-      chEl.textContent = (change24h >= 0 ? "▲ +" : "▼ ") + change24h.toFixed(2) + "% (24h)";
-      chEl.className = "change " + (change24h >= 0 ? "up" : "down");
+      // ---- compute indicators ----
+      lastIndicators = computeIndicators(candles);
+
+      // ---- update mini prices in sidebar (only for selected to save calls; refresh others lazily) ----
+      const mini = document.getElementById("mini-" + selectedCrypto.symbol);
+      if(mini) mini.textContent = "$" + formatNum(price);
 
       setStatus("");
     }catch(err){
-      setStatus("⚠️ Imeshindikana kupakua bei. Angalia mtandao.");
+      setStatus("⚠️ Imeshindikana kupakua data. Angalia mtandao.");
       console.error(err);
     }
   }
 
-  // ---------- FOREX PRICE (Frankfurter API) ----------
+  // ================= RENDER CRYPTO UI =================
+  function renderCryptoUI(){
+    if(!lastCryptoData) return;
+    const d = lastCryptoData;
+
+    document.getElementById("pairPrice").textContent = "$" + formatNum(d.price);
+    const chEl = document.getElementById("pairChange");
+    chEl.textContent = (d.change24h >= 0 ? "▲ +" : "▼ ") + d.change24h.toFixed(2) + "% (24h)";
+    chEl.className = "change " + (d.change24h >= 0 ? "up" : "down");
+
+    document.getElementById("statRow").innerHTML = `
+      <div class="stat-item"><div class="lbl">1h</div><div class="val" style="color:${d.change1h>=0?'var(--buy)':'var(--sell)'}">${d.change1h>=0?'+':''}${d.change1h.toFixed(2)}%</div></div>
+      <div class="stat-item"><div class="lbl">7d</div><div class="val" style="color:${d.change7d>=0?'var(--buy)':'var(--sell)'}">${d.change7d>=0?'+':''}${d.change7d.toFixed(2)}%</div></div>
+      <div class="stat-item"><div class="lbl">24h High</div><div class="val">${formatNum(d.high24h)}</div></div>
+      <div class="stat-item"><div class="lbl">24h Low</div><div class="val">${formatNum(d.low24h)}</div></div>
+      <div class="stat-item"><div class="lbl">Volume 24h</div><div class="val">$${formatNum(d.volume24h)}</div></div>
+    `;
+
+    updateCharts();
+    renderIndicatorGrid();
+    renderSummaryBar();
+  }
+
+  // ================= RENDER FOREX UI =================
   async function fetchForexPrice(){
     setStatus("Inapakua bei ya " + selectedForex.base + "/" + selectedForex.quote + "...");
-    document.getElementById("forexPairName").textContent = selectedForex.base + " / " + selectedForex.quote;
+    document.getElementById("pairName").textContent = selectedForex.base + " / " + selectedForex.quote;
 
     try{
-      const url = "https://api.frankfurter.app/latest?from=" + selectedForex.base + "&to=" + selectedForex.quote;
+      const url = "https://finnhub.io/api/v1/forex/rates?base=" + selectedForex.base + "&token=" + FINNHUB_API_KEY;
       const res = await fetch(url);
       const data = await res.json();
-      const rate = data.rates[selectedForex.quote];
 
-      // Get yesterday's rate for trend
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(today.getDate() - 2);
-      const yStr = yesterday.toISOString().split("T")[0];
+      if(!data.quote || data.quote[selectedForex.quote] === undefined){
+        throw new Error("Jozi " + selectedForex.base + "/" + selectedForex.quote + " haipatikani.");
+      }
+
+      const rate = data.quote[selectedForex.quote];
 
       let prevRate = rate;
-      try{
-        const histRes = await fetch("https://api.frankfurter.app/" + yStr + "?from=" + selectedForex.base + "&to=" + selectedForex.quote);
-        const histData = await histRes.json();
-        prevRate = histData.rates[selectedForex.quote];
-      }catch(e){ /* ignore, fallback to same rate */ }
-
-      const pctChange = ((rate - prevRate) / prevRate) * 100;
+      if(lastForexData && lastForexData.pair === (selectedForex.base + "/" + selectedForex.quote)){
+        prevRate = lastForexData.rate;
+      }
+      const pctChange = prevRate ? ((rate - prevRate) / prevRate) * 100 : 0;
 
       lastForexData = {
         pair: selectedForex.base + "/" + selectedForex.quote,
-        rate: rate,
-        prevRate: prevRate,
-        pctChange: pctChange
+        rate, prevRate, pctChange
       };
-
-      document.getElementById("forexPrice").textContent = rate.toFixed(4);
-      const chEl = document.getElementById("forexChange");
-      chEl.textContent = (pctChange >= 0 ? "▲ +" : "▼ ") + pctChange.toFixed(3) + "% (siku 2 zilizopita)";
-      chEl.className = "change " + (pctChange >= 0 ? "up" : "down");
 
       setStatus("");
     }catch(err){
-      setStatus("⚠️ Imeshindikana kupakua bei ya forex. Angalia mtandao.");
+      setStatus("⚠️ Imeshindikana kupakua bei ya forex. " + err.message);
       console.error(err);
     }
   }
 
-  // ---------- GROQ AI SIGNAL ----------
+  function renderForexUI(){
+    if(!lastForexData) return;
+    const d = lastForexData;
+    const decimals = d.rate < 10 ? 4 : 2;
+
+    document.getElementById("pairPrice").textContent = d.rate.toFixed(decimals);
+    const chEl = document.getElementById("pairChange");
+    chEl.textContent = (d.pctChange >= 0 ? "▲ +" : "▼ ") + d.pctChange.toFixed(3) + "% (tangu mara ya mwisho)";
+    chEl.className = "change " + (d.pctChange >= 0 ? "up" : "down");
+
+    document.getElementById("statRow").innerHTML = `
+      <div class="stat-item"><div class="lbl">Bei ya awali</div><div class="val">${d.prevRate.toFixed(decimals)}</div></div>
+    `;
+
+    // Clear chart/indicator areas for forex (data ya candles haipo kwa Finnhub free tier)
+    [priceChart, rsiChart, macdChart].forEach(c=>{
+      c.data.labels = [];
+      c.data.datasets.forEach(ds=>ds.data=[]);
+      c.update();
+    });
+    document.getElementById("indicatorGrid").innerHTML = `
+      <div class="ind-box" style="grid-column: 1 / -1;">
+        <div class="ind-name">Taarifa</div>
+        <div style="font-size:0.85rem; color:var(--muted); line-height:1.6;">
+          Vipimo vya kiufundi (RSI, MACD, EMA, Bollinger Bands n.k.) kwa sasa vinapatikana kwa Crypto pekee, kwa sababu data ya chati (klines) ya Forex haipo kwenye kifurushi cha bure cha Finnhub. AI bado itatoa ishara ya BUY/SELL/WAIT kwa kutumia bei ya sasa.
+        </div>
+      </div>`;
+    document.getElementById("summaryBar").innerHTML = "";
+  }
+
+  // ================= INDICATOR ENGINE =================
+  function computeIndicators(data){
+    const closes = data.map(c=>c.close);
+    const highs = data.map(c=>c.high);
+    const lows = data.map(c=>c.low);
+    const volumes = data.map(c=>c.volume);
+
+    const ema20 = ema(closes, 20);
+    const ema50 = ema(closes, 50);
+    const ema200 = ema(closes, 200);
+
+    const rsi14 = rsi(closes, 14);
+    const macdData = macd(closes, 12, 26, 9);
+    const bb = bollinger(closes, 20, 2);
+    const stoch = stochastic(highs, lows, closes, 14, 3);
+    const atr14 = atr(highs, lows, closes, 14);
+
+    const last = closes.length - 1;
+    const lastClose = closes[last];
+
+    // Support / Resistance via recent swing highs/lows (last 50 candles)
+    const lookback = Math.min(50, data.length);
+    const recent = data.slice(-lookback);
+    const resistance = Math.max(...recent.map(c=>c.high));
+    const support = Math.min(...recent.map(c=>c.low));
+
+    // Volume trend
+    const avgVol = volumes.slice(-20).reduce((a,b)=>a+b,0) / Math.min(20, volumes.length);
+    const lastVol = volumes[last];
+
+    return {
+      closes, highs, lows, volumes,
+      ema20, ema50, ema200,
+      rsi: rsi14,
+      macd: macdData,
+      bb,
+      stoch,
+      atr: atr14,
+      lastClose,
+      support, resistance,
+      avgVol, lastVol
+    };
+  }
+
+  function ema(arr, period){
+    const k = 2/(period+1);
+    const out = new Array(arr.length).fill(null);
+    let prev = null;
+    for(let i=0;i<arr.length;i++){
+      if(i < period-1){ continue; }
+      if(prev === null){
+        // seed with SMA
+        let sum=0;
+        for(let j=i-period+1;j<=i;j++) sum += arr[j];
+        prev = sum/period;
+      }else{
+        prev = arr[i]*k + prev*(1-k);
+      }
+      out[i] = prev;
+    }
+    return out;
+  }
+
+  function sma(arr, period){
+    const out = new Array(arr.length).fill(null);
+    for(let i=period-1;i<arr.length;i++){
+      let sum=0;
+      for(let j=i-period+1;j<=i;j++) sum+=arr[j];
+      out[i] = sum/period;
+    }
+    return out;
+  }
+
+  function rsi(closes, period){
+    const out = new Array(closes.length).fill(null);
+    let gains=0, losses=0;
+    for(let i=1;i<closes.length;i++){
+      const diff = closes[i]-closes[i-1];
+      if(i <= period){
+        if(diff>=0) gains+=diff; else losses-=diff;
+        if(i===period){
+          let avgG = gains/period, avgL = losses/period;
+          out[i] = avgL===0 ? 100 : 100 - (100/(1+avgG/avgL));
+          var prevAvgG = avgG, prevAvgL = avgL;
+        }
+        continue;
+      }
+      const gain = diff>0?diff:0;
+      const loss = diff<0?-diff:0;
+      prevAvgG = (prevAvgG*(period-1)+gain)/period;
+      prevAvgL = (prevAvgL*(period-1)+loss)/period;
+      out[i] = prevAvgL===0 ? 100 : 100 - (100/(1+prevAvgG/prevAvgL));
+    }
+    return out;
+  }
+
+  function macd(closes, fast, slow, signalP){
+    const emaFast = ema(closes, fast);
+    const emaSlow = ema(closes, slow);
+    const macdLine = closes.map((_,i)=> (emaFast[i]!==null && emaSlow[i]!==null) ? emaFast[i]-emaSlow[i] : null);
+
+    // signal = EMA of macdLine (only over valid values)
+    const validIdx = macdLine.findIndex(v=>v!==null);
+    const signalLine = new Array(closes.length).fill(null);
+    if(validIdx >= 0){
+      const sub = macdLine.slice(validIdx).map(v=>v);
+      const subSignal = ema(sub, signalP);
+      for(let i=0;i<subSignal.length;i++){
+        signalLine[validIdx+i] = subSignal[i];
+      }
+    }
+    const histogram = macdLine.map((v,i)=> (v!==null && signalLine[i]!==null) ? v-signalLine[i] : null);
+    return { macdLine, signalLine, histogram };
+  }
+
+  function bollinger(closes, period, mult){
+    const mid = sma(closes, period);
+    const upper = new Array(closes.length).fill(null);
+    const lower = new Array(closes.length).fill(null);
+    for(let i=period-1;i<closes.length;i++){
+      let sum=0;
+      for(let j=i-period+1;j<=i;j++) sum += Math.pow(closes[j]-mid[i],2);
+      const std = Math.sqrt(sum/period);
+      upper[i] = mid[i] + mult*std;
+      lower[i] = mid[i] - mult*std;
+    }
+    return { mid, upper, lower };
+  }
+
+  function stochastic(highs, lows, closes, period, smoothK){
+    const k = new Array(closes.length).fill(null);
+    for(let i=period-1;i<closes.length;i++){
+      const h = Math.max(...highs.slice(i-period+1,i+1));
+      const l = Math.min(...lows.slice(i-period+1,i+1));
+      k[i] = h===l ? 50 : ((closes[i]-l)/(h-l))*100;
+    }
+    // %D = SMA of %K
+    const validK = k.map(v=>v===null?0:v);
+    const d = sma(k.map(v=>v===null?null:v), smoothK);
+    return { k, d };
+  }
+
+  function atr(highs, lows, closes, period){
+    const tr = new Array(closes.length).fill(null);
+    for(let i=1;i<closes.length;i++){
+      tr[i] = Math.max(
+        highs[i]-lows[i],
+        Math.abs(highs[i]-closes[i-1]),
+        Math.abs(lows[i]-closes[i-1])
+      );
+    }
+    const out = new Array(closes.length).fill(null);
+    let prev = null;
+    for(let i=1;i<closes.length;i++){
+      if(i < period) continue;
+      if(prev === null){
+        let sum=0;
+        for(let j=i-period+1;j<=i;j++) sum += tr[j];
+        prev = sum/period;
+      }else{
+        prev = (prev*(period-1) + tr[i]) / period;
+      }
+      out[i] = prev;
+    }
+    return out;
+  }
+
+  function lastValid(arr){
+    for(let i=arr.length-1;i>=0;i--){
+      if(arr[i] !== null && arr[i] !== undefined && !isNaN(arr[i])) return arr[i];
+    }
+    return null;
+  }
+
+  // ================= UPDATE CHARTS =================
+  function updateCharts(){
+    const labels = candles.map(c => new Date(c.time).toLocaleString("sw-TZ", {
+      month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"
+    }));
+    const closes = candles.map(c=>c.close);
+
+    priceChart.data.labels = labels;
+    priceChart.data.datasets[0].data = closes;
+    priceChart.data.datasets[1].data = lastIndicators.ema20;
+    priceChart.data.datasets[2].data = lastIndicators.ema50;
+    priceChart.data.datasets[3].data = lastIndicators.bb.upper;
+    priceChart.data.datasets[4].data = lastIndicators.bb.lower;
+    priceChart.update();
+
+    rsiChart.data.labels = labels;
+    rsiChart.data.datasets[0].data = lastIndicators.rsi;
+    rsiChart.update();
+
+    macdChart.data.labels = labels;
+    macdChart.data.datasets[0].data = lastIndicators.macd.histogram;
+    macdChart.data.datasets[1].data = lastIndicators.macd.macdLine;
+    macdChart.data.datasets[2].data = lastIndicators.macd.signalLine;
+    macdChart.update();
+  }
+
+  // ================= RENDER INDICATOR GRID =================
+  function renderIndicatorGrid(){
+    const ind = lastIndicators;
+    const price = ind.lastClose;
+
+    const rsiVal = lastValid(ind.rsi);
+    const macdVal = lastValid(ind.macd.macdLine);
+    const signalVal = lastValid(ind.macd.signalLine);
+    const ema20 = lastValid(ind.ema20);
+    const ema50 = lastValid(ind.ema50);
+    const ema200 = lastValid(ind.ema200);
+    const bbUpper = lastValid(ind.bb.upper);
+    const bbLower = lastValid(ind.bb.lower);
+    const bbMid = lastValid(ind.bb.mid);
+    const stochK = lastValid(ind.stoch.k);
+    const stochD = lastValid(ind.stoch.d);
+    const atrVal = lastValid(ind.atr);
+
+    const items = [];
+
+    // RSI
+    if(rsiVal !== null){
+      let tag = "tag-neutral", txt = "Neutral";
+      if(rsiVal >= 70){ tag="tag-overbought"; txt="Overbought"; }
+      else if(rsiVal <= 30){ tag="tag-oversold"; txt="Oversold"; }
+      items.push(box("RSI (14)", rsiVal.toFixed(2), tag, txt));
+    }
+
+    // MACD
+    if(macdVal !== null && signalVal !== null){
+      const tag = macdVal > signalVal ? "tag-buy" : "tag-sell";
+      const txt = macdVal > signalVal ? "Bullish Cross" : "Bearish Cross";
+      items.push(box("MACD", macdVal.toFixed(4), tag, txt, "Signal: " + signalVal.toFixed(4)));
+    }
+
+    // EMA Trend
+    if(ema20 !== null && ema50 !== null){
+      const tag = ema20 > ema50 ? "tag-buy" : "tag-sell";
+      const txt = ema20 > ema50 ? "Uptrend (EMA20>50)" : "Downtrend (EMA20<50)";
+      items.push(box("EMA 20 / 50", formatNum(ema20) + " / " + formatNum(ema50), tag, txt));
+    }
+    if(ema200 !== null){
+      const tag = price > ema200 ? "tag-buy" : "tag-sell";
+      const txt = price > ema200 ? "Bei > EMA200" : "Bei < EMA200";
+      items.push(box("EMA 200", formatNum(ema200), tag, txt));
+    }
+
+    // Bollinger Bands
+    if(bbUpper !== null && bbLower !== null){
+      let tag="tag-neutral", txt="Ndani ya Bands";
+      if(price >= bbUpper){ tag="tag-overbought"; txt="Karibu/Juu ya Upper Band"; }
+      else if(price <= bbLower){ tag="tag-oversold"; txt="Karibu/Chini ya Lower Band"; }
+      items.push(box("Bollinger Bands", formatNum(bbLower)+" – "+formatNum(bbUpper), tag, txt, "Mid: "+formatNum(bbMid)));
+    }
+
+    // Stochastic
+    if(stochK !== null){
+      let tag="tag-neutral", txt="Neutral";
+      if(stochK >= 80){ tag="tag-overbought"; txt="Overbought"; }
+      else if(stochK <= 20){ tag="tag-oversold"; txt="Oversold"; }
+      items.push(box("Stochastic %K/%D", stochK.toFixed(1)+" / "+(stochD!==null?stochD.toFixed(1):"–"), tag, txt));
+    }
+
+    // ATR (volatility)
+    if(atrVal !== null){
+      const pct = (atrVal/price)*100;
+      items.push(box("ATR (14)", formatNum(atrVal), "tag-neutral", "Volatility: "+pct.toFixed(2)+"%"));
+    }
+
+    // Support / Resistance
+    items.push(box("Resistance (50)", formatNum(ind.resistance), "tag-sell", "Karibu na bei = pinzani"));
+    items.push(box("Support (50)", formatNum(ind.support), "tag-buy", "Karibu na bei = msaada"));
+
+    // Volume
+    if(ind.lastVol !== undefined){
+      const tag = ind.lastVol > ind.avgVol ? "tag-buy" : "tag-neutral";
+      const txt = ind.lastVol > ind.avgVol ? "Volume > Wastani" : "Volume < Wastani";
+      items.push(box("Volume (sasa)", formatNum(ind.lastVol), tag, txt, "Wastani: "+formatNum(ind.avgVol)));
+    }
+
+    document.getElementById("indicatorGrid").innerHTML = items.join("");
+  }
+
+  function box(name, val, tagClass, tagText, sub){
+    return `
+      <div class="ind-box">
+        <div class="ind-name">${name}</div>
+        <div class="ind-val">${val}</div>
+        ${tagText ? `<span class="ind-tag ${tagClass}">${tagText}</span>` : ""}
+        ${sub ? `<div style="font-size:0.7rem; color:var(--muted); margin-top:4px;">${sub}</div>` : ""}
+      </div>`;
+  }
+
+  // ================= OVERALL SIGNAL SUMMARY =================
+  function renderSummaryBar(){
+    const ind = lastIndicators;
+    const price = ind.lastClose;
+
+    const rsiVal = lastValid(ind.rsi);
+    const macdVal = lastValid(ind.macd.macdLine);
+    const signalVal = lastValid(ind.macd.signalLine);
+    const ema20 = lastValid(ind.ema20);
+    const ema50 = lastValid(ind.ema50);
+    const stochK = lastValid(ind.stoch.k);
+
+    let buyCount=0, sellCount=0, neutralCount=0;
+    const signals = [];
+
+    // RSI
+    if(rsiVal !== null){
+      if(rsiVal < 30){ signals.push(["RSI","BUY"]); buyCount++; }
+      else if(rsiVal > 70){ signals.push(["RSI","SELL"]); sellCount++; }
+      else { signals.push(["RSI","NEUTRAL"]); neutralCount++; }
+    }
+    // MACD
+    if(macdVal!==null && signalVal!==null){
+      if(macdVal > signalVal){ signals.push(["MACD","BUY"]); buyCount++; }
+      else { signals.push(["MACD","SELL"]); sellCount++; }
+    }
+    // EMA
+    if(ema20!==null && ema50!==null){
+      if(ema20 > ema50){ signals.push(["EMA","BUY"]); buyCount++; }
+      else { signals.push(["EMA","SELL"]); sellCount++; }
+    }
+    // Stochastic
+    if(stochK!==null){
+      if(stochK < 20){ signals.push(["STOCH","BUY"]); buyCount++; }
+      else if(stochK > 80){ signals.push(["STOCH","SELL"]); sellCount++; }
+      else { signals.push(["STOCH","NEUTRAL"]); neutralCount++; }
+    }
+    // Price vs BB
+    const bbUpper = lastValid(ind.bb.upper), bbLower = lastValid(ind.bb.lower);
+    if(bbUpper!==null && bbLower!==null){
+      if(price <= bbLower){ signals.push(["BB","BUY"]); buyCount++; }
+      else if(price >= bbUpper){ signals.push(["BB","SELL"]); sellCount++; }
+      else { signals.push(["BB","NEUTRAL"]); neutralCount++; }
+    }
+
+    let overall = "NEUTRAL", overallClass="neutral";
+    if(buyCount > sellCount && buyCount >= 3){ overall = "BUY (BULLISH)"; overallClass="buy"; }
+    else if(sellCount > buyCount && sellCount >= 3){ overall = "SELL (BEARISH)"; overallClass="sell"; }
+    else if(buyCount > sellCount){ overall = "TENDS BUY"; overallClass="buy"; }
+    else if(sellCount > buyCount){ overall = "TENDS SELL"; overallClass="sell"; }
+
+    let html = `<div class="summary-pill overall-pill ${overallClass}">
+        <div class="s-name">Muhtasari Mkuu</div>
+        <div class="s-val">${overall}</div>
+      </div>`;
+
+    signals.forEach(([name,sig])=>{
+      const cls = sig==="BUY"?"buy":(sig==="SELL"?"sell":"neutral");
+      html += `<div class="summary-pill ${cls}">
+        <div class="s-name">${name}</div>
+        <div class="s-val">${sig}</div>
+      </div>`;
+    });
+
+    document.getElementById("summaryBar").innerHTML = html;
+
+    // store for AI prompt
+    lastIndicators._summary = { buyCount, sellCount, neutralCount, overall };
+  }
+
+  // ================= GROQ AI SIGNAL =================
   document.getElementById("generateBtn").addEventListener("click", generateSignal);
 
   async function generateSignal(){
@@ -503,27 +1302,56 @@
       let promptData, pairLabel, currentPrice;
 
       if(activeTab === "crypto"){
-        if(!lastCryptoData) await fetchCryptoPrice();
+        if(!lastCryptoData || !lastIndicators) await fetchCryptoCandles();
         pairLabel = lastCryptoData.symbol + "/USD";
         currentPrice = lastCryptoData.price;
+
+        const ind = lastIndicators;
+        const rsiVal = lastValid(ind.rsi);
+        const macdVal = lastValid(ind.macd.macdLine);
+        const signalVal = lastValid(ind.macd.signalLine);
+        const histVal = lastValid(ind.macd.histogram);
+        const ema20 = lastValid(ind.ema20);
+        const ema50 = lastValid(ind.ema50);
+        const ema200 = lastValid(ind.ema200);
+        const bbUpper = lastValid(ind.bb.upper);
+        const bbLower = lastValid(ind.bb.lower);
+        const stochK = lastValid(ind.stoch.k);
+        const stochD = lastValid(ind.stoch.d);
+        const atrVal = lastValid(ind.atr);
+
         promptData = `Jozi: ${pairLabel}
+Timeframe: ${activeTF}
 Bei ya sasa: $${currentPrice}
 Mabadiliko ya 1h: ${lastCryptoData.change1h.toFixed(2)}%
 Mabadiliko ya 24h: ${lastCryptoData.change24h.toFixed(2)}%
 Mabadiliko ya 7d: ${lastCryptoData.change7d.toFixed(2)}%
 Volume 24h: $${formatNum(lastCryptoData.volume24h)}
-Market Cap: $${formatNum(lastCryptoData.marketCap)}`;
+
+== VIPIMO VYA KIUFUNDI ==
+RSI(14): ${rsiVal !== null ? rsiVal.toFixed(2) : "N/A"}
+MACD: ${macdVal !== null ? macdVal.toFixed(4) : "N/A"}, Signal: ${signalVal !== null ? signalVal.toFixed(4) : "N/A"}, Histogram: ${histVal !== null ? histVal.toFixed(4) : "N/A"}
+EMA20: ${ema20 !== null ? ema20.toFixed(4) : "N/A"}
+EMA50: ${ema50 !== null ? ema50.toFixed(4) : "N/A"}
+EMA200: ${ema200 !== null ? ema200.toFixed(4) : "N/A"}
+Bollinger Bands: Lower=${bbLower!==null?bbLower.toFixed(4):"N/A"}, Upper=${bbUpper!==null?bbUpper.toFixed(4):"N/A"}
+Stochastic %K/%D: ${stochK!==null?stochK.toFixed(2):"N/A"} / ${stochD!==null?stochD.toFixed(2):"N/A"}
+ATR(14): ${atrVal !== null ? atrVal.toFixed(4) : "N/A"}
+Support (50 candles): ${ind.support.toFixed(4)}
+Resistance (50 candles): ${ind.resistance.toFixed(4)}
+Muhtasari wa Indicators (BUY/SELL count): BUY=${ind._summary ? ind._summary.buyCount : 0}, SELL=${ind._summary ? ind._summary.sellCount : 0}, NEUTRAL=${ind._summary ? ind._summary.neutralCount : 0}`;
+
       }else{
         if(!lastForexData) await fetchForexPrice();
         pairLabel = lastForexData.pair;
         currentPrice = lastForexData.rate;
         promptData = `Jozi: ${pairLabel}
 Bei ya sasa: ${currentPrice}
-Bei ya siku 2 zilizopita: ${lastForexData.prevRate}
+Bei ya awali: ${lastForexData.prevRate}
 Mabadiliko: ${lastForexData.pctChange.toFixed(3)}%`;
       }
 
-      const systemPrompt = `Wewe ni mchambuzi wa soko la fedha (trading analyst) mwenye uzoefu mkubwa. Kazi yako ni kuchambua data ya bei uliyopewa na kutoa ISHARA (signal) ya kibiashara.
+      const systemPrompt = `Wewe ni mchambuzi wa soko la fedha (trading analyst) mwenye uzoefu mkubwa na ujuzi wa kina wa Technical Analysis (RSI, MACD, EMA, Bollinger Bands, Stochastic, ATR, Support/Resistance, Volume). Kazi yako ni kuchambua data ya bei na vipimo vya kiufundi ulivyopewa, na kutoa ISHARA (signal) ya kibiashara.
 
 Jibu LAZIMA liwe JSON safi tu, bila maandishi mengine yoyote, bila markdown, bila backticks. Muundo wa JSON:
 
@@ -533,15 +1361,16 @@ Jibu LAZIMA liwe JSON safi tu, bila maandishi mengine yoyote, bila markdown, bil
   "entry": namba ya bei ya kuingia (sawa na bei ya sasa au karibu nayo),
   "stop_loss": namba ya bei ya SL (Stop Loss),
   "take_profit": namba ya bei ya TP (Take Profit),
-  "reason": "maelezo mafupi kwa Kiswahili (sentensi 2-4) yanayoeleza kwa nini ishara hii imetolewa, ukitumia data ya mabadiliko ya bei na volume",
-  "risk_note": "tahadhari fupi kwa Kiswahili kuhusu hatari ya biashara hii"
+  "reason": "maelezo mafupi kwa Kiswahili (sentensi 3-5) yanayoeleza kwa nini ishara hii imetolewa, ukirejea moja kwa moja vipimo vya kiufundi vilivyotolewa (RSI, MACD, EMA, Bollinger, Stochastic, Support/Resistance, Volume) na mabadiliko ya bei",
+  "risk_note": "tahadhari fupi kwa Kiswahili kuhusu hatari ya biashara hii, ikitumia ATR/volatility kama inawezekana"
 }
 
 Kanuni za kuhesabu SL na TP:
-- Kwa BUY: stop_loss iwe chini ya entry, take_profit iwe juu ya entry (risk:reward angalau 1:1.5)
-- Kwa SELL: stop_loss iwe juu ya entry, take_profit iwe chini ya entry (risk:reward angalau 1:1.5)
-- Kwa WAIT: entry, stop_loss, take_profit zote ziwe sawa na bei ya sasa
-- Tumia asilimia ndogo (0.5% - 3%) kuhesabu umbali wa SL/TP kutoka entry, kulingana na "volatility" ya data uliyopewa.`;
+- Tumia ATR na Support/Resistance kuhesabu umbali wa SL/TP pale data hizo zinapopatikana.
+- Kwa BUY: stop_loss iwe chini ya entry (karibu na Support), take_profit iwe juu ya entry (karibu na Resistance), risk:reward angalau 1:1.5.
+- Kwa SELL: stop_loss iwe juu ya entry (karibu na Resistance), take_profit iwe chini ya entry (karibu na Support), risk:reward angalau 1:1.5.
+- Kwa WAIT: entry, stop_loss, take_profit zote ziwe sawa na bei ya sasa.
+- Pale data za kiufundi hazipo (mfano Forex), tumia asilimia ndogo (0.5% - 3%) kuhesabu umbali wa SL/TP kulingana na "volatility" ya mabadiliko ya bei uliyopewa.`;
 
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -555,17 +1384,11 @@ Kanuni za kuhesabu SL na TP:
             { role: "system", content: systemPrompt },
             { role: "user", content: promptData }
           ],
-          temperature: 0.4,
-          response_format: { type: "json_object" }
+          temperature: 0.4
         })
       });
 
       const data = await res.json();
-
-      if(data.error){
-        throw new Error(data.error.message || JSON.stringify(data.error));
-      }
-
       let raw = data.choices[0].message.content.trim();
       raw = raw.replace(/```json|```/g, "").trim();
       const signal = JSON.parse(raw);
@@ -575,26 +1398,29 @@ Kanuni za kuhesabu SL na TP:
 
     }catch(err){
       console.error(err);
-      setStatus("⚠️ Hitilafu: " + err.message);
+      setStatus("⚠️ Imeshindikana kupata jibu kutoka AI. Angalia GROQ API KEY.");
     }
 
     btn.disabled = false;
-    btn.innerHTML = "Pata Ishara (Signal) na AI";
+    btn.innerHTML = "🤖 Pata Ishara (Signal) na AI";
   }
 
-  // ---------- RENDER SIGNAL CARD ----------
+  // ================= RENDER SIGNAL CARD =================
   function renderSignal(signal, pairLabel, currentPrice){
     const action = (signal.action || "WAIT").toUpperCase();
     const cls = action === "BUY" ? "buy" : (action === "SELL" ? "sell" : "wait");
     const icon = action === "BUY" ? "📈" : (action === "SELL" ? "📉" : "⏸️");
 
     const decimals = currentPrice < 10 ? 4 : 2;
+    const conf = Math.max(0, Math.min(100, Number(signal.confidence)||0));
 
     const html = `
       <div class="signal-card">
         <div class="signal-label">Ishara ya ${pairLabel}</div>
         <div class="signal-badge ${cls}">${icon} ${action}</div>
-        <div class="confidence">Uhakika (Confidence): <b>${signal.confidence}%</b></div>
+        <div class="confidence">Uhakika (Confidence): <b>${conf}%</b>
+          <div class="conf-bar"><div class="conf-bar-fill" style="width:${conf}%;"></div></div>
+        </div>
 
         <div class="arrow-track">${action === "BUY" ? "▲▲▲" : (action === "SELL" ? "▼▼▼" : "⏸ ⏸ ⏸")}</div>
 
@@ -625,27 +1451,27 @@ Kanuni za kuhesabu SL na TP:
       </div>
     `;
 
-    const target = activeTab === "crypto" ? "cryptoSignalArea" : "forexSignalArea";
-    document.getElementById(target).innerHTML = html;
+    document.getElementById("signalArea").innerHTML = html;
   }
 
-  // ---------- HELPERS ----------
+  // ================= HELPERS =================
   function setStatus(msg){
     document.getElementById("statusLine").textContent = msg;
   }
 
   function formatNum(n){
-    if(n === undefined || n === null) return "0";
-    if(n >= 1e9) return (n/1e9).toFixed(2) + "B";
-    if(n >= 1e6) return (n/1e6).toFixed(2) + "M";
-    if(n >= 1e3) return (n/1e3).toFixed(2) + "K";
-    if(n < 1) return n.toFixed(6);
+    if(n === undefined || n === null || isNaN(n)) return "0";
+    if(Math.abs(n) >= 1e9) return (n/1e9).toFixed(2) + "B";
+    if(Math.abs(n) >= 1e6) return (n/1e6).toFixed(2) + "M";
+    if(Math.abs(n) >= 1e3) return (n/1e3).toFixed(2) + "K";
+    if(Math.abs(n) < 1) return n.toFixed(6);
     return n.toFixed(2);
   }
 
-  // ---------- INIT ----------
-  buildSelectors();
-  fetchCryptoPrice();
+  // ================= AUTO REFRESH =================
+  setInterval(()=>{
+    loadAll();
+  }, 30000);
 </script>
 
 </body>
