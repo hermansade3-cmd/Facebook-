@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pochi Trading Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0D0D0D;
+            --bg-card: #1A1A2E;
+            --bg-card-hover: #2A2A3E;
+            --border: #2A2A3E;
+            --text: #FFFFFF;
+            --text-muted: #A0A0B8;
+            --primary: #6C5CE7;
+            --primary-light: #A29BFE;
+            --gold: #FFD700;
+            --green: #00D26A;
+            --red: #FF4757;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-card-hover); border-radius: 3px; }
+
+        /* Layout */
+        .app { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
+        .main { margin-left: 260px; flex: 1; padding: 24px 32px; max-width: calc(100% - 260px); }
+
+        /* Sidebar */
+        .logo { display: flex; align-items: center; gap: 12px; padding: 0 12px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+        .logo img { width: 40px; height: 40px; object-fit: contain; }
+        .logo-text { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
+        .logo-text span { color: var(--gold); }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: var(--text-muted); font-size: 14px; font-weight: 500; }
+        .nav-item:hover, .nav-item.active { background: var(--bg-card); color: var(--text); }
+        .nav-item.active { border-left: 3px solid var(--primary); }
+        .nav-item svg { width: 18px; height: 18px; }
+        .sidebar-footer { margin-top: auto; padding: 16px 12px 0; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted); text-align: center; }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+        .header-title { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-sub { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn:hover { background: var(--bg-card-hover); border-color: var(--primary); }
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: white; }
+        .btn-primary:hover { background: #5a4bd4; }
+        .btn-green { background: var(--green); border-color: var(--green); color: white; }
+        .btn-red { background: var(--red); border-color: var(--red); color: white; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-green { background: rgba(0,210,106,0.15); color: var(--green); border: 1px solid rgba(0,210,106,0.3); }
+        .badge-red { background: rgba(255,71,87,0.15); color: var(--red); border: 1px solid rgba(255,71,87,0.3); }
+        .badge-gold { background: rgba(255,215,0,0.1); color: var(--gold); border: 1px solid rgba(255,215,0,0.2); }
+        .badge-purple { background: rgba(108,92,231,0.15); color: var(--primary-light); border: 1px solid rgba(108,92,231,0.3); }
+
+        /* Cards Grid */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: all 0.2s; }
+        .card:hover { border-color: var(--bg-card-hover); transform: translateY(-1px); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .card-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-value { font-size: 26px; font-weight: 700; margin: 4px 0; }
+        .card-change { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .card-change.up { color: var(--green); }
+        .card-change.down { color: var(--red); }
+        .card-mini-chart { height: 40px; margin-top: 12px; opacity: 0.6; }
+
+        /* Chart Section */
+        .chart-section { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .chart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+        .chart-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .chart-card-title { font-size: 16px; font-weight: 600; }
+        .chart-tabs { display: flex; gap: 4px; }
+        .chart-tab { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-muted); border: none; background: transparent; }
+        .chart-tab.active { background: var(--primary); color: white; }
+        .chart-tab:hover:not(.active) { background: var(--bg-card-hover); color: var(--text); }
+        .chart-container { position: relative; height: 320px; border-radius: 8px; overflow: hidden; }
+        .chart-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; opacity: 0.9; }
+        .chart-overlay { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; }
+
+        /* AI Signal Card */
+        .ai-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; }
+        .ai-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .ai-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(108,92,231,0.15); display: flex; align-items: center; justify-content: center; }
+        .ai-icon img { width: 32px; height: 32px; object-fit: contain; }
+        .ai-title { font-size: 16px; font-weight: 600; }
+        .ai-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .signal-box { background: rgba(0,210,106,0.08); border: 1px solid rgba(0,210,106,0.2); border-radius: 10px; padding: 16px; margin-bottom: 16px; text-align: center; }
+        .signal-box.sell { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
+        .signal-direction { font-size: 24px; font-weight: 800; color: var(--green); letter-spacing: 1px; }
+        .signal-box.sell .signal-direction { color: var(--red); }
+        .signal-confidence { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .signal-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .metric { background: var(--bg); border-radius: 8px; padding: 12px; text-align: center; }
+        .metric-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-value { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+        /* Indicators */
+        .indicators { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .indicator-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+        .indicator-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .indicator-name { font-size: 14px; font-weight: 600; }
+        .indicator-status { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+        .indicator-canvas { height: 100px; width: 100%; }
+        .indicator-info { display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; color: var(--text-muted); }
+        .indicator-info span { color: var(--text); font-weight: 600; }
+
+        /* Table */
+        .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .table-title { font-size: 16px; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 12px 16px; color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(42,42,62,0.3); }
+        .td-pair { font-weight: 600; }
+        .td-signal { font-weight: 600; }
+        .td-signal.buy { color: var(--green); }
+        .td-signal.sell { color: var(--red); }
+        .td-price { font-family: 'Inter', monospace; font-variant-numeric: tabular-nums; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-section { grid-template-columns: 1fr; }
+            .indicators { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 0; padding: 0; overflow: hidden; border: none; }
+            .main { margin-left: 0; max-width: 100%; padding: 16px; }
+            .grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 16px; align-items: flex-start; }
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(108,92,231,0.4); }
+            50% { box-shadow: 0 0 20px 0 rgba(108,92,231,0.2); }
+        }
+        .pulse { animation: pulse-glow 2s ease-in-out infinite; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="gold-icon.png" alt="Gold">
+                <div class="logo-text">Pochi<span>Trading</span></div>
+            </div>
+
+            <div class="nav-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+                Dashboard
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                Analysis
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Signals
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                AI Chat
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                History
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Settings
+            </div>
+
+            <div class="sidebar-footer">
+                Pochi Trading Analyzer v1.0<br>
+                Real-time XAU/USD Analysis
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Header -->
+            <div class="header fade-in">
+                <div>
+                    <div class="header-title">Trading Dashboard</div>
+                    <div class="header-sub">XAU/USD Analysis & AI-Powered Signals</div>
+                </div>
+                <div class="header-actions">
+                    <span class="badge badge-green">● Market Open</span>
+                    <button class="btn btn-green">BUY</button>
+                    <button class="btn btn-red">SELL</button>
+                    <button class="btn">Refresh</button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid">
+                <div class="card fade-in delay-1">
+                    <div class="card-header">
+                        <span class="card-label">XAU/USD Price</span>
+                        <span class="badge badge-gold">Gold</span>
+                    </div>
+                    <div class="card-value" style="color: var(--gold);">2,341.28</div>
+                    <div class="card-change up">▲ +12.45 (+0.53%)</div>
+                    <canvas class="card-mini-chart" id="miniChart1"></canvas>
+                </div>
+                <div class="card fade-in delay-2">
+                    <div class="card-header">
+                        <span class="card-label">24h Volume</span>
+                        <span class="badge badge-purple">High</span>
+                    </div>
+                    <div class="card-value">48.2B</div>
+                    <div class="card-change up">▲ +8.3% vs avg</div>
+                    <canvas class="card-mini-chart" id="miniChart2"></canvas>
+                </div>
+                <div class="card fade-in delay-3">
+                    <div class="card-header">
+                        <span class="card-label">RSI (14)</span>
+                        <span class="badge badge-green">Neutral</span>
+                    </div>
+                    <div class="card-value" style="color: var(--primary-light);">58.42</div>
+                    <div class="card-change">↔ Within range</div>
+                    <canvas class="card-mini-chart" id="miniChart3"></canvas>
+                </div>
+                <div class="card fade-in delay-4">
+                    <div class="card-header">
+                        <span class="card-label">MACD Signal</span>
+                        <span class="badge badge-green">Bullish</span>
+                    </div>
+                    <div class="card-value" style="color: var(--green);">+2.14</div>
+                    <div class="card-change up">▲ Bullish crossover</div>
+                    <canvas class="card-mini-chart" id="miniChart4"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart & AI Signal -->
+            <div class="chart-section">
+                <div class="chart-card fade-in delay-2">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">XAU/USD Price Chart</div>
+                        <div class="chart-tabs">
+                            <button class="chart-tab">1H</button>
+                            <button class="chart-tab">4H</button>
+                            <button class="chart-tab active">1D</button>
+                            <button class="chart-tab">1W</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <img src="chart-pattern.jpg" alt="XAU/USD Chart">
+                        <div class="chart-overlay">
+                            <button class="btn btn-green" style="padding: 6px 14px; font-size: 12px;">BUY</button>
+                            <button class="btn btn-red" style="padding: 6px 14px; font-size: 12px;">SELL</button>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 12px; color: var(--text-muted);">
+                        <span>S: <b style="color: var(--red);">2,320.00</b></span>
+                        <span>R1: <b style="color: var(--green);">2,350.00</b></span>
+                        <span>R2: <b style="color: var(--green);">2,365.00</b></span>
+                        <span style="margin-left: auto;">Updated: <b>Just now</b></span>
+                    </div>
+                </div>
+
+                <div class="ai-card fade-in delay-3">
+                    <div class="ai-header">
+                        <div class="ai-icon">
+                            <img src="ai-brain-icon.png" alt="AI">
+                        </div>
+                        <div>
+                            <div class="ai-title">AI Signal</div>
+                            <div class="ai-sub">Neural Network Analysis</div>
+                        </div>
+                    </div>
+                    <div class="signal-box">
+                        <div class="signal-direction">STRONG BUY</div>
+                        <div class="signal-confidence">Confidence: 87.3%</div>
+                    </div>
+                    <div class="signal-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Entry</div>
+                            <div class="metric-value" style="color: var(--gold);">2,338.50</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Target</div>
+                            <div class="metric-value" style="color: var(--green);">2,360.00</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Stop Loss</div>
+                            <div class="metric-value" style="color: var(--red);">2,325.00</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Risk/Reward</div>
+                            <div class="metric-value" style="color: var(--primary-light);">1:1.7</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                            <b style="color: var(--primary-light);">AI Reasoning:</b> Price broke above descending channel with strong volume. RSI at 58 indicates room for upward movement. MACD bullish crossover confirmed on 4H timeframe.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicators -->
+            <div class="indicators">
+                <div class="indicator-card fade-in delay-1">
+                    <div class="indicator-header">
+                        <span class="indicator-name">RSI (14)</span>
+                        <span class="indicator-status" style="background: rgba(0,210,106,0.15); color: var(--green);">Neutral</span>
+                    </div>
+                    <canvas class="indicator-canvas" id="rsiCanvas"></canvas>
+                    <div class="indicator-info">
+                        <span>Current: <span>58.42</span></span>
+                        <span>Overbought: <span style="color: var(--red);">70</span></span>
+                        <span>Oversold: <span style="color: var(--green);">30</span></span>
+                    </div>
+                </div>
+                <div class="indicator-card fade-in delay-2">
+                    <div class="indicator-header">
+                        <span class="indicator-name">MACD (12,26,9)</span>
+                        <span class="indicator-status" style="background: rgba(0,210,106,0.15); color: var(--green);">Bullish</span>
+                    </div>
+                    <canvas class="indicator-canvas" id="macdCanvas"></canvas>
+                    <div class="indicator-info">
+                        <span>MACD: <span style="color: var(--green);">+2.14</span></span>
+                        <span>Signal: <span>+0.85</span></span>
+                        <span>Hist: <span style="color: var(--green);">+1.29</span></span>
+                    </div>
+                </div>
+                <div class="indicator-card fade-in delay-3">
+                    <div class="indicator-header">
+                        <span class="indicator-name">Bollinger Bands</span>
+                        <span class="indicator-status" style="background: rgba(255,215,0,0.1); color: var(--gold);">Squeeze</span>
+                    </div>
+                    <canvas class="indicator-canvas" id="bbCanvas"></canvas>
+                    <div class="indicator-info">
+                        <span>Upper: <span>2,365.20</span></span>
+                        <span>Mid: <span>2,340.50</span></span>
+                        <span>Lower: <span>2,315.80</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signals Table -->
+            <div class="table-card fade-in delay-4">
+                <div class="table-header">
+                    <div class="table-title">Recent Trading Signals</div>
+                    <button class="btn" style="font-size: 12px;">View All</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Pair</th>
+                            <th>Signal</th>
+                            <th>Entry Price</th>
+                            <th>Exit Price</th>
+                            <th>P/L</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="color: var(--text-muted);">14:32:05</td>
+                            <td class="td-pair">XAU/USD</td>
+                            <td class="td-signal buy">BUY</td>
+                            <td class="td-price">2,338.50</td>
+                            <td class="td-price">—</td>
+                            <td class="td-signal buy">+0.00</td>
+                            <td><span class="badge badge-green">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-muted);">13:15:22</td>
+                            <td class="td-pair">XAU/USD</td>
+                            <td class="td-signal sell">SELL</td>
+                            <td class="td-price">2,345.80</td>
+                            <td class="td-price">2,339.20</td>
+                            <td class="td-signal buy">+6.60</td>
+                            <td><span class="badge badge-purple">Closed</span></td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-muted);">11:45:10</td>
+                            <td class="td-pair">XAU/USD</td>
+                            <td class="td-signal buy">BUY</td>
+                            <td class="td-price">2,328.00</td>
+                            <td class="td-price">2,345.80</td>
+                            <td class="td-signal buy">+17.80</td>
+                            <td><span class="badge badge-purple">Closed</span></td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-muted);">09:20:45</td>
+                            <td class="td-pair">XAU/USD</td>
+                            <td class="td-signal sell">SELL</td>
+                            <td class="td-price">2,335.50</td>
+                            <td class="td-price">2,328.00</td>
+                            <td class="td-signal buy">+7.50</td>
+                            <td><span class="badge badge-purple">Closed</span></td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-muted);">08:05:33</td>
+                            <td class="td-pair">XAU/USD</td>
+                            <td class="td-signal buy">BUY</td>
+                            <td class="td-price">2,320.00</td>
+                            <td class="td-price">2,335.50</td>
+                            <td class="td-signal buy">+15.50</td>
+                            <td><span class="badge badge-purple">Closed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mini sparkline charts
+        function drawSparkline(canvasId, data, color) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width, h = rect.height;
+            const min = Math.min(...data), max = Math.max(...data);
+            const range = max - min || 1;
+
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            data.forEach((val, i) => {
+                const x = (i / (data.length - 1)) * w;
+                const y = h - ((val - min) / range) * (h - 4) - 2;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Gradient fill
+            ctx.lineTo(w, h);
+            ctx.lineTo(0, h);
+            ctx.closePath();
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, color.replace(')', ', 0.2)').replace('rgb', 'rgba'));
+            grad.addColorStop(1, color.replace(')', ', 0)').replace('rgb', 'rgba'));
+            ctx.fillStyle = grad;
+            ctx.fill();
+        }
+
+        // Draw mini charts
+        const goldColor = 'rgb(255, 215, 0)';
+        const purpleColor = 'rgb(162, 155, 254)';
+        const greenColor = 'rgb(0, 210, 106)';
+        const redColor = 'rgb(255, 71, 87)';
+
+        drawSparkline('miniChart1', [2320, 2325, 2318, 2330, 2328, 2335, 2332, 2340, 2338, 2341], goldColor);
+        drawSparkline('miniChart2', [40, 42, 38, 45, 43, 47, 44, 50, 48, 52], purpleColor);
+        drawSparkline('miniChart3', [45, 48, 52, 55, 50, 58, 62, 55, 60, 58], greenColor);
+        drawSparkline('miniChart4', [-1, -0.5, 0, 0.5, 1, 1.2, 1.5, 1.8, 2, 2.14], greenColor);
+
+        // RSI Canvas
+        function drawRSI() {
+            const canvas = document.getElementById('rsiCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width, h = rect.height;
+            const data = [35, 42, 55, 48, 62, 58, 45, 52, 60, 58, 55, 58, 62, 58, 55, 52, 58, 62, 58, 58];
+
+            // Background zones
+            ctx.fillStyle = 'rgba(255,71,87,0.05)';
+            ctx.fillRect(0, 0, w, h * 0.3);
+            ctx.fillStyle = 'rgba(0,210,106,0.05)';
+            ctx.fillRect(0, h * 0.7, w, h * 0.3);
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(42,42,62,0.5)';
+            ctx.lineWidth = 1;
+            [0.3, 0.5, 0.7].forEach(y => {
+                ctx.beginPath();
+                ctx.moveTo(0, h * y);
+                ctx.lineTo(w, h * y);
+                ctx.stroke();
+            });
+
+            // RSI Line
+            ctx.beginPath();
+            ctx.strokeStyle = '#A29BFE';
+            ctx.lineWidth = 2;
+            data.forEach((val, i) => {
+                const x = (i / (data.length - 1)) * w;
+                const y = h - (val / 100) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Current point
+            const lastX = w;
+            const lastY = h - (data[data.length - 1] / 100) * h;
+            ctx.beginPath();
+            ctx.arc(lastX - 3, lastY, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#A29BFE';
+            ctx.fill();
+        }
+
+        // MACD Canvas
+        function drawMACD() {
+            const canvas = document.getElementById('macdCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width, h = rect.height;
+            const hist = [0.5, -0.3, 0.8, 1.2, 0.6, -0.2, 0.4, 0.9, 1.1, 1.3, 1.0, 0.8, 1.2, 1.5, 1.8, 2.0, 1.8, 1.5, 1.2, 1.29];
+            const macdLine = [-1, -0.5, 0, 0.3, 0.5, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.05, 2.1, 2.14];
+            const signalLine = [-0.8, -0.6, -0.4, -0.2, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.82, 0.84, 0.85, 0.85, 0.85, 0.85];
+
+            const barW = (w / hist.length) * 0.6;
+            const zeroY = h * 0.6;
+
+            // Histogram
+            hist.forEach((val, i) => {
+                const x = (i / hist.length) * w + barW / 2;
+                const barH = Math.abs(val) * 15;
+                const y = val > 0 ? zeroY - barH : zeroY;
+                ctx.fillStyle = val > 0 ? 'rgba(0,210,106,0.6)' : 'rgba(255,71,87,0.6)';
+                ctx.fillRect(x - barW / 2, y, barW, barH);
+            });
+
+            // Zero line
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(42,42,62,0.8)';
+            ctx.lineWidth = 1;
+            ctx.moveTo(0, zeroY);
+            ctx.lineTo(w, zeroY);
+            ctx.stroke();
+
+            // MACD line
+            ctx.beginPath();
+            ctx.strokeStyle = '#6C5CE7';
+            ctx.lineWidth = 2;
+            macdLine.forEach((val, i) => {
+                const x = (i / (macdLine.length - 1)) * w;
+                const y = zeroY - val * 15;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Signal line
+            ctx.beginPath();
+            ctx.strokeStyle = '#FF4757';
+            ctx.lineWidth = 2;
+            signalLine.forEach((val, i) => {
+                const x = (i / (signalLine.length - 1)) * w;
+                const y = zeroY - val * 15;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        }
+
+        // Bollinger Bands Canvas
+        function drawBB() {
+            const canvas = document.getElementById('bbCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width, h = rect.height;
+            const upper = [2365, 2362, 2360, 2358, 2355, 2358, 2360, 2362, 2365, 2368, 2365, 2362, 2360, 2358, 2355, 2358, 2360, 2362, 2365, 2365.2];
+            const mid = [2340, 2338, 2335, 2332, 2330, 2332, 2335, 2338, 2340, 2342, 2340, 2338, 2335, 2332, 2330, 2332, 2335, 2338, 2340, 2340.5];
+            const lower = [2315, 2314, 2310, 2308, 2305, 2308, 2310, 2312, 2315, 2318, 2315, 2312, 2310, 2308, 2305, 2308, 2310, 2312, 2315, 2315.8];
+            const price = [2342, 2338, 2335, 2330, 2328, 2332, 2336, 2339, 2341, 2343, 2340, 2337, 2334, 2331, 2329, 2333, 2337, 2340, 2342, 2341.28];
+
+            const min = 2300, max = 2375;
+            const range = max - min;
+
+            // Bands fill
+            ctx.beginPath();
+            upper.forEach((val, i) => {
+                const x = (i / (upper.length - 1)) * w;
+                const y = h - ((val - min) / range) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            lower.slice().reverse().forEach((val, i) => {
+                const x = w - (i / (lower.length - 1)) * w;
+                const y = h - ((val - min) / range) * h;
+                ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(108,92,231,0.08)';
+            ctx.fill();
+
+            // Upper band
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(108,92,231,0.5)';
+            ctx.lineWidth = 1.5;
+            upper.forEach((val, i) => {
+                const x = (i / (upper.length - 1)) * w;
+                const y = h - ((val - min) / range) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Lower band
+            ctx.beginPath();
+            lower.forEach((val, i) => {
+                const x = (i / (lower.length - 1)) * w;
+                const y = h - ((val - min) / range) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Middle band
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255,215,0,0.5)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            mid.forEach((val, i) => {
+                const x = (i / (mid.length - 1)) * w;
+                const y = h - ((val - min) / range) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Price
+            ctx.beginPath();
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 2;
+            price.forEach((val, i) => {
+                const x = (i / (price.length - 1)) * w;
+                const y = h - ((val - min) / range) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        }
+
+        // Initialize all canvases
+        window.addEventListener('load', () => {
+            drawRSI();
+            drawMACD();
+            drawBB();
+        });
+
+        window.addEventListener('resize', () => {
+            drawRSI();
+            drawMACD();
+            drawBB();
+            drawSparkline('miniChart1', [2320, 2325, 2318, 2330, 2328, 2335, 2332, 2340, 2338, 2341], goldColor);
+            drawSparkline('miniChart2', [40, 42, 38, 45, 43, 47, 44, 50, 48, 52], purpleColor);
+            drawSparkline('miniChart3', [45, 48, 52, 55, 50, 58, 62, 55, 60, 58], greenColor);
+            drawSparkline('miniChart4', [-1, -0.5, 0, 0.5, 1, 1.2, 1.5, 1.8, 2, 2.14], greenColor);
+        });
+
+        // Live price update simulation
+        let currentPrice = 2341.28;
+        setInterval(() => {
+            const change = (Math.random() - 0.5) * 0.5;
+            currentPrice += change;
+            document.querySelector('.card-value').textContent = currentPrice.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }, 3000);
+    </script>
+</body>
+</html>
