@@ -3,1610 +3,1051 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SadeTrade — Crypto Signal Terminal v4</title>
+<title>RegimeTrader — Quant Systematic Engine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{
-  --bg:#f0f4f8;--bg2:#ffffff;--panel:#ffffff;--panel2:#f5f8fc;
-  --border:#dde3ef;--border2:#c8d2e8;
-  --buy:#00b87a;--buy-light:#e6f9f3;
-  --sell:#e8334a;--sell-light:#fdedf0;
-  --neutral:#4b6cf7;--neut-light:#eef1fe;
-  --warn:#e68a00;--warn-light:#fff4e0;
-  --text:#1e2d4a;--muted:#7a8db3;--dim:#c2ccde;--white:#ffffff;
-  --mono:'IBM Plex Mono','Courier New',monospace;
-  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --bg:#0a0d12;--bg-elevated:#0f1318;--panel:#11161d;--panel2:#161c25;
+  --border:#1f2733;--border-bright:#2a3544;
+  --bull:#3ddc97;--bull-dim:#1a4636;--bull-glow:rgba(61,220,151,0.12);
+  --bear:#ff5d6c;--bear-dim:#4a1e24;--bear-glow:rgba(255,93,108,0.12);
+  --warn:#ffb84d;--warn-dim:#4a3415;--warn-glow:rgba(255,184,77,0.12);
+  --text:#e8edf4;--text-dim:#8b97a8;--text-faint:#52606f;
+  --accent:#5b8def;
+  --disp:'Space Grotesk',system-ui,sans-serif;
+  --mono:'JetBrains Mono','Courier New',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;overflow-x:hidden}
-.header{background:var(--white);border-bottom:1px solid var(--border);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 1px 8px rgba(30,45,74,0.06)}
-.brand{font-family:var(--mono);font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;color:var(--text)}
-.brand-mark{background:linear-gradient(135deg,#00b87a,#4b6cf7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.ws-pill{display:flex;align-items:center;gap:6px;background:var(--buy-light);border:1px solid rgba(0,184,122,0.3);border-radius:6px;padding:4px 12px;font-family:var(--mono);font-size:11px;color:var(--buy)}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--buy)}
-.blink{animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.tick-counter{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:3px 10px}
-.tick-counter span{color:var(--buy);font-weight:700}
-.hdr-right{display:flex;align-items:center;gap:10px}
-.last-update{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.layout{display:grid;grid-template-columns:205px 1fr;min-height:calc(100vh - 52px)}
-.sidebar{background:var(--white);border-right:1px solid var(--border);padding:12px 8px;overflow-y:auto;position:sticky;top:52px;height:calc(100vh - 52px);scrollbar-width:thin}
-.sb-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 6px;margin-bottom:8px}
-.coin-btn{display:flex;align-items:center;gap:7px;width:100%;padding:7px 8px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text);cursor:pointer;transition:background .1s;margin-bottom:2px;font-family:var(--sans);font-size:12px;text-align:left}
-.coin-btn:hover{background:var(--panel2);border-color:var(--border)}
-.coin-btn.active{background:var(--neut-light);border-color:var(--border2)}
-.coin-sym{font-weight:700;font-size:12px;flex:1}
-.coin-price-sb{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.coin-price-sb.up{color:var(--buy)}.coin-price-sb.dn{color:var(--sell)}
-.sig-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.sb-divider{border:none;border-top:1px solid var(--border);margin:10px 0}
-.tf-row{display:flex;gap:4px;flex-wrap:wrap;padding:0 4px}
-.tf-btn{flex:1;padding:5px 3px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;font-weight:600;cursor:pointer;transition:all .1s;text-align:center;min-width:28px}
-.tf-btn.active{background:var(--neut-light);border-color:var(--neutral);color:var(--neutral)}
-.btn-all{width:100%;margin-top:8px;padding:7px;border-radius:6px;border:1px dashed var(--border2);background:transparent;color:var(--neutral);font-family:var(--mono);font-size:10px;cursor:pointer}
-.btn-all:hover{background:var(--neut-light)}
-.main{padding:14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
-.skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--panel2) 50%,var(--border) 75%);background-size:400% 100%;animation:shimmer 1.2s infinite;border-radius:6px}
-@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-.sk-header{height:80px;border-radius:12px;margin-bottom:12px}
-.sk-card{height:300px;border-radius:12px;margin-bottom:12px}
-.sk-chart{height:200px;border-radius:12px}
-.coin-header{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
-.coin-title{display:flex;align-items:center;gap:10px}
-.coin-em{font-size:26px}
-.coin-sym-big{font-family:var(--mono);font-size:20px;font-weight:700}
-.coin-fullname{font-size:10px;color:var(--muted)}
-.live-price-wrap{text-align:right}
-.live-price{font-family:var(--mono);font-size:28px;font-weight:700;will-change:color}
-.live-price.flash-up{color:var(--buy)}.live-price.flash-dn{color:var(--sell)}
-.price-chg{font-family:var(--mono);font-size:12px;margin-top:2px}
-.up{color:var(--buy)}.dn{color:var(--sell)}
-.meta-row{display:flex;gap:14px;flex-wrap:wrap}
-.meta-item{text-align:center}
-.meta-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
-.meta-val{font-family:var(--mono);font-size:11px;font-weight:600;margin-top:2px}
-.sig-card{background:var(--white);border:2px solid var(--border2);border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(30,45,74,0.07)}
-.sig-card.is-buy{border-color:rgba(0,184,122,0.4)}
-.sig-card.is-sell{border-color:rgba(232,51,74,0.4)}
-.sig-card.is-neut{border-color:rgba(75,108,247,0.35)}
-.sig-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border)}
-.sig-head.buy-bg{background:var(--buy-light)}.sig-head.sell-bg{background:var(--sell-light)}.sig-head.neut-bg{background:var(--neut-light)}
-.sig-type{font-family:var(--mono);font-size:24px;font-weight:700;display:flex;align-items:center;gap:8px}
-.sig-type.buy{color:var(--buy)}.sig-type.sell{color:var(--sell)}.sig-type.neut{color:var(--neutral)}
-.sig-arrow{font-size:32px;line-height:1}
-.badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:4px 10px;border-radius:20px}
-.b-buy{background:var(--buy-light);color:var(--buy);border:1px solid rgba(0,184,122,.35)}
-.b-sell{background:var(--sell-light);color:var(--sell);border:1px solid rgba(232,51,74,.35)}
-.b-neut{background:var(--neut-light);color:var(--neutral);border:1px solid rgba(75,108,247,.3)}
-.b-bull{background:var(--buy-light);color:var(--buy);border:1px solid rgba(0,184,122,.25)}
-.b-bear{background:var(--sell-light);color:var(--sell);border:1px solid rgba(232,51,74,.25)}
-.b-side{background:var(--warn-light);color:var(--warn);border:1px solid rgba(230,138,0,.25)}
-.b-conf-h{background:var(--buy-light);color:var(--buy);border:1px solid rgba(0,184,122,.25)}
-.b-conf-m{background:var(--warn-light);color:var(--warn);border:1px solid rgba(230,138,0,.25)}
-.b-conf-l{background:var(--sell-light);color:var(--sell);border:1px solid rgba(232,51,74,.25)}
-.sig-body{background:var(--white);padding:16px 18px}
-.sig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.sig-cell{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
-.sc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px}
-.sc-val{font-family:var(--mono);font-size:15px;font-weight:700}
-.sc-val.entry{color:var(--neutral)}.sc-val.sl{color:var(--sell)}.sc-val.tp{color:var(--buy)}.sc-val.rr{color:var(--warn)}
-.sc-sub{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
-.conf-wrap{margin-bottom:14px}
-.conf-top{display:flex;justify-content:space-between;margin-bottom:5px}
-.conf-lbl{font-size:10px;color:var(--muted);font-weight:500}
-.conf-pct{font-family:var(--mono);font-size:12px;font-weight:700}
-.conf-track{height:7px;background:var(--panel2);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
-.conf-fill{height:100%;border-radius:4px;transition:width .5s ease}
-.validity-bar{background:var(--warn-light);border:1px solid rgba(230,138,0,.25);border-radius:8px;padding:8px 12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
-.validity-label{font-size:10px;color:var(--warn);font-weight:600;font-family:var(--mono);display:flex;align-items:center;gap:5px}
-.validity-timer{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--warn)}
-.validity-note{font-size:10px;color:var(--muted)}
-.reason-box{background:var(--panel2);border:1px solid var(--border);border-left:3px solid;border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:14px}
-.reason-box.buy{border-left-color:var(--buy)}.reason-box.sell{border-left-color:var(--sell)}.reason-box.neut{border-left-color:var(--neutral)}
-.r-title{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;font-weight:600}
-.r-points{list-style:none}
-.r-points li{font-size:11px;color:var(--text);padding:3px 0;line-height:1.5;display:flex;align-items:flex-start;gap:5px}
-.r-arrow{color:var(--muted);flex-shrink:0}
-.ind-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.ind-cell{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;text-align:center}
-.ind-name{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px}
-.ind-val{font-family:var(--mono);font-size:12px;font-weight:700}
-.ind-val.bull{color:var(--buy)}.ind-val.bear{color:var(--sell)}.ind-val.neut{color:var(--warn)}
-.pos-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
-.pos-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.pos-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
-.pos-input-wrap{display:flex;flex-direction:column;gap:4px}
-.pos-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
-.pos-input{background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;width:100%}
-.pos-input:focus{border-color:var(--neutral)}
-.pos-results{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.pos-res-cell{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
-.pos-res-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px}
-.pos-res-val{font-family:var(--mono);font-size:14px;font-weight:700}
-.pos-warning{font-size:10px;color:var(--sell);margin-top:8px;font-weight:600;display:none}
-.sent-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
-.sent-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.sent-block{display:flex;flex-direction:column;gap:8px}
-.sent-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-.fg-arc-wrap{display:flex;align-items:center;gap:10px}
-.fg-num{font-family:var(--mono);font-size:28px;font-weight:700}
-.fg-label{font-size:10px;color:var(--muted)}
-.ls-bar-wrap{display:flex;flex-direction:column;gap:4px}
-.ls-bar-track{height:10px;border-radius:5px;overflow:hidden;background:var(--sell-light);border:1px solid var(--border)}
-.ls-bar-fill{height:100%;background:var(--buy);border-radius:5px;transition:width .4s}
-.ls-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px}
-/* FOREX PANEL */
-.forex-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
-.forex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.forex-cell{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center;cursor:default}
-.forex-pair{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;font-weight:700}
-.forex-rate{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text)}
-.forex-chg{font-family:var(--mono);font-size:9px;margin-top:2px}
-.chart-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
-.chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.chart-title-txt{font-size:12px;font-weight:700}
-.chart-meta{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.alert-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-family:var(--mono);font-size:11px;cursor:pointer;font-weight:600}
-.alert-btn.active-alert{background:var(--buy-light);border-color:var(--buy);color:var(--buy)}
-.ov-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
-.ov-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
-.ov-title{font-size:12px;font-weight:700}
-.ov-table{width:100%;border-collapse:collapse}
-.ov-table th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--panel2)}
-.ov-table td{padding:10px 14px;font-family:var(--mono);font-size:11px;border-bottom:1px solid var(--border);white-space:nowrap}
-.ov-table tbody tr{cursor:pointer}
-.ov-table tbody tr:hover td{background:var(--panel2)}
-.ov-table tbody tr:last-child td{border-bottom:none}
-.ov-coin{display:flex;align-items:center;gap:7px}
-.ov-em{font-size:14px}
-.ov-sym2{font-weight:700}.ov-full2{font-size:9px;color:var(--muted);font-family:var(--sans)}
-.td-buy{color:var(--buy)!important;font-weight:700}.td-sell{color:var(--sell)!important;font-weight:700}.td-neut{color:var(--neutral)!important;font-weight:700}
-.up-txt{color:var(--buy)}.dn-txt{color:var(--sell)}
-.ord-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700}
-.ord-buy{background:var(--buy-light);color:var(--buy)}.ord-sell{background:var(--sell-light);color:var(--sell)}.ord-neut{background:var(--neut-light);color:var(--neutral)}
-.loading-ovl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px}
-.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--buy);border-radius:50%;animation:spin .75s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.load-txt{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.err-box{background:var(--sell-light);border:1px solid rgba(232,51,74,0.3);border-radius:8px;padding:14px;font-size:12px;color:var(--sell);font-family:var(--mono);line-height:1.7}
-.disclaimer{background:var(--warn-light);border:1px solid rgba(230,138,0,0.2);border-radius:8px;padding:9px 14px;font-size:11px;color:var(--muted);line-height:1.6}
-.disclaimer strong{color:var(--warn)}
-.ws-status{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;align-items:center;gap:5px}
-.ws-ok{color:var(--buy)}.ws-err{color:var(--sell)}.ws-wait{color:var(--warn)}
-.ai-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:0 1px 6px rgba(30,45,74,0.05)}
-.ai-panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.ai-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
-.ai-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:10px;background:linear-gradient(135deg,#ff6b6b22,#ffa50022);border:1px solid var(--border2);color:#e65c00;font-weight:700}
-.ai-ask-btn{padding:10px;border-radius:7px;border:none;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;width:100%}
-.ai-ask-btn:disabled{opacity:.5;cursor:not-allowed}
-.ai-output{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-height:60px;font-size:12px;line-height:1.7;font-family:var(--sans);white-space:pre-wrap;word-break:break-word}
-.ai-output.loading{color:var(--muted);font-style:italic}
-.ai-output.error{color:var(--sell)}
-.ai-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.ai-field-cell{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
-.ai-field-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px}
-.ai-field-val{font-family:var(--mono);font-size:13px;font-weight:700}
-.ai-field-val.entry{color:var(--neutral)}.ai-field-val.sl{color:var(--sell)}.ai-field-val.tp{color:var(--buy)}
-.ai-disclaimer{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5}
-#toasts{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:5px}
-.toast{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:11px;box-shadow:0 4px 20px rgba(30,45,74,0.12);animation:slideUp .2s ease;max-width:300px}
-@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,45,74,.35);z-index:500;align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;width:340px;box-shadow:0 8px 40px rgba(30,45,74,.15)}
-.modal-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px}
-.modal-input{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:13px;outline:none;margin-bottom:10px}
-.modal-input:focus{border-color:var(--neutral)}
-.modal-note{font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.5}
-.modal-btns{display:flex;gap:8px}
-.modal-confirm{flex:1;padding:9px;border-radius:8px;border:none;background:var(--neutral);color:var(--white);font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer}
-.modal-cancel{padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:12px;cursor:pointer}
-::-webkit-scrollbar{width:4px;height:4px}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--disp);
+  font-size:14px;line-height:1.5;
+  background-image:
+    radial-gradient(ellipse 800px 500px at 15% -10%, rgba(91,141,239,0.07), transparent),
+    radial-gradient(ellipse 600px 400px at 100% 20%, rgba(61,220,151,0.05), transparent);
+}
+::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-@media(max-width:880px){
-  .layout{grid-template-columns:1fr}
-  .sidebar{position:static;height:auto;display:flex;flex-wrap:wrap;gap:8px;padding:10px}
-  .sig-grid{grid-template-columns:repeat(2,1fr)}
-  .ind-row{grid-template-columns:repeat(3,1fr)}
-  .pos-grid{grid-template-columns:1fr 1fr}
-  .pos-results{grid-template-columns:1fr 1fr}
-  .sent-row{grid-template-columns:1fr}
-  .forex-grid{grid-template-columns:repeat(2,1fr)}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:3px}
+
+/* ═══ LAYOUT ═══ */
+.shell{display:grid;grid-template-columns:228px 1fr;min-height:100vh}
+.sidebar{
+  background:var(--bg-elevated);border-right:1px solid var(--border);
+  padding:24px 18px;display:flex;flex-direction:column;gap:28px;
+  position:sticky;top:0;height:100vh;
 }
-@media(max-width:540px){
-  .sig-grid{grid-template-columns:1fr 1fr}
-  .ind-row{grid-template-columns:repeat(2,1fr)}
-  .pos-grid{grid-template-columns:1fr}
-  .pos-results{grid-template-columns:1fr}
-  .forex-grid{grid-template-columns:repeat(2,1fr)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--bull) 0%,var(--accent) 100%);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:var(--mono);font-weight:700;font-size:15px;color:#06120c;
 }
+.brand-text{display:flex;flex-direction:column}
+.brand-name{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:0.2px}
+.brand-sub{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
+
+.nav-group{display:flex;flex-direction:column;gap:2px}
+.nav-label{font-family:var(--mono);font-size:9.5px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;padding:0 10px;margin-bottom:6px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;
+  color:var(--text-dim);text-decoration:none;font-size:12.5px;font-weight:500;
+  transition:background .12s,color .12s;cursor:pointer;
+}
+.nav-item:hover{background:var(--panel2);color:var(--text)}
+.nav-item.active{background:var(--panel2);color:var(--text)}
+.nav-item.active .nav-dot{background:var(--bull)}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--border-bright);flex-shrink:0}
+
+.sidebar-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.engine-status{
+  border:1px solid var(--border);border-radius:9px;padding:12px;
+  background:var(--panel);display:flex;flex-direction:column;gap:8px;
+}
+.engine-status-row{display:flex;align-items:center;justify-content:space-between;font-size:11px}
+.engine-status-lbl{color:var(--text-faint);font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase}
+.engine-status-val{font-family:var(--mono);font-weight:600;font-size:11px;display:flex;align-items:center;gap:5px}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--bull);box-shadow:0 0 0 0 rgba(61,220,151,0.7);animation:pulseRing 2s infinite}
+@keyframes pulseRing{
+  0%{box-shadow:0 0 0 0 rgba(61,220,151,0.5)}
+  70%{box-shadow:0 0 0 6px rgba(61,220,151,0)}
+  100%{box-shadow:0 0 0 0 rgba(61,220,151,0)}
+}
+
+/* ═══ MAIN ═══ */
+.main{padding:24px 32px 60px;max-width:1320px}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+.topbar h1{font-family:var(--disp);font-size:24px;font-weight:700;letter-spacing:-0.3px}
+.topbar .sub{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);margin-top:4px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.clock{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:8px 12px}
+.btn{
+  font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:0.4px;
+  padding:9px 16px;border-radius:7px;border:1px solid var(--border-bright);
+  background:var(--panel2);color:var(--text);cursor:pointer;transition:all .12s;
+}
+.btn:hover{border-color:var(--accent);color:#fff}
+.btn.danger{border-color:var(--bear-dim);color:var(--bear)}
+.btn.danger:hover{background:var(--bear-glow);border-color:var(--bear)}
+
+/* ═══ REGIME HERO ═══ */
+.regime-hero{
+  border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(135deg,var(--panel) 0%,var(--bg-elevated) 100%);
+  padding:28px 32px;margin-bottom:20px;position:relative;overflow:hidden;
+}
+.regime-hero::before{
+  content:'';position:absolute;top:-50%;right:-10%;width:420px;height:420px;
+  background:radial-gradient(circle,var(--bull-glow) 0%,transparent 70%);
+  pointer-events:none;transition:background 0.6s ease;
+}
+.regime-hero.is-bear::before{background:radial-gradient(circle,var(--bear-glow) 0%,transparent 70%)}
+.regime-hero.is-warn::before{background:radial-gradient(circle,var(--warn-glow) 0%,transparent 70%)}
+
+.regime-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:24px;position:relative;z-index:1}
+.regime-label{font-family:var(--mono);font-size:10.5px;letter-spacing:3px;color:var(--text-faint);text-transform:uppercase;margin-bottom:10px}
+.regime-state{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.regime-pill{
+  font-family:var(--disp);font-size:34px;font-weight:700;letter-spacing:-0.5px;
+  display:flex;align-items:center;gap:12px;
+}
+.regime-pill .dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;position:relative}
+.regime-pill .dot::after{
+  content:'';position:absolute;inset:-5px;border-radius:50%;border:1.5px solid currentColor;opacity:0.35;
+}
+.regime-pill.bull{color:var(--bull)}
+.regime-pill.bull .dot{background:var(--bull);color:var(--bull)}
+.regime-pill.bear{color:var(--bear)}
+.regime-pill.bear .dot{background:var(--bear);color:var(--bear)}
+.regime-meta{display:flex;gap:24px;margin-top:14px;flex-wrap:wrap}
+.regime-meta-item{display:flex;flex-direction:column;gap:4px}
+.regime-meta-lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;color:var(--text-faint);text-transform:uppercase}
+.regime-meta-val{font-family:var(--mono);font-size:14px;font-weight:600}
+.regime-meta-val.bull{color:var(--bull)}
+.regime-meta-val.bear{color:var(--bear)}
+
+.regime-history{display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:280px}
+.regime-history-lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;color:var(--text-faint);text-transform:uppercase}
+.regime-bars{display:flex;gap:3px;align-items:flex-end;height:48px}
+.regime-bar{width:7px;border-radius:2px 2px 0 0;transition:height .3s}
+.regime-bars-axis{font-family:var(--mono);font-size:9px;color:var(--text-faint);display:flex;justify-content:space-between;width:100%}
+
+.regime-prob-row{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;position:relative;z-index:1}
+.prob-chip{
+  flex:1;min-width:130px;border:1px solid var(--border);border-radius:9px;padding:11px 14px;
+  background:rgba(255,255,255,0.015);
+}
+.prob-chip-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prob-chip-name{font-size:11.5px;font-weight:600}
+.prob-chip-pct{font-family:var(--mono);font-size:12px;font-weight:700}
+.prob-chip-pct.bull{color:var(--bull)}.prob-chip-pct.bear{color:var(--bear)}.prob-chip-pct.warn{color:var(--warn)}.prob-chip-pct.neutral{color:var(--text-dim)}
+.prob-track{height:5px;border-radius:3px;background:var(--border);overflow:hidden}
+.prob-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.prob-fill.bull{background:var(--bull)}.prob-fill.bear{background:var(--bear)}.prob-fill.warn{background:var(--warn)}.prob-fill.neutral{background:var(--text-dim)}
+
+/* ═══ GRID ═══ */
+.grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px}
+
+.card{
+  border:1px solid var(--border);border-radius:13px;background:var(--panel);
+  padding:20px 22px;
+}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.card-title{font-family:var(--disp);font-size:14.5px;font-weight:600}
+.card-title-sub{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:2px;letter-spacing:0.5px}
+.card-tag{font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:1px;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+.tag-live{background:var(--bull-dim);color:var(--bull);border:1px solid rgba(61,220,151,0.25)}
+.tag-info{background:rgba(91,141,239,0.1);color:var(--accent);border:1px solid rgba(91,141,239,0.25)}
+.tag-warn{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(255,184,77,0.25)}
+
+/* ═══ METRIC CARDS (Portfolio) ═══ */
+.metric-card{display:flex;flex-direction:column;gap:10px}
+.metric-lbl{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--text-faint);text-transform:uppercase}
+.metric-val{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-0.5px}
+.metric-val.bull{color:var(--bull)}
+.metric-val.bear{color:var(--bear)}
+.metric-foot{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px}
+.metric-delta{font-weight:600}
+.metric-delta.bull{color:var(--bull)}.metric-delta.bear{color:var(--bear)}
+.metric-foot-dim{color:var(--text-faint)}
+.metric-spark{height:32px;margin-top:2px}
+
+/* ═══ RISK PANEL ═══ */
+.risk-status-banner{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:10px;
+  border:1px solid rgba(61,220,151,0.25);background:var(--bull-glow);margin-bottom:16px;
+}
+.risk-status-banner.warn{border-color:rgba(255,184,77,0.3);background:var(--warn-glow)}
+.risk-status-banner.bear{border-color:rgba(255,93,108,0.3);background:var(--bear-glow)}
+.risk-status-icon{
+  width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;background:rgba(61,220,151,0.12);color:var(--bull);
+}
+.risk-status-banner.warn .risk-status-icon{background:rgba(255,184,77,0.12);color:var(--warn)}
+.risk-status-banner.bear .risk-status-icon{background:rgba(255,93,108,0.12);color:var(--bear)}
+.risk-status-text strong{display:block;font-size:13px;font-weight:700;margin-bottom:2px}
+.risk-status-text span{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+
+.breaker{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 14px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;
+  background:var(--bg-elevated);
+}
+.breaker:last-child{margin-bottom:0}
+.breaker-left{display:flex;align-items:center;gap:11px;min-width:0}
+.breaker-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);font-size:12px;font-weight:700}
+.breaker-icon.ok{background:rgba(61,220,151,0.1);color:var(--bull)}
+.breaker-icon.armed{background:rgba(255,184,77,0.1);color:var(--warn)}
+.breaker-icon.halt{background:rgba(255,93,108,0.1);color:var(--bear)}
+.breaker-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.breaker-name{font-size:12.5px;font-weight:600}
+.breaker-rule{font-family:var(--mono);font-size:10.5px;color:var(--text-faint)}
+.breaker-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.breaker-val{font-family:var(--mono);font-size:13px;font-weight:700}
+.breaker-val.ok{color:var(--bull)}.breaker-val.armed{color:var(--warn)}.breaker-val.halt{color:var(--bear)}
+.breaker-state{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint)}
+.breaker-bar{width:64px;height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-top:3px}
+.breaker-bar-fill{height:100%;border-radius:2px}
+
+/* ═══ SIGNALS TABLE ═══ */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);
+  text-align:left;padding:0 12px 10px;border-bottom:1px solid var(--border);font-weight:600;white-space:nowrap;
+}
+td{padding:12px;border-bottom:1px solid var(--border);font-size:12.5px;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--bg-elevated)}
+.sig-side{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:5px;
+}
+.sig-side.long{background:var(--bull-dim);color:var(--bull)}
+.sig-side.flat{background:rgba(139,151,168,0.1);color:var(--text-dim)}
+.sig-side.exit{background:var(--bear-dim);color:var(--bear)}
+.mono{font-family:var(--mono)}
+.dim{color:var(--text-faint)}
+.tkr{font-weight:700;font-family:var(--mono)}
+.conf-bar-mini{display:inline-flex;align-items:center;gap:6px}
+.conf-track-mini{width:46px;height:4px;border-radius:2px;background:var(--border);overflow:hidden}
+.conf-fill-mini{height:100%;border-radius:2px;background:var(--accent)}
+
+/* ═══ PHILOSOPHY ═══ */
+.philosophy{
+  border:1px solid var(--border);border-radius:14px;
+  background:var(--panel);padding:32px;margin-top:8px;
+  display:grid;grid-template-columns:1.1fr 1fr;gap:36px;
+}
+.philosophy-left h2{font-family:var(--disp);font-size:21px;font-weight:700;margin-bottom:12px;letter-spacing:-0.3px}
+.philosophy-left p{color:var(--text-dim);font-size:13px;line-height:1.75;margin-bottom:14px}
+.philosophy-left p:last-child{margin-bottom:0}
+.philosophy-left .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
+
+.principle-list{display:flex;flex-direction:column;gap:14px}
+.principle{
+  display:flex;gap:14px;padding:16px;border:1px solid var(--border);border-radius:10px;background:var(--bg-elevated);
+}
+.principle-mark{
+  font-family:var(--mono);font-size:11px;font-weight:700;color:var(--bull);
+  width:30px;height:30px;border-radius:7px;background:var(--bull-dim);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.principle.no-short .principle-mark{color:var(--bear);background:var(--bear-dim)}
+.principle-body strong{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.principle-body span{font-size:12px;color:var(--text-dim);line-height:1.6}
+
+/* ═══ FOOTER ═══ */
+.foot{
+  margin-top:32px;padding-top:20px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  font-family:var(--mono);font-size:10.5px;color:var(--text-faint);
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width:1080px){
+  .grid-2{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr 1fr}
+  .philosophy{grid-template-columns:1fr;gap:24px}
+}
+@media (max-width:780px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:relative;height:auto;flex-direction:row;align-items:center;overflow-x:auto;padding:14px 16px;gap:18px}
+  .nav-group{flex-direction:row;gap:6px}
+  .nav-label{display:none}
+  .sidebar-foot{display:none}
+  .main{padding:18px 16px 40px}
+  .grid-3{grid-template-columns:1fr}
+  .regime-top{flex-direction:column}
+  .regime-history{align-items:flex-start;width:100%}
+}
+
+/* ═══ MOTION ═══ */
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+.fade-in{animation:fadeIn .5s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="brand">⚡ Sade<span class="brand-mark">Trade</span>
-    <span style="color:var(--muted);font-size:10px;font-weight:400;margin-left:2px">TERMINAL v4</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <div class="ws-pill"><div class="dot blink"></div>Binance Live</div>
-    <div class="ws-status" id="wsStatus"><span class="ws-wait">⏳ Inaunganika...</span></div>
-  </div>
-  <div class="hdr-right">
-    <div class="tick-counter">Ticks: <span id="tickCount">0</span></div>
-    <div class="last-update" id="lastUpd">—</div>
-  </div>
-</header>
+<div class="shell">
 
-<div class="layout">
-  <aside class="sidebar" id="sidebarEl">
-    <div style="padding:0 4px;margin-bottom:8px">
-      <div class="sb-label">Crypto</div>
-      <div id="coinList"></div>
-      <button class="btn-all" onclick="showAll()">☰ Angalia Zote</button>
-    </div>
-    <hr class="sb-divider">
-    <div style="padding:0 4px;margin-bottom:8px">
-      <div class="sb-label">Madini & Forex</div>
-      <div id="metalList">
-        <div class="coin-btn" style="cursor:default"><span style="font-size:14px">🥇</span><span class="coin-sym" style="font-size:11px">XAU/USD</span><span class="coin-price-sb" id="metal_XAU">—</span></div>
-        <div class="coin-btn" style="cursor:default"><span style="font-size:14px">🥈</span><span class="coin-sym" style="font-size:11px">XAG/USD</span><span class="coin-price-sb" id="metal_XAG">—</span></div>
-        <div class="coin-btn" style="cursor:default"><span style="font-size:12px">💱</span><span class="coin-sym" style="font-size:10px">EUR/USD</span><span class="coin-price-sb" id="forex_EURUSD">—</span></div>
-        <div class="coin-btn" style="cursor:default"><span style="font-size:12px">💱</span><span class="coin-sym" style="font-size:10px">GBP/USD</span><span class="coin-price-sb" id="forex_GBPUSD">—</span></div>
-        <div class="coin-btn" style="cursor:default"><span style="font-size:12px">💱</span><span class="coin-sym" style="font-size:10px">USD/JPY</span><span class="coin-price-sb" id="forex_USDJPY">—</span></div>
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">RT</div>
+      <div class="brand-text">
+        <div class="brand-name">RegimeTrader</div>
+        <div class="brand-sub">Systematic Engine</div>
       </div>
     </div>
-    <hr class="sb-divider">
-    <div style="padding:0 4px">
-      <div class="sb-label" style="margin-bottom:6px">Chart Muda</div>
-      <div class="tf-row">
-        <button class="tf-btn active" onclick="setTF(this,'1m')">1m</button>
-        <button class="tf-btn" onclick="setTF(this,'5m')">5m</button>
-        <button class="tf-btn" onclick="setTF(this,'15m')">15m</button>
-        <button class="tf-btn" onclick="setTF(this,'1h')">1h</button>
-        <button class="tf-btn" onclick="setTF(this,'4h')">4h</button>
-        <button class="tf-btn" onclick="setTF(this,'1d')">1d</button>
+
+    <nav class="nav-group">
+      <div class="nav-label">Overview</div>
+      <a class="nav-item active"><span class="nav-dot"></span>Dashboard</a>
+      <a class="nav-item"><span class="nav-dot"></span>Regime Model</a>
+      <a class="nav-item"><span class="nav-dot"></span>Portfolio</a>
+    </nav>
+
+    <nav class="nav-group">
+      <div class="nav-label">Operations</div>
+      <a class="nav-item"><span class="nav-dot"></span>Risk Controls</a>
+      <a class="nav-item"><span class="nav-dot"></span>Signal Log</a>
+      <a class="nav-item"><span class="nav-dot"></span>Execution</a>
+      <a class="nav-item"><span class="nav-dot"></span>Backtests</a>
+    </nav>
+
+    <nav class="nav-group">
+      <div class="nav-label">System</div>
+      <a class="nav-item"><span class="nav-dot"></span>Philosophy</a>
+      <a class="nav-item"><span class="nav-dot"></span>Settings</a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="engine-status">
+        <div class="engine-status-row">
+          <span class="engine-status-lbl">Engine</span>
+          <span class="engine-status-val"><span class="pulse"></span>RUNNING</span>
+        </div>
+        <div class="engine-status-row">
+          <span class="engine-status-lbl">Data Feed</span>
+          <span class="engine-status-val" style="color:var(--bull)">Binance + Twelve Data</span>
+        </div>
+        <div class="engine-status-row">
+          <span class="engine-status-lbl">Last Sync</span>
+          <span class="engine-status-val" id="lastSync" style="color:var(--text-dim)">—</span>
+        </div>
       </div>
     </div>
   </aside>
 
-  <main class="main" id="mainArea">
-    <div class="skeleton sk-header"></div>
-    <div class="skeleton sk-card"></div>
-    <div class="skeleton sk-chart"></div>
+  <!-- ═══════════ MAIN ═══════════ -->
+  <main class="main">
+
+    <div class="topbar fade-in">
+      <div>
+        <h1>Market Regime Dashboard</h1>
+        <div class="sub">HMM REGIME ENGINE · n_components selected via BIC · model refresh: 15m bars</div>
+      </div>
+      <div class="topbar-right">
+        <div class="clock" id="clock">—</div>
+        <button class="btn">Export Report</button>
+        <button class="btn danger" id="killSwitch">⏻ Kill Switch</button>
+      </div>
+    </div>
+
+    <!-- ═══ REGIME HERO ═══ -->
+    <section class="regime-hero fade-in" id="regimeHero" style="animation-delay:.05s">
+      <div class="regime-top">
+        <div>
+          <div class="regime-label">Current Market Regime</div>
+          <div class="regime-state">
+            <div class="regime-pill bull" id="regimePill">
+              <span class="dot"></span>
+              <span id="regimeName">Low Vol / BULL</span>
+            </div>
+          </div>
+          <div class="regime-meta">
+            <div class="regime-meta-item">
+              <span class="regime-meta-lbl">Realized Vol (Ann.)</span>
+              <span class="regime-meta-val bull" id="metaVol">11.4%</span>
+            </div>
+            <div class="regime-meta-item">
+              <span class="regime-meta-lbl">Trend Drift (μ)</span>
+              <span class="regime-meta-val bull" id="metaDrift">+0.082%/day</span>
+            </div>
+            <div class="regime-meta-item">
+              <span class="regime-meta-lbl">Regime Duration</span>
+              <span class="regime-meta-val" id="metaDuration" style="color:var(--text)">18 bars (4.5 days)</span>
+            </div>
+            <div class="regime-meta-item">
+              <span class="regime-meta-lbl">Active Allocation</span>
+              <span class="regime-meta-val" id="metaAlloc" style="color:var(--text)">100% Target Exposure</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="regime-history">
+          <div class="regime-history-lbl">Regime — Last 30 Bars</div>
+          <div class="regime-bars" id="regimeBars"></div>
+          <div class="regime-bars-axis"><span>−30</span><span>−15</span><span>now</span></div>
+        </div>
+      </div>
+
+      <div class="regime-prob-row" id="probRow"></div>
+    </section>
+
+    <!-- ═══ PORTFOLIO METRICS ═══ -->
+    <section class="grid-3 fade-in" style="animation-delay:.1s">
+      <div class="card metric-card">
+        <span class="metric-lbl">Total Equity</span>
+        <span class="metric-val" id="mTotalEquity">$248,930.18</span>
+        <div class="metric-foot">
+          <span class="metric-delta bull" id="mEquityDelta">+$1,840.55</span>
+          <span class="metric-foot-dim">since open</span>
+        </div>
+        <canvas class="metric-spark" id="sparkEquity"></canvas>
+      </div>
+
+      <div class="card metric-card">
+        <span class="metric-lbl">Daily P&amp;L</span>
+        <span class="metric-val bull" id="mDailyPnl">+$1,840.55</span>
+        <div class="metric-foot">
+          <span class="metric-delta bull" id="mDailyPct">+0.745%</span>
+          <span class="metric-foot-dim">vs. yesterday close</span>
+        </div>
+        <canvas class="metric-spark" id="sparkPnl"></canvas>
+      </div>
+
+      <div class="card metric-card">
+        <span class="metric-lbl">Gross Leverage</span>
+        <span class="metric-val" id="mLeverage">1.00×</span>
+        <div class="metric-foot">
+          <span class="metric-foot-dim" id="mLeverageNote">Target: 1.00× (Low-Vol regime)</span>
+        </div>
+        <canvas class="metric-spark" id="sparkLev"></canvas>
+      </div>
+    </section>
+
+    <!-- ═══ LIVE MARKETS ═══ -->
+    <section class="grid-2 fade-in" style="animation-delay:.12s">
+
+      <!-- LIVE CRYPTO (Binance WS) -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Live Crypto</div>
+            <div class="card-title-sub">Binance WebSocket · real-time ticker stream</div>
+          </div>
+          <span class="card-tag tag-live" id="cryptoStreamTag">CONNECTING</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Pair</th><th>Last</th><th>24h %</th><th>24h High</th><th>24h Low</th><th>Volume</th></tr>
+            </thead>
+            <tbody id="cryptoBody">
+              <tr><td colspan="6" class="mono dim">Connecting to Binance…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LIVE FOREX (Twelve Data) -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Live Forex</div>
+            <div class="card-title-sub">Twelve Data API · polled every 60s</div>
+          </div>
+          <span class="card-tag tag-info" id="forexStreamTag">LOADING</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Pair</th><th>Rate</th><th>Change</th><th>% Change</th><th>High</th><th>Low</th></tr>
+            </thead>
+            <tbody id="forexBody">
+              <tr><td colspan="6" class="mono dim">Loading forex rates…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-title-sub" style="margin-top:12px" id="forexNextUpdate"></div>
+      </div>
+
+    </section>
+
+    <!-- ═══ RISK + SIGNALS ═══ -->
+    <section class="grid-2 fade-in" style="animation-delay:.15s">
+
+      <!-- RISK STATUS -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Risk Status</div>
+            <div class="card-title-sub">Independent circuit breakers · evaluated every tick</div>
+          </div>
+          <span class="card-tag tag-live" id="riskTag">ALL CLEAR</span>
+        </div>
+
+        <div class="risk-status-banner" id="riskBanner">
+          <div class="risk-status-icon" id="riskIcon">✓</div>
+          <div class="risk-status-text">
+            <strong id="riskHeadline">Trading enabled — all systems nominal</strong>
+            <span id="riskSub">No breaker thresholds have been triggered today</span>
+          </div>
+        </div>
+
+        <div class="breaker">
+          <div class="breaker-left">
+            <div class="breaker-icon ok">DD</div>
+            <div class="breaker-info">
+              <div class="breaker-name">Daily Drawdown</div>
+              <div class="breaker-rule">Trigger: Daily DD &gt; 3.00% → reduce exposure 50%</div>
+            </div>
+          </div>
+          <div class="breaker-right">
+            <span class="breaker-val ok">0.00%</span>
+            <span class="breaker-state">ARMED</span>
+            <div class="breaker-bar"><div class="breaker-bar-fill" style="width:0%;background:var(--bull)"></div></div>
+          </div>
+        </div>
+
+        <div class="breaker">
+          <div class="breaker-left">
+            <div class="breaker-icon ok">PK</div>
+            <div class="breaker-info">
+              <div class="breaker-name">Peak-to-Trough Drawdown</div>
+              <div class="breaker-rule">Trigger: Peak DD &gt; 10.00% → HALT all trading</div>
+            </div>
+          </div>
+          <div class="breaker-right">
+            <span class="breaker-val ok">2.31%</span>
+            <span class="breaker-state">ARMED</span>
+            <div class="breaker-bar"><div class="breaker-bar-fill" style="width:23.1%;background:var(--bull)"></div></div>
+          </div>
+        </div>
+
+        <div class="breaker">
+          <div class="breaker-left">
+            <div class="breaker-icon ok">VOL</div>
+            <div class="breaker-info">
+              <div class="breaker-name">Volatility Spike Guard</div>
+              <div class="breaker-rule">Trigger: Realized Vol &gt; 35% (Ann.) → cut to High-Vol sizing</div>
+            </div>
+          </div>
+          <div class="breaker-right">
+            <span class="breaker-val ok">11.4%</span>
+            <span class="breaker-state">ARMED</span>
+            <div class="breaker-bar"><div class="breaker-bar-fill" style="width:32.6%;background:var(--bull)"></div></div>
+          </div>
+        </div>
+
+        <div class="breaker">
+          <div class="breaker-left">
+            <div class="breaker-icon ok">CON</div>
+            <div class="breaker-info">
+              <div class="breaker-name">Order Connectivity</div>
+              <div class="breaker-rule">Trigger: Broker heartbeat lost &gt; 60s → HALT new orders</div>
+            </div>
+          </div>
+          <div class="breaker-right">
+            <span class="breaker-val ok">2s</span>
+            <span class="breaker-state">ARMED</span>
+            <div class="breaker-bar"><div class="breaker-bar-fill" style="width:3%;background:var(--bull)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT SIGNALS -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Recent Signals</div>
+            <div class="card-title-sub">Live feed via Binance market data stream</div>
+          </div>
+          <span class="card-tag tag-info" id="streamTag">STREAMING</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Time</th><th>Ticker</th><th>Signal</th><th>Regime</th><th>Conf.</th><th>Size</th></tr>
+            </thead>
+            <tbody id="signalsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ═══ PHILOSOPHY ═══ -->
+    <section class="philosophy fade-in" style="animation-delay:.2s">
+      <div class="philosophy-left">
+        <div class="eyebrow">Our Philosophy</div>
+        <h2>We size risk to the regime — we don't bet on direction.</h2>
+        <p>
+          RegimeTrader is built on one core belief: most of what looks like skill in markets is actually
+          just exposure to volatility at the wrong time. Rather than forecasting price direction, our engine
+          continuously classifies the market into a small set of statistical regimes — defined by realized
+          volatility and drift — using a Gaussian Hidden Markov Model fit on rolling return data.
+        </p>
+        <p>
+          The model selects between 3 and 7 latent states using BIC, so complexity is earned by the data,
+          not assumed in advance. Each regime carries its own volatility-based target exposure: calm,
+          trending markets receive full allocation, while turbulent markets are sized down automatically —
+          long before a drawdown becomes painful.
+        </p>
+        <p>
+          We deliberately run an <strong style="color:var(--text)">always-long</strong> book. Shorting introduces
+          asymmetric tail risk and borrow costs that, in our research, are rarely compensated by the
+          marginal edge of a regime model. Defense, in our system, means holding less — not betting against
+          the market.
+        </p>
+      </div>
+
+      <div class="principle-list">
+        <div class="principle">
+          <div class="principle-mark">σ</div>
+          <div class="principle-body">
+            <strong>Volatility-Based Sizing</strong>
+            <span>Position size is a direct function of the detected regime's realized volatility — not a fixed
+            leverage target. Low-Vol/BULL regimes run near full exposure; High-Vol regimes are scaled down
+            mechanically.</span>
+          </div>
+        </div>
+        <div class="principle no-short">
+          <div class="principle-mark">∅</div>
+          <div class="principle-body">
+            <strong>No Shorting, Ever</strong>
+            <span>The strategy never holds a net-short position. In defensive regimes, capital rotates toward
+            cash or low-volatility allocation rather than betting on further declines.</span>
+          </div>
+        </div>
+        <div class="principle">
+          <div class="principle-mark">BIC</div>
+          <div class="principle-body">
+            <strong>Data-Driven Regime Count</strong>
+            <span>The number of hidden states (3–7) is chosen by Bayesian Information Criterion on each
+            re-fit, balancing model fit against overfitting risk.</span>
+          </div>
+        </div>
+        <div class="principle">
+          <div class="principle-mark">⛔</div>
+          <div class="principle-body">
+            <strong>Independent Circuit Breakers</strong>
+            <span>Daily drawdown, peak drawdown, volatility spikes, and broker connectivity are each monitored
+            by an isolated breaker — any one of them can halt trading independently of the others.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot">
+      <span>RegimeTrader · Demo Dashboard — all figures are simulated for illustration</span>
+      <span id="footClock">—</span>
+    </div>
+
   </main>
 </div>
-
-<div class="modal-overlay" id="alertModal">
-  <div class="modal">
-    <div class="modal-title">🔔 Weka Tahadhari ya Bei</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Coin: <strong id="alertCoinName">—</strong> &nbsp;|&nbsp; Bei: <strong id="alertCurrentPrice">—</strong></div>
-    <input class="modal-input" type="number" id="alertPriceInput" placeholder="Ingiza bei (USD)..." step="0.01">
-    <div class="modal-note">⚡ Utapata taarifa mara bei itakapofikia lengo.</div>
-    <div class="modal-btns">
-      <button class="modal-confirm" onclick="confirmAlert()">✓ Weka Tahadhari</button>
-      <button class="modal-cancel" onclick="closeAlertModal()">Ghairi</button>
-    </div>
-  </div>
-</div>
-
-<div id="toasts"></div>
-
-<script>
-(function(){
-  var s=document.createElement('script');
-  s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
-  s.async=true;
-  document.head.appendChild(s);
-})();
-</script>
 
 <script>
 'use strict';
 
-// ═══════════════════════════════════
-//  API KEYS
-// ═══════════════════════════════════
-const KEYS={
-  xai:'65KTZ22AKF6JGL4E',
-  alphavantage:'e3f85901a6b24a5d853e8deafe7c3103',
-  twelvedata:'d8mmfd1r01qn3045iro0',
-  finnhub:'d8mmfd1r01qn3045irog',
-  metal:'2952a78c9779331373b7f8dec2d6708d'
-};
-
-// ═══════════════════════════════════
-//  COINS
-// ═══════════════════════════════════
-const COINS=[
-  {id:'BTC',name:'Bitcoin',em:'₿',ws:'btcusdt'},
-  {id:'ETH',name:'Ethereum',em:'Ξ',ws:'ethusdt'},
-  {id:'BNB',name:'BNB',em:'◈',ws:'bnbusdt'},
-  {id:'SOL',name:'Solana',em:'◎',ws:'solusdt'},
-  {id:'XRP',name:'XRP',em:'✕',ws:'xrpusdt'},
-  {id:'DOGE',name:'Dogecoin',em:'Ð',ws:'dogeusdt'},
-  {id:'ADA',name:'Cardano',em:'₳',ws:'adausdt'},
-  {id:'AVAX',name:'Avalanche',em:'▲',ws:'avaxusdt'},
-  {id:'DOT',name:'Polkadot',em:'●',ws:'dotusdt'},
-  {id:'LINK',name:'Chainlink',em:'⬡',ws:'linkusdt'},
-  {id:'TRX',name:'TRON',em:'⬟',ws:'trxusdt'},
-  {id:'SHIB',name:'Shiba Inu',em:'🐕',ws:'shibusdt'},
-  {id:'LTC',name:'Litecoin',em:'Ł',ws:'ltcusdt'},
-  {id:'BCH',name:'Bitcoin Cash',em:'Ƀ',ws:'bchusdt'},
-  {id:'UNI',name:'Uniswap',em:'🦄',ws:'uniusdt'},
-  {id:'ATOM',name:'Cosmos',em:'⚛',ws:'atomusdt'},
-  {id:'NEAR',name:'NEAR Protocol',em:'Ⓝ',ws:'nearusdt'},
-  {id:'ARB',name:'Arbitrum',em:'🔵',ws:'arbusdt'},
-  {id:'OP',name:'Optimism',em:'🔴',ws:'opusdt'},
-  {id:'INJ',name:'Injective',em:'💎',ws:'injusdt'},
-  {id:'SUI',name:'Sui',em:'🌊',ws:'suiusdt'},
-  {id:'APT',name:'Aptos',em:'🅰',ws:'aptusdt'},
-  {id:'FIL',name:'Filecoin',em:'⌂',ws:'filusdt'},
-  {id:'MATIC',name:'Polygon',em:'⬡',ws:'maticusdt'},
-  {id:'ICP',name:'Internet Cmp',em:'∞',ws:'icpusdt'},
-  {id:'RENDER',name:'Render',em:'🖥',ws:'renderusdt'},
-  {id:'FET',name:'Fetch.ai',em:'🤖',ws:'fetusdt'},
-  {id:'PEPE',name:'Pepe',em:'🐸',ws:'pepeusdt'},
-  {id:'WIF',name:'dogwifhat',em:'🎩',ws:'wifusdt'},
-  {id:'TON',name:'Toncoin',em:'💎',ws:'tonusdt'},
-  {id:'XLM',name:'Stellar',em:'★',ws:'xlmusdt'},
-  {id:'ALGO',name:'Algorand',em:'◆',ws:'algousdt'},
-  {id:'VET',name:'VeChain',em:'✦',ws:'vetusdt'},
-  {id:'HBAR',name:'Hedera',em:'ℏ',ws:'hbarusdt'},
-  {id:'AAVE',name:'Aave',em:'👻',ws:'aaveusdt'},
-  {id:'CRV',name:'Curve',em:'〰',ws:'crvusdt'},
-  {id:'MKR',name:'Maker',em:'🏛',ws:'mkrusdt'},
-  {id:'SNX',name:'Synthetix',em:'⚗',ws:'snxusdt'},
-  {id:'GRT',name:'The Graph',em:'📊',ws:'grtusdt'},
-  {id:'LDO',name:'Lido DAO',em:'🧪',ws:'ldousdt'},
-  {id:'SAND',name:'The Sandbox',em:'🏖',ws:'sandusdt'},
-  {id:'MANA',name:'Decentraland',em:'🌐',ws:'manausdt'},
-  {id:'AXS',name:'Axie Infinity',em:'🎮',ws:'axsusdt'},
-  {id:'CHZ',name:'Chiliz',em:'⚽',ws:'chzusdt'},
-  {id:'EOS',name:'EOS',em:'◉',ws:'eosusdt'},
-  {id:'XMR',name:'Monero',em:'ɱ',ws:'xmrusdt'},
-  {id:'EGLD',name:'MultiversX',em:'⚡',ws:'egldusdt'},
-  {id:'THETA',name:'Theta Network',em:'θ',ws:'thetausdt'},
-  {id:'FTM',name:'Fantom',em:'👻',ws:'ftmusdt'},
-  {id:'RUNE',name:'THORChain',em:'⚔',ws:'runeusdt'},
+/* ══════════════════════════════════════
+   DEMO DATA — simulated, for UI illustration only
+   ══════════════════════════════════════ */
+const REGIMES=[
+  {key:'low_bull', name:'Low Vol / BULL', side:'bull', vol:'11.4%', drift:'+0.082%/day', alloc:'100% Target Exposure'},
+  {key:'high_bear',name:'High Vol / BEAR',side:'bear', vol:'38.7%', drift:'−0.214%/day', alloc:'25% Target Exposure (Defensive)'},
 ];
 
-const COINCAP_IDS={
-  BTC:'bitcoin',ETH:'ethereum',BNB:'binance-coin',SOL:'solana',
-  XRP:'xrp',DOGE:'dogecoin',ADA:'cardano',AVAX:'avalanche',
-  DOT:'polkadot',LINK:'chainlink',TRX:'tron',SHIB:'shiba-inu',
-  LTC:'litecoin',BCH:'bitcoin-cash',UNI:'uniswap',ATOM:'cosmos',
-  NEAR:'near-protocol',ARB:'arbitrum',OP:'optimism',INJ:'injective-protocol',
-  SUI:'sui',APT:'aptos',FIL:'filecoin',MATIC:'polygon',
-  ICP:'internet-computer',RENDER:'render-token',FET:'fetch',
-  PEPE:'pepe',WIF:'dogwifcoin',TON:'toncoin',XLM:'stellar',
-  ALGO:'algorand',VET:'vechain',HBAR:'hedera-hashgraph',AAVE:'aave',
-  CRV:'curve-dao-token',MKR:'maker',SNX:'synthetix-network-token',
-  GRT:'the-graph',LDO:'lido-dao',SAND:'the-sandbox',MANA:'decentraland',
-  AXS:'axie-infinity',CHZ:'chiliz',EOS:'eos',XMR:'monero',
-  EGLD:'elrond-erd-2',THETA:'theta-network',FTM:'fantom',RUNE:'thorchain',
-};
-const COINCAP_REV=Object.fromEntries(Object.entries(COINCAP_IDS).map(([k,v])=>[v,k]));
+const SIGNAL_TICKERS=['SPY','QQQ','IWM','GLD','TLT','XLE','XLF','BTC/USD'];
+const SIGNAL_TYPES=[
+  {label:'ENTER LONG',cls:'long'},
+  {label:'HOLD',cls:'flat'},
+  {label:'REDUCE',cls:'exit'},
+  {label:'FLAT',cls:'flat'},
+];
 
-// ═══════════════════════════════════
-//  STATE — persist selected coin
-// ═══════════════════════════════════
-const savedCoinId=localStorage.getItem('st_selected')||'BTC';
-const defaultCoin=COINS.find(c=>c.id===savedCoinId)||COINS[0];
-const savedTF=localStorage.getItem('st_tf')||'1m';
-
-const S={
-  prices:{},candles:{},signals:{},
-  selected:defaultCoin,tf:savedTF,view:'single',
-  tickCount:0,ws:null,wsBatches:[],wsToastShown:false,
-  klineWs:null,chartInst:null,ready:false,
-  alerts:{},metals:{},forex:{},_validityInterval:null,
-};
-
-// ═══════════════════════════════════
-//  FORMAT helpers
-// ═══════════════════════════════════
-const fP=p=>{
-  if(!p&&p!==0)return'—';
-  if(p>=1000)return'$'+p.toLocaleString('en-US',{maximumFractionDigits:2});
-  if(p>=1)return'$'+p.toFixed(4);
-  if(p>=0.0001)return'$'+p.toFixed(6);
-  return'$'+p.toFixed(8);
-};
-const fPct=p=>(p>=0?'+':'')+p.toFixed(2)+'%';
-const fVol=v=>{
-  if(v>=1e9)return'$'+(v/1e9).toFixed(2)+'B';
-  if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';
-  if(v>=1e3)return'$'+(v/1e3).toFixed(2)+'K';
-  return'$'+v.toFixed(2);
-};
-const nowStr=()=>new Date().toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-
-const TF_VALIDITY={'1m':180,'5m':900,'15m':2700,'1h':7200,'4h':28800,'1d':86400};
-const TF_LABEL={'1m':'Dakika 3','5m':'Dakika 15','15m':'Dakika 45','1h':'Masaa 2','4h':'Masaa 8','1d':'Siku 1'};
-
-// ═══════════════════════════════════
-//  PRICE STORE
-// ═══════════════════════════════════
-function storePrice(d){
-  const sym=d.symbol?d.symbol.replace('USDT',''):d.s?d.s.replace('USDT',''):null;
-  if(!sym)return;
-  const price=parseFloat(d.lastPrice||d.c||0);
-  if(!price)return;
-  S.prices[sym]={
-    price,
-    open:parseFloat(d.openPrice||d.o||price),
-    high:parseFloat(d.highPrice||d.h||price),
-    low:parseFloat(d.lowPrice||d.l||price),
-    close:price,
-    vol:parseFloat(d.volume||d.v||0)*price,
-    chg24h:parseFloat(d.priceChangePercent||d.P||0),
-    bid:parseFloat(d.bidPrice||d.b||price),
-    ask:parseFloat(d.askPrice||d.a||price),
-    trades:parseInt(d.count||d.n||0),
-  };
+/* ── Clock ── */
+function tickClock(){
+  const now=new Date();
+  const str=now.toLocaleString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' UTC';
+  const el=document.getElementById('clock');if(el)el.textContent=str;
+  const fc=document.getElementById('footClock');if(fc)fc.textContent='Rendered '+str;
+  const ls=document.getElementById('lastSync');
+  if(ls)ls.textContent=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
+tickClock();setInterval(tickClock,1000);
 
-// ═══════════════════════════════════
-//  PRICE LOADING
-// ═══════════════════════════════════
-async function preloadPricesREST(){
-  openCoinCapWS();
-  try{
-    const symbols=COINS.map(c=>'"'+c.id+'USDT"').join(',');
-    const r=await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${symbols}]`,{signal:AbortSignal.timeout(6000)});
-    if(r.ok){
-      const arr=await r.json();
-      if(Array.isArray(arr)){
-        arr.forEach(d=>storePrice(d));
-        if(!S.ready){
-          S.ready=true;
-          renderSingle(S.selected);
-          buildSidebar();
-          fetchKlines(S.selected,S.tf);
-          connectKlineWS(S.selected,S.tf);
-        }else buildSidebar();
-      }
-    }
-  }catch(e){}
-}
-
-function openCoinCapWS(){
-  const url='wss://ws.coincap.io/prices?assets='+COINS.map(c=>COINCAP_IDS[c.id]||c.id.toLowerCase()).join(',');
-  const ws=new WebSocket(url);
-  S.wsBatches.push(ws);
-  ws.onopen=()=>{
-    setWsStatus('ok','● CoinCap Live');
-    if(!S.wsToastShown){toast('✅ CoinCap — Imeunganishwa!');S.wsToastShown=true;}
-  };
-  ws.onmessage=e=>{
-    let data;try{data=JSON.parse(e.data);}catch{return;}
-    Object.entries(data).forEach(([geckoId,priceStr])=>{
-      const sym=COINCAP_REV[geckoId];if(!sym)return;
-      const price=parseFloat(priceStr);if(!price)return;
-      const old=S.prices[sym];
-      S.prices[sym]={price,open:old?.open||price,high:old?.high?Math.max(old.high,price):price,
-        low:old?.low?Math.min(old.low,price):price,close:price,vol:old?.vol||0,
-        chg24h:old?.chg24h||0,bid:price*0.9999,ask:price*1.0001,trades:0};
-      S.tickCount++;
-      if(S.tickCount%5===0){
-        const tc=document.getElementById('tickCount');const lu=document.getElementById('lastUpd');
-        if(tc)tc.textContent=S.tickCount;if(lu)lu.textContent=nowStr();
-      }
-      flashSidebarPrice(sym);
-      checkPriceAlert(sym,price,old?.price||price);
-      if(sym===S.selected.id&&S.view==='single'){
-        updateLivePrice(sym);
-        if(S.tickCount%5===0)recomputeAndUpdateSignal(sym);
-      }
-      if(!S.ready&&sym===S.selected.id){
-        S.ready=true;renderSingle(S.selected);buildSidebar();
-        fetchKlines(S.selected,S.tf);connectKlineWS(S.selected,S.tf);
-      }
-      if(S.tickCount%30===0)buildSidebar();
-    });
-  };
-  ws.onerror=()=>setWsStatus('err','✕ CoinCap Error');
-  ws.onclose=()=>{setWsStatus('wait','⏳ Inaunganika tena...');setTimeout(openCoinCapWS,3000);};
-}
-
-function openBinanceWSIfNeeded(){
-  if(S.tickCount>0)return;
-  const BATCH=10,base='wss://stream.binance.com:9443';
-  for(let i=0;i<COINS.length;i+=BATCH)openBatchWS(COINS.slice(i,i+BATCH),base,i===0);
-}
-
-function openBatchWS(coins,base,isPrimary){
-  const streams=coins.map(c=>c.ws+'@ticker').join('/');
-  const ws=new WebSocket(`${base}/stream?streams=${streams}`);
-  ws.onopen=()=>{if(isPrimary&&!S.wsToastShown){setWsStatus('ok','● Binance Live');toast('✅ Binance — Imeunganishwa!');S.wsToastShown=true;}};
-  ws.onmessage=e=>{
-    let msg;try{msg=JSON.parse(e.data);}catch{return;}
-    const d=msg.data;if(!d||d.e!=='24hrTicker')return;
-    const sym=d.s.replace('USDT','');
-    const oldPrice=S.prices[sym]?.price||0;
-    storePrice({...d,symbol:d.s});
-    S.tickCount++;
-    if(S.tickCount%5===0){const tc=document.getElementById('tickCount');const lu=document.getElementById('lastUpd');if(tc)tc.textContent=S.tickCount;if(lu)lu.textContent=nowStr();}
-    flashSidebarPrice(sym);
-    checkPriceAlert(sym,parseFloat(d.c),oldPrice);
-    if(sym===S.selected.id&&S.view==='single'){updateLivePrice(sym);if(S.tickCount%5===0)recomputeAndUpdateSignal(sym);}
-    if(!S.ready&&sym===S.selected.id){S.ready=true;renderSingle(S.selected);buildSidebar();fetchKlines(S.selected,S.tf);connectKlineWS(S.selected,S.tf);setWsStatus('ok','● Binance Live');}
-    if(S.tickCount%30===0)buildSidebar();
-  };
-  ws.onerror=()=>{if(isPrimary)setWsStatus('err','✕ WS Error');};
-  ws.onclose=()=>setTimeout(()=>openBatchWS(coins,base,isPrimary),5000);
-  S.wsBatches.push(ws);
-}
-
-function setWsStatus(cls,txt){const el=document.getElementById('wsStatus');if(el)el.innerHTML=`<span class="ws-${cls}">${txt}</span>`;}
-
-// ═══════════════════════════════════
-//  KLINES
-// ═══════════════════════════════════
-async function fetchKlines(coin,interval){
-  const key=coin.id+'_'+interval;
-  try{
-    const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.id}USDT&interval=${interval}&limit=150`);
-    if(!r.ok)return;
-    const raw=await r.json();
-    S.candles[key]=raw.map(k=>({t:k[0],o:parseFloat(k[1]),h:parseFloat(k[2]),l:parseFloat(k[3]),c:parseFloat(k[4]),v:parseFloat(k[5])}));
-    if(S.view==='single'&&S.selected.id===coin.id)drawChart(coin,interval);
-    computeSignalFromCandles(coin,S.candles[key]);
-  }catch(e){}
-}
-
-function connectKlineWS(coin,interval){
-  if(S.klineWs){S.klineWs.close();S.klineWs=null;}
-  const ws=new WebSocket(`wss://stream.binance.com:9443/ws/${coin.ws}@kline_${interval}`);
-  ws.onmessage=e=>{
-    let msg;try{msg=JSON.parse(e.data);}catch{return;}
-    const k=msg.k;if(!k)return;
-    const key=coin.id+'_'+interval;if(!S.candles[key])return;
-    const candle={t:k.t,o:parseFloat(k.o),h:parseFloat(k.h),l:parseFloat(k.l),c:parseFloat(k.c),v:parseFloat(k.v)};
-    const last=S.candles[key][S.candles[key].length-1];
-    if(last&&last.t===k.t)S.candles[key][S.candles[key].length-1]=candle;
-    else{S.candles[key].push(candle);if(S.candles[key].length>200)S.candles[key].shift();}
-    if(S.view==='single'&&S.selected.id===coin.id)drawChart(coin,interval);
-    computeSignalFromCandles(coin,S.candles[key]);
-  };
-  S.klineWs=ws;
-}
-
-// ═══════════════════════════════════
-//  TECHNICAL ANALYSIS
-// ═══════════════════════════════════
-const sma=(arr,n)=>arr.length<n?null:arr.slice(-n).reduce((a,b)=>a+b,0)/n;
-function ema(arr,n){
-  if(arr.length<n)return null;
-  const k=2/(n+1);let v=arr.slice(0,n).reduce((a,b)=>a+b,0)/n;
-  for(let i=n;i<arr.length;i++)v=arr[i]*k+v*(1-k);
-  return v;
-}
-function rsi(prices,n=14){
-  if(prices.length<n+1)return 50;
-  let g=0,l=0;const s=prices.slice(-n-1);
-  for(let i=1;i<s.length;i++){const d=s[i]-s[i-1];d>0?g+=d:l+=Math.abs(d);}
-  const ag=g/n,al=l/n;return al===0?100:100-(100/(1+ag/al));
-}
-function macd(prices){
-  if(prices.length<26)return null;
-  const e12=ema(prices,12),e26=ema(prices,26);
-  if(!e12||!e26)return null;
-  const line=e12-e26;return{line,signal:line*0.85,hist:line*0.15};
-}
-function bb(prices,n=20,mult=2){
-  if(prices.length<n)return null;
-  const sl=prices.slice(-n);
-  const mean=sl.reduce((a,b)=>a+b,0)/n;
-  const std=Math.sqrt(sl.reduce((a,b)=>a+(b-mean)**2,0)/n);
-  return{upper:mean+mult*std,mid:mean,lower:mean-mult*std,std};
-}
-function atr(candles,n=14){
-  if(candles.length<n+1)return candles[candles.length-1]?.c*0.01||1;
-  let sum=0;
-  for(let i=candles.length-n;i<candles.length;i++){
-    const tr=Math.max(candles[i].h-candles[i].l,Math.abs(candles[i].h-candles[i-1].c),Math.abs(candles[i].l-candles[i-1].c));
-    sum+=tr;
+/* ── Regime history bars (demo) ── */
+function buildRegimeBars(){
+  const wrap=document.getElementById('regimeBars');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  // Simulated 30-bar regime history: mostly bull with a brief bear stretch
+  const seq=[];
+  for(let i=0;i<30;i++){
+    if(i>=9&&i<=13)seq.push('bear');
+    else seq.push('bull');
   }
-  return Math.max(sum/n,candles[candles.length-1].c*0.003);
-}
-function stochRSI(prices,period=14){
-  const r=rsi(prices,period);
-  const s=prices.slice(-period);
-  const mn=Math.min(...s),mx=Math.max(...s);
-  return mx===mn?50:((prices[prices.length-1]-mn)/(mx-mn))*100;
-}
-// Swing highs/lows kwa kuona support/resistance halisi
-function findSwingLevels(candles,lookback=30){
-  const n=Math.min(lookback,candles.length);
-  const recent=candles.slice(-n);
-  const highs=recent.map(c=>c.h);
-  const lows=recent.map(c=>c.l);
-  // Cluster-based: pata kiwango kinachoonekana mara nyingi
-  const resistance=Math.max(...highs);
-  const support=Math.min(...lows);
-  // Kiwango cha kati (pivot)
-  const pivot=(resistance+support+recent[recent.length-1].c)/3;
-  const r1=2*pivot-support;
-  const s1=2*pivot-resistance;
-  return{resistance,support,pivot,r1,s1};
-}
-
-// ═══════════════════════════════════
-//  SIGNAL ENGINE (Iliyoboreshwa)
-// ═══════════════════════════════════
-function computeSignalFromCandles(coin,candles){
-  if(!candles||candles.length<20)return;
-  const closes=candles.map(c=>c.c);
-  const highs=candles.map(c=>c.h);
-  const lows=candles.map(c=>c.l);
-  const vols=candles.map(c=>c.v);
-  const current=closes[closes.length-1];
-  const prevClose=closes[closes.length-2]||current;
-  const d=S.prices[coin.id]||{price:current,chg24h:0};
-
-  const RSI=rsi(closes,14);
-  const SMA20=sma(closes,Math.min(20,closes.length));
-  const SMA50=sma(closes,Math.min(50,closes.length));
-  const EMA9=ema(closes,Math.min(9,closes.length));
-  const EMA12=ema(closes,Math.min(12,closes.length));
-  const EMA26=ema(closes,Math.min(26,closes.length));
-  const BB=bb(closes,Math.min(20,closes.length));
-  const MACD=macd(closes);
-  const ATR=atr(candles,Math.min(14,candles.length-1));
-  const StochRSI=stochRSI(closes,14);
-
-  const avgVol=vols.slice(-10).reduce((a,b)=>a+b,0)/10;
-  const volMomentum=vols[vols.length-1]/Math.max(avgVol,0.0001);
-  const roc5=closes.length>5?((current-closes[closes.length-6])/closes[closes.length-6])*100:0;
-  const roc3=closes.length>3?((current-closes[closes.length-4])/closes[closes.length-4])*100:0;
-
-  // Swing levels
-  const swings=findSwingLevels(candles,30);
-  const {resistance,support,pivot,r1,s1}=swings;
-  const distToRes=(resistance-current)/current*100;
-  const distToSup=(current-support)/current*100;
-
-  // Candle pattern
-  const lastCandle=candles[candles.length-1];
-  const prevCandle=candles[candles.length-2]||lastCandle;
-  const candleBody=Math.abs(lastCandle.c-lastCandle.o);
-  const candleRange=lastCandle.h-lastCandle.l||0.001;
-  const upperWick=(lastCandle.h-Math.max(lastCandle.o,lastCandle.c))/candleRange;
-  const lowerWick=(Math.min(lastCandle.o,lastCandle.c)-lastCandle.l)/candleRange;
-  const isBullishEngulf=lastCandle.c>lastCandle.o&&prevCandle.c<prevCandle.o&&lastCandle.c>prevCandle.o&&lastCandle.o<prevCandle.c;
-  const isBearishEngulf=lastCandle.c<lastCandle.o&&prevCandle.c>prevCandle.o&&lastCandle.c<prevCandle.o&&lastCandle.o>prevCandle.c;
-
-  let bull=0,bear=0,reasons=[],inds={};
-
-  // RSI
-  if(RSI<25){bull+=4;reasons.push('RSI '+RSI.toFixed(0)+' — Oversold Kali: rebound inatarajiwa');inds.rsi='bull';}
-  else if(RSI<35){bull+=3;reasons.push('RSI '+RSI.toFixed(0)+' — Oversold: nguvu ya kununua');inds.rsi='bull';}
-  else if(RSI<45){bull+=1;inds.rsi='bull';}
-  else if(RSI>75){bear+=4;reasons.push('RSI '+RSI.toFixed(0)+' — Overbought Kali: marekebisho yanaweza kutokea');inds.rsi='bear';}
-  else if(RSI>65){bear+=3;reasons.push('RSI '+RSI.toFixed(0)+' — Overbought: hatari ya kushuka');inds.rsi='bear';}
-  else if(RSI>55){bear+=1;inds.rsi='bear';}
-  else inds.rsi='neut';
-
-  // SMA
-  if(SMA20&&SMA50){
-    if(SMA20>SMA50*1.002){bull+=2;reasons.push('SMA20 > SMA50 — Uptrend (Golden Cross)');inds.sma='bull';}
-    else if(SMA20<SMA50*0.998){bear+=2;reasons.push('SMA20 < SMA50 — Downtrend (Death Cross)');inds.sma='bear';}
-    else inds.sma='neut';
-  }else inds.sma='neut';
-
-  // EMA
-  if(EMA12&&EMA26){
-    if(EMA12>EMA26*1.001){bull+=2;reasons.push('EMA12 juu ya EMA26 — Momentum ya kununua');inds.ema='bull';}
-    else if(EMA12<EMA26*0.999){bear+=2;reasons.push('EMA12 chini ya EMA26 — Momentum ya kuuza');inds.ema='bear';}
-    else inds.ema='neut';
-  }else inds.ema='neut';
-
-  // Bollinger Bands
-  if(BB){
-    const bbRange=BB.upper-BB.lower;
-    const bbPos=(current-BB.lower)/Math.max(bbRange,0.0001);
-    if(current<BB.lower){bull+=3;reasons.push('Bei CHINI ya BB Lower ('+fP(BB.lower)+') — Bounce inawezekana');inds.bb='bull';}
-    else if(current>BB.upper){bear+=3;reasons.push('Bei JUU ya BB Upper ('+fP(BB.upper)+') — Pullback inatarajiwa');inds.bb='bear';}
-    else if(bbPos<0.2){bull+=2;reasons.push('Bei karibu na BB Lower — Support ya kiufundi');inds.bb='bull';}
-    else if(bbPos>0.8){bear+=2;reasons.push('Bei karibu na BB Upper — Resistance ya kiufundi');inds.bb='bear';}
-    else inds.bb='neut';
-  }else inds.bb='neut';
-
-  // MACD
-  if(MACD){
-    if(MACD.line>0&&MACD.hist>0){bull+=2;reasons.push('MACD Chanya ('+MACD.line.toFixed(4)+') — Nguvu ya kununua');inds.macd='bull';}
-    else if(MACD.line<0&&MACD.hist<0){bear+=2;reasons.push('MACD Hasi ('+MACD.line.toFixed(4)+') — Nguvu ya kuuza');inds.macd='bear';}
-    else if(MACD.line>0)inds.macd='bull';
-    else if(MACD.line<0)inds.macd='bear';
-    else inds.macd='neut';
-  }else inds.macd='neut';
-
-  // Stoch RSI
-  if(StochRSI<15){bull+=2;reasons.push('Stoch RSI '+StochRSI.toFixed(0)+' — Oversold kali');}
-  else if(StochRSI<25)bull+=1;
-  else if(StochRSI>85){bear+=2;reasons.push('Stoch RSI '+StochRSI.toFixed(0)+' — Overbought kali');}
-  else if(StochRSI>75)bear+=1;
-
-  // Volume
-  if(volMomentum>2.0){bull+=2;reasons.push('Volume ('+volMomentum.toFixed(1)+'x avg) — Nguvu kubwa ya soko');}
-  else if(volMomentum>1.5)bull+=1;
-
-  // Momentum
-  if(roc5>4){bull+=2;reasons.push('Momentum: +'+roc5.toFixed(1)+'% — Nguvu ya juu');}
-  else if(roc5>2)bull+=1;
-  else if(roc5<-4){bear+=2;reasons.push('Momentum: '+roc5.toFixed(1)+'% — Udhaifu mkubwa');}
-  else if(roc5<-2)bear+=1;
-
-  // 24h change
-  if(d.chg24h>8){bull+=2;reasons.push('Nguvu ya soko: +'+d.chg24h.toFixed(1)+'% leo — Trend nzuri');}
-  else if(d.chg24h>4)bull+=1;
-  else if(d.chg24h<-8){bear+=2;reasons.push('Udhaifu wa soko: '+d.chg24h.toFixed(1)+'% — Shinikizo la kuuza');}
-  else if(d.chg24h<-4)bear+=1;
-
-  // Candlestick patterns
-  if(isBullishEngulf){bull+=2;reasons.push('Bullish Engulfing Pattern — Mwelekeo wa kununua');}
-  if(isBearishEngulf){bear+=2;reasons.push('Bearish Engulfing Pattern — Mwelekeo wa kuuza');}
-  if(lowerWick>0.6&&RSI<50){bull+=1;reasons.push('Lower wick ndefu — Wanunuzi wanaingilia');}
-  if(upperWick>0.6&&RSI>50){bear+=1;reasons.push('Upper wick ndefu — Wauzaji wanaingilia');}
-
-  // Support/Resistance proximity
-  if(distToSup<1.5&&distToSup>0){bull+=1;reasons.push('Bei karibu na Support ($'+support.toFixed(4)+') — Bounce inawezekana');}
-  if(distToRes<1.5&&distToRes>0){bear+=1;reasons.push('Bei karibu na Resistance ($'+resistance.toFixed(4)+') — Marekebisho yanawezekana');}
-
-  const net=bull-bear;
-  const total=Math.max(bull+bear,1);
-
-  // ═══ SIGNAL TYPE — SIDEWAYS haizalishi BUY/SELL ═══
-  let type,trend,orderType;
-  if(net>=5){type='BUY';trend='BULLISH';orderType=RSI<35||(BB&&current<BB.lower)?'Buy Market':'Buy Limit';}
-  else if(net<=-5){type='SELL';trend='BEARISH';orderType=RSI>65||(BB&&current>BB.upper)?'Sell Market':'Sell Limit';}
-  else if(net>=2){type='BUY';trend='BULLISH';orderType='Buy Limit';}
-  else if(net<=-2){type='SELL';trend='BEARISH';orderType='Sell Limit';}
-  else{type='NEUTRAL';trend='SIDEWAYS';orderType='Subiri — Soko Halina Mwelekeo';}
-
-  // ═══ SIDEWAYS override: kama trend ni SIDEWAYS, signal ni NEUTRAL ═══
-  // Hii inaepuka upingano wa SIDEWAYS + SELL/BUY
-  if(trend==='SIDEWAYS'){
-    type='NEUTRAL';
-    orderType='Subiri — Soko Halina Mwelekeo';
-  }
-
-  // ═══ SELL karibu na Resistance — ukaguzi wa ziada ═══
-  // Kama SELL lakini bei iko mbali sana na resistance, signal ni dhaifu
-  if(type==='SELL'&&distToRes>3){
-    // Bei iko mbali na resistance — SELL si salama
-    reasons.unshift('⚠ Bei mbali na Resistance ('+distToRes.toFixed(1)+'%) — Signal dhaifu');
-    if(net>=-3){type='NEUTRAL';trend='SIDEWAYS';orderType='Subiri — SELL Dhaifu';}
-  }
-
-  // ═══ CONFIDENCE sahihi — hesabu moja tu ═══
-  // Tumia wingi wa ushahidi, siyo fraction ya bull vs bear
-  // Hii inaepuka upingano wa "50% juu" lakini "67% chini"
-  let conf;
-  if(type==='NEUTRAL'){
-    // Kwa NEUTRAL, uhakika ni mdogo kwa asili
-    conf=Math.min(55,Math.max(35,Math.round(35+(total*2))));
-  } else {
-    // Kwa BUY/SELL: hesabu kulingana na nguvu ya ushahidi
-    const dominantScore=type==='BUY'?bull:bear;
-    const weakScore=type==='BUY'?bear:bull;
-    // Ratio ya ushahidi wa dominant vs total
-    const ratio=dominantScore/total;
-    // Kiwango cha uhakika: 50-93% kulingana na ushahidi
-    conf=Math.min(93,Math.max(50,Math.round(50+(ratio*50))));
-  }
-
-  // ═══ ENTRY sahihi zaidi ═══
-  let entry;
-  if(type==='BUY'){
-    if(orderType==='Buy Market'){
-      entry=current; // Market order — ingia sasa hivi
-    }else{
-      // Limit order — subiri pullback kidogo
-      const pullback=ATR*0.3;
-      entry=Math.max(current-pullback,support*1.001);
-      // Kama bei iko juu ya EMA9, ingia karibu na EMA9
-      if(EMA9&&EMA9<current)entry=Math.min(entry,EMA9*1.002);
-      entry=Math.min(entry,current); // Usizidi bei ya sasa kwa BUY
-    }
-  }else if(type==='SELL'){
-    if(orderType==='Sell Market'){
-      entry=current;
-    }else{
-      const bounce=ATR*0.3;
-      entry=Math.min(current+bounce,resistance*0.999);
-      if(EMA9&&EMA9>current)entry=Math.max(entry,EMA9*0.998);
-      entry=Math.max(entry,current); // Usishuke chini ya bei ya sasa kwa SELL
-    }
-  }else{
-    entry=current;
-  }
-
-  // ═══ TF Multiplier — M1 ina noise nyingi, SL lazima iwe kubwa zaidi ═══
-  // M1: 2.0x (ilikuwa 1.2x — ilikuwa ndogo sana kwa Bitcoin noise)
-  const tfMult=S.tf==='1m'?2.0:S.tf==='5m'?2.0:S.tf==='15m'?2.2:S.tf==='1h'?2.8:S.tf==='4h'?3.2:4.0;
-  const atrSL=ATR*tfMult;
-
-  // ═══ SL/TP sahihi zaidi (ATR-based na Structure) ═══
-  let sl_p,tp_p;
-  // Kiwango cha chini kabisa cha SL: angalau 0.5% ya entry (Bitcoin ina noise kubwa)
-  const minSLpct=0.005;
-
-  if(type==='BUY'){
-    // SL: chini ya support au ATR kutoka entry — lolote lililo chini zaidi
-    const slByATR=entry-atrSL;
-    const slBySupport=support-ATR*0.5; // Kidogo chini ya support
-    sl_p=Math.max(slByATR,slBySupport); // Tumia ile iliyo karibu zaidi (chini sana ni hatari)
-    // Lazima SL iwe angalau 0.5% chini ya entry
-    sl_p=Math.min(sl_p,entry*(1-minSLpct));
-    // Lakini usizidi 8% ya entry
-    sl_p=Math.max(sl_p,entry*(1-0.08));
-
-    // TP: kuelekea resistance au R:R ratio
-    const rrTarget=conf>=75?3.0:conf>=65?2.5:2.0;
-    const slDistance=Math.abs(entry-sl_p);
-    const tpByRR=entry+slDistance*rrTarget;
-    const tpByResistance=resistance*0.995;
-    // Tumia ile ya chini (conservative) kati ya RR na Resistance
-    tp_p=Math.min(tpByRR,tpByResistance);
-    // Kama TP ni ndogo sana, tumia RR bila kuzingatia resistance
-    if(tp_p<=entry)tp_p=tpByRR;
-
-  }else if(type==='SELL'){
-    const slByATR=entry+atrSL;
-    const slByResistance=resistance+ATR*0.5;
-    sl_p=Math.min(slByATR,slByResistance);
-    // Lazima SL iwe angalau 0.5% juu ya entry
-    sl_p=Math.max(sl_p,entry*(1+minSLpct));
-    sl_p=Math.min(sl_p,entry*(1+0.08));
-
-    const rrTarget=conf>=75?3.0:conf>=65?2.5:2.0;
-    const slDistance=Math.abs(sl_p-entry);
-    const tpByRR=entry-slDistance*rrTarget;
-    const tpBySupport=support*1.005;
-    tp_p=Math.max(tpByRR,tpBySupport);
-    if(tp_p>=entry)tp_p=tpByRR;
-
-  }else{
-    sl_p=entry-atrSL;
-    tp_p=entry+atrSL*2;
-  }
-
-  const slDistance=Math.abs(entry-sl_p);
-  const tpDistance=Math.abs(tp_p-entry);
-  const rrRatio=(tpDistance/Math.max(slDistance,0.0001)).toFixed(1);
-  const longPct=type==='BUY'?Math.min(85,55+Math.floor(bull)*3):type==='SELL'?Math.max(15,45-Math.floor(bear)*3):50;
-
-  // ═══ Hakikisha reasons zipo kila wakati — kamwe si tupu ═══
-  // Kama reasons ni chache, ongeza maelezo ya viashiria vya msingi
-  if(reasons.length===0){
-    reasons.push('RSI: '+RSI.toFixed(1)+' — '+(RSI<40?'Oversold':RSI>60?'Overbought':'Wastani'));
-    if(SMA20&&SMA50)reasons.push('SMA20 '+(SMA20>SMA50?'juu ya':'chini ya')+' SMA50 — '+(SMA20>SMA50?'Uptrend':'Downtrend'));
-    if(MACD)reasons.push('MACD: '+(MACD.line>0?'Chanya (bullish)':'Hasi (bearish)'));
-    if(BB){
-      const bbPos=(current-BB.lower)/(BB.upper-BB.lower);
-      reasons.push('BB Position: '+(bbPos*100).toFixed(0)+'% — '+(bbPos<0.3?'Karibu Lower Band':bbPos>0.7?'Karibu Upper Band':'Katikati ya Bands'));
-    }
-    reasons.push('Soko SIDEWAYS — Viashiria havijatoa ishara wazi ya BUY au SELL');
-  }
-  if(reasons.length<2){
-    reasons.push('StochRSI: '+StochRSI.toFixed(0)+' — '+(StochRSI<30?'Oversold':StochRSI>70?'Overbought':'Wastani'));
-  }
-
-  S.signals[coin.id]={
-    type,trend,orderType,conf,entry,sl:sl_p,tp:tp_p,rr:rrRatio,
-    rsi:RSI,sma20:SMA20,ema9:EMA9,ema12:EMA12,ema26:EMA26,bb:BB,macd:MACD,
-    stochRSI:StochRSI,atr:ATR,reasons:reasons.slice(0,6),inds,
-    bull,bear,longPct,support,resistance,pivot,r1,s1,
-    generatedAt:Date.now(),tf:S.tf,
-  };
-
-  if(S.view==='single'&&S.selected.id===coin.id)updateSignalUI();
-}
-
-// ═══════════════════════════════════
-//  LIVE PRICE UPDATE
-// ═══════════════════════════════════
-function updateLivePrice(sym){
-  const d=S.prices[sym];if(!d)return;
-  const priceEl=document.getElementById('liveMainPrice');if(!priceEl)return;
-  const prev=parseFloat(priceEl.dataset.prev||d.price);
-  priceEl.textContent=fP(d.price);priceEl.dataset.prev=d.price;
-  if(d.price!==prev){priceEl.className='live-price '+(d.price>prev?'flash-up':'flash-dn');setTimeout(()=>{if(priceEl)priceEl.className='live-price';},350);}
-  const chgEl=document.getElementById('liveChg');
-  if(chgEl){chgEl.textContent=fPct(d.chg24h)+' (24h)';chgEl.className='price-chg '+(d.chg24h>=0?'up':'dn');}
-  const highEl=document.getElementById('mainHigh');if(highEl)highEl.textContent=fP(d.high);
-  const lowEl=document.getElementById('mainLow');if(lowEl)lowEl.textContent=fP(d.low);
-  const volEl=document.getElementById('mainVol');if(volEl)volEl.textContent=fVol(d.vol);
-}
-
-function recomputeAndUpdateSignal(sym){
-  const coin=COINS.find(c=>c.id===sym);if(!coin)return;
-  const key=sym+'_'+S.tf;if(S.candles[key])computeSignalFromCandles(coin,S.candles[key]);
-}
-
-// ═══════════════════════════════════
-//  UPDATE SIGNAL UI
-// ═══════════════════════════════════
-function updateSignalUI(){
-  const sig=S.signals[S.selected.id];if(!sig)return;
-  const sc=sig.type==='BUY'?'buy':sig.type==='SELL'?'sell':'neut';
-  const typeEl=document.getElementById('sigTypeEl');
-  if(typeEl){typeEl.className='sig-type '+sc;const arrow=sig.type==='BUY'?'▲':sig.type==='SELL'?'▼':'→';typeEl.innerHTML=`<span class="sig-arrow">${arrow}</span> ${sig.type}`;}
-  const cardEl=document.getElementById('sigCard');if(cardEl)cardEl.className='sig-card is-'+sc;
-  const slPct=((Math.abs(sig.entry-sig.sl)/sig.entry)*100).toFixed(2);
-  const tpPct=((Math.abs(sig.tp-sig.entry)/sig.entry)*100).toFixed(2);
-  const updates={entryVal:fP(sig.entry),slVal:fP(sig.sl),tpVal:fP(sig.tp),rrVal:'1 : '+sig.rr,
-    supportVal:sig.support?fP(sig.support):'—',resistanceVal:sig.resistance?fP(sig.resistance):'—',
-    pivotVal:sig.pivot?fP(sig.pivot):'—'};
-  Object.entries(updates).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val;});
-  const slSubEl=document.getElementById('slSub');if(slSubEl)slSubEl.textContent='-'+slPct+'% kutoka Entry';
-  const tpSubEl=document.getElementById('tpSub');if(tpSubEl)tpSubEl.textContent='+'+tpPct+'% kutoka Entry';
-  const confEl=document.getElementById('confFill');const confPctEl=document.getElementById('confPct');
-  const confColor=sig.conf>=70?'var(--buy)':sig.conf<=55?'var(--sell)':'var(--warn)';
-  if(confEl){confEl.style.width=sig.conf+'%';confEl.style.background=confColor;}
-  if(confPctEl){confPctEl.textContent=sig.conf+'% '+(sig.conf>=70?'(Imara)':sig.conf>=55?'(Wastani)':'(Dhaifu)');confPctEl.style.color=confColor;}
-  const lsEl=document.getElementById('lsFill');if(lsEl)lsEl.style.width=sig.longPct+'%';
-  const lsLong=document.getElementById('lsLongPct');const lsShort=document.getElementById('lsShortPct');
-  if(lsLong)lsLong.textContent='Long '+sig.longPct+'%';if(lsShort)lsShort.textContent='Short '+(100-sig.longPct)+'%';
-  const reasonsEl=document.getElementById('reasonsList');
-  if(reasonsEl){
-    const items=sig.reasons&&sig.reasons.length>0?sig.reasons:['RSI: '+(sig.rsi?sig.rsi.toFixed(1):'—')+' — Inachanganua viashiria...'];
-    reasonsEl.innerHTML=items.map(r=>`<li><span class="r-arrow">→</span>${r}</li>`).join('');
-  }
-}
-
-// ═══════════════════════════════════
-//  VALIDITY COUNTDOWN
-// ═══════════════════════════════════
-function startValidityTimer(sig){
-  if(S._validityInterval)clearInterval(S._validityInterval);
-  const el=document.getElementById('validityTimer');if(!el)return;
-  const validSecs=TF_VALIDITY[sig.tf]||3600;
-  const tick=()=>{
-    const remaining=Math.max(0,validSecs-Math.floor((Date.now()-sig.generatedAt)/1000));
-    el.textContent=Math.floor(remaining/60)+':'+(remaining%60<10?'0':'')+(remaining%60);
-  };
-  tick();S._validityInterval=setInterval(tick,1000);
-}
-
-// ═══════════════════════════════════
-//  POSITION SIZING
-// ═══════════════════════════════════
-function calcPositionSize(){
-  const capitalEl=document.getElementById('psCapital');const riskEl=document.getElementById('psRisk');
-  const sig=S.signals[S.selected.id];if(!capitalEl||!riskEl||!sig)return;
-  const capital=parseFloat(capitalEl.value)||0;const riskPct=parseFloat(riskEl.value)||1;
-  const entry=sig.entry,sl=sig.sl;
-  const slPct=Math.abs(entry-sl)/entry;
-  const riskUSD=capital*(riskPct/100);
-  const positionUSD=slPct>0?riskUSD/slPct:0;
-  const potentialProfit=positionUSD*(parseFloat(sig.rr)||2)*slPct;
-  const r=document.getElementById('psRiskUSD');const p=document.getElementById('psPositionUSD');const pr=document.getElementById('psProfit');
-  if(r)r.textContent=capital>0?'$'+riskUSD.toFixed(2):'—';
-  if(p)p.textContent=positionUSD>0?'$'+positionUSD.toFixed(2):'—';
-  if(pr){pr.textContent=potentialProfit>0?'$'+potentialProfit.toFixed(2):'—';pr.style.color=potentialProfit>0?'var(--buy)':'var(--text)';}
-  const warn=document.getElementById('psWarning');if(warn)warn.style.display=(positionUSD>capital*0.5&&capital>0)?'block':'none';
-}
-
-// ═══════════════════════════════════
-//  PRICE ALERTS
-// ═══════════════════════════════════
-function openAlertModal(){
-  const sym=S.selected.id;const d=S.prices[sym];
-  document.getElementById('alertCoinName').textContent=sym;
-  document.getElementById('alertCurrentPrice').textContent=d?fP(d.price):'—';
-  document.getElementById('alertPriceInput').value=S.alerts[sym]||'';
-  document.getElementById('alertModal').classList.add('open');
-}
-function closeAlertModal(){document.getElementById('alertModal').classList.remove('open');}
-function confirmAlert(){
-  const sym=S.selected.id;const val=parseFloat(document.getElementById('alertPriceInput').value);
-  if(!val||val<=0){toast('⚠ Ingiza bei halali',true);return;}
-  S.alerts[sym]=val;closeAlertModal();toast('🔔 Tahadhari: '+sym+' @ '+fP(val));
-  const btn=document.getElementById('alertBtn');if(btn)btn.classList.add('active-alert');
-}
-function checkPriceAlert(sym,currentPrice,prevPrice){
-  const target=S.alerts[sym];if(!target)return;
-  if((prevPrice<target&&currentPrice>=target)||(prevPrice>target&&currentPrice<=target)){
-    toast('🔔 TAHADHARI! '+sym+' @ '+fP(currentPrice));
-    delete S.alerts[sym];
-    const btn=document.getElementById('alertBtn');if(btn&&S.selected.id===sym)btn.classList.remove('active-alert');
-  }
-}
-
-// ═══════════════════════════════════
-//  FULL RENDER
-// ═══════════════════════════════════
-function renderSingle(coin){
-  const d=S.prices[coin.id];if(!d)return;
-  const sig=S.signals[coin.id]||{
-    type:'NEUTRAL',trend:'SIDEWAYS',orderType:'Inachanganua...',conf:50,
-    entry:d.price,sl:d.price*0.985,tp:d.price*1.03,rr:'2.0',
-    rsi:50,sma20:null,ema12:null,ema26:null,bb:null,macd:null,stochRSI:50,
-    atr:d.price*0.01,reasons:['Inakusanya data...'],inds:{rsi:'neut',sma:'neut',ema:'neut',bb:'neut',macd:'neut'},
-    bull:0,bear:0,longPct:50,support:d.price*0.98,resistance:d.price*1.02,
-    pivot:d.price,r1:d.price*1.01,s1:d.price*0.99,generatedAt:Date.now(),tf:S.tf,
-  };
-
-  const sc=sig.type==='BUY'?'buy':sig.type==='SELL'?'sell':'neut';
-  const sBg=sig.type==='BUY'?'buy-bg':sig.type==='SELL'?'sell-bg':'neut-bg';
-  const tClass=sig.trend==='BULLISH'?'b-bull':sig.trend==='BEARISH'?'b-bear':'b-side';
-  const tIcon=sig.trend==='BULLISH'?'▲':sig.trend==='BEARISH'?'▼':'→';
-  const confClass=sig.conf>=70?'b-conf-h':sig.conf<=50?'b-conf-l':'b-conf-m';
-  const confColor=sig.conf>=70?'var(--buy)':sig.conf<=50?'var(--sell)':'var(--warn)';
-  const ordClass=sig.type==='BUY'?'b-buy':sig.type==='SELL'?'b-sell':'b-neut';
-  const pctCls=d.chg24h>=0?'up':'dn';
-  const arrow=sig.type==='BUY'?'▲':sig.type==='SELL'?'▼':'→';
-  const longPct=sig.longPct||50;
-  const hasAlert=!!S.alerts[coin.id];
-  const fgScore=sig.type==='BUY'?Math.min(90,40+sig.bull*8):sig.type==='SELL'?Math.max(10,60-sig.bear*8):50;
-  const fgLabel=fgScore>=75?'Tamaa Kubwa':fgScore>=55?'Tamaa':fgScore>=45?'Wastani':fgScore>=25?'Hofu':'Hofu Kubwa';
-  const fgColor=fgScore>=75?'var(--sell)':fgScore>=55?'var(--warn)':fgScore>=45?'var(--muted)':'var(--buy)';
-  const slPct=((Math.abs(sig.entry-sig.sl)/sig.entry)*100).toFixed(2);
-  const tpPct=((Math.abs(sig.tp-sig.entry)/sig.entry)*100).toFixed(2);
-
-  document.getElementById('mainArea').innerHTML=`
-    <div class="disclaimer"><strong>⚠ Tahadhari:</strong> Signals zinatokana na data halisi za Binance + viashiria vya kiufundi (RSI, MACD, BB, ATR, Candles). Si ushauri wa uwekezaji.</div>
-
-    <div class="coin-header">
-      <div class="coin-title">
-        <div class="coin-em">${coin.em}</div>
-        <div><div class="coin-sym-big">${coin.id}/USDT</div><div class="coin-fullname">${coin.name} · Binance Live</div></div>
-      </div>
-      <div class="meta-row">
-        <div class="meta-item"><div class="meta-lbl">Juu (24h)</div><div class="meta-val" id="mainHigh">${fP(d.high)}</div></div>
-        <div class="meta-item"><div class="meta-lbl">Chini (24h)</div><div class="meta-val" id="mainLow">${fP(d.low)}</div></div>
-        <div class="meta-item"><div class="meta-lbl">Volume</div><div class="meta-val" id="mainVol">${fVol(d.vol)}</div></div>
-        <div class="meta-item"><div class="meta-lbl">ATR (14)</div><div class="meta-val">${sig.atr?fP(sig.atr):'—'}</div></div>
-      </div>
-      <div class="live-price-wrap">
-        <div class="live-price" id="liveMainPrice" data-prev="${d.price}">${fP(d.price)}</div>
-        <div class="price-chg ${pctCls}" id="liveChg">${fPct(d.chg24h)} (24h)</div>
-      </div>
-    </div>
-
-    <div class="sig-card is-${sc}" id="sigCard">
-      <div class="sig-head ${sBg}">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <div class="sig-type ${sc}" id="sigTypeEl"><span class="sig-arrow">${arrow}</span> ${sig.type}</div>
-          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">TF: <strong style="color:var(--text)">${S.tf.toUpperCase()}</strong> &nbsp;|&nbsp; ATR: <strong>${sig.atr?fP(sig.atr):'—'}</strong></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <button class="alert-btn ${hasAlert?'active-alert':''}" id="alertBtn" onclick="openAlertModal()">🔔 ${hasAlert?'Tahadhari Imewekwa':'Weka Tahadhari'}</button>
-          ${S.tf==='1m'?'<div style="background:var(--warn-light);border:1px solid rgba(230,138,0,.35);border-radius:6px;padding:4px 10px;font-family:var(--mono);font-size:10px;color:var(--warn);font-weight:700">⚠ M1 — Noise Nyingi. Tumia M5/M15 kwa usahihi zaidi</div>':''}
-          <div class="badges">
-            <span class="badge ${ordClass}">📋 ${sig.orderType}</span>
-            <span class="badge ${tClass}">${tIcon} ${sig.trend}</span>
-            <span class="badge ${confClass}">🎯 ${sig.conf}% Uhakika</span>
-          </div>
-        </div>
-      </div>
-      <div class="sig-body">
-        ${sig.trend==='SIDEWAYS'?`<div style="background:var(--warn-light);border:1px solid rgba(230,138,0,.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--warn);font-family:var(--mono)">⚠ <strong>Soko ni SIDEWAYS</strong> — Hakuna mwelekeo wazi. Signal za BUY/SELL ni dhaifu sana. Subiri breakout imara kabla ya kuingia.</div>`:''}
-        <div class="validity-bar">
-          <div>
-            <div class="validity-label">⏱ Uhalali wa Signal (${S.tf.toUpperCase()})</div>
-            <div class="validity-note">Sahihi kwa ${TF_LABEL[S.tf]||'—'}. Baada ya hapo tathmini upya.</div>
-          </div>
-          <div class="validity-timer" id="validityTimer">—:——</div>
-        </div>
-        <div class="sig-grid">
-          <div class="sig-cell"><div class="sc-lbl">🎯 Bei ya Kuingia</div><div class="sc-val entry" id="entryVal">${fP(sig.entry)}</div><div class="sc-sub">${sig.orderType}</div></div>
-          <div class="sig-cell"><div class="sc-lbl">🛑 Stop Loss</div><div class="sc-val sl" id="slVal">${fP(sig.sl)}</div><div class="sc-sub" id="slSub">-${slPct}% kutoka Entry</div></div>
-          <div class="sig-cell"><div class="sc-lbl">✅ Take Profit</div><div class="sc-val tp" id="tpVal">${fP(sig.tp)}</div><div class="sc-sub" id="tpSub">+${tpPct}% kutoka Entry</div></div>
-          <div class="sig-cell"><div class="sc-lbl">⚖ Risk / Reward</div><div class="sc-val rr" id="rrVal">1 : ${sig.rr}</div><div class="sc-sub">${parseFloat(sig.rr)>=2?'✅ R:R Nzuri':'⚠ R:R Ndogo'}</div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
-          <div class="sig-cell" style="border-left:3px solid var(--buy)"><div class="sc-lbl">📗 Support</div><div class="sc-val tp" id="supportVal">${sig.support?fP(sig.support):'—'}</div><div class="sc-sub">Kiwango cha Chini</div></div>
-          <div class="sig-cell" style="border-left:3px solid var(--neutral)"><div class="sc-lbl">⚖ Pivot Point</div><div class="sc-val" id="pivotVal" style="color:var(--neutral)">${sig.pivot?fP(sig.pivot):'—'}</div><div class="sc-sub">R1: ${sig.r1?fP(sig.r1):'—'}</div></div>
-          <div class="sig-cell" style="border-left:3px solid var(--sell)"><div class="sc-lbl">📕 Resistance</div><div class="sc-val sl" id="resistanceVal">${sig.resistance?fP(sig.resistance):'—'}</div><div class="sc-sub">Kiwango cha Juu</div></div>
-        </div>
-        <div class="conf-wrap">
-          <div class="conf-top">
-            <span class="conf-lbl">Nguvu ya Signal — Ishara za Bull: <strong style="color:var(--buy)">${sig.bull}</strong> | Ishara za Bear: <strong style="color:var(--sell)">${sig.bear}</strong> | Jumla: ${sig.bull+sig.bear}</span>
-            <span class="conf-pct" id="confPct" style="color:${confColor}">${sig.conf}% ${sig.conf>=70?'(Imara)':sig.conf>=55?'(Wastani)':'(Dhaifu)'}</span>
-          </div>
-          <div class="conf-track"><div class="conf-fill" id="confFill" style="width:${sig.conf}%;background:${confColor}"></div></div>
-          ${sig.bull===0&&sig.bear===0?`<div style="font-size:10px;color:var(--sell);margin-top:5px;font-family:var(--mono)">⚠ Hakuna ushahidi wa kutosha — signal hii si ya kuaminiwa. Subiri viashiria zaidi.</div>`:''}
-        </div>
-        <div class="reason-box ${sc}">
-          <div class="r-title">Sababu za Signal (Viashiria vya Kiufundi)</div>
-          <ul class="r-points" id="reasonsList">${sig.reasons.map(r=>`<li><span class="r-arrow">→</span>${r}</li>`).join('')||'<li><span class="r-arrow">→</span>Inakusanya...</li>'}</ul>
-        </div>
-        <div class="ind-row">
-          <div class="ind-cell"><div class="ind-name">RSI (14)</div><div class="ind-val ${sig.inds.rsi||'neut'}">${sig.rsi?sig.rsi.toFixed(1):'—'}</div></div>
-          <div class="ind-cell"><div class="ind-name">SMA (20)</div><div class="ind-val ${sig.inds.sma||'neut'}">${sig.sma20?fP(sig.sma20):'—'}</div></div>
-          <div class="ind-cell"><div class="ind-name">EMA (12/26)</div><div class="ind-val ${sig.inds.ema||'neut'}">${sig.ema12?fP(sig.ema12):'—'}</div></div>
-          <div class="ind-cell"><div class="ind-name">BB Band</div><div class="ind-val ${sig.inds.bb||'neut'}">${sig.bb?fP(sig.bb.mid):'—'}</div></div>
-          <div class="ind-cell"><div class="ind-name">MACD</div><div class="ind-val ${sig.inds.macd||'neut'}">${sig.macd?sig.macd.line.toFixed(4):'—'}</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="forex-panel">
-      <div class="pos-title">💱 Exchange Rates — Forex & Dhahabu (Live)</div>
-      <div class="forex-grid" id="forexGrid">
-        <div class="forex-cell"><div class="forex-pair">XAU/USD (GOLD)</div><div class="forex-rate" id="fx_XAUUSD">—</div><div class="forex-chg" id="fxc_XAUUSD" style="color:var(--muted)">Inapakia...</div></div>
-        <div class="forex-cell"><div class="forex-pair">XAG/USD (SILVER)</div><div class="forex-rate" id="fx_XAGUSD">—</div><div class="forex-chg" id="fxc_XAGUSD" style="color:var(--muted)">—</div></div>
-        <div class="forex-cell"><div class="forex-pair">EUR/USD</div><div class="forex-rate" id="fx_EURUSD">—</div><div class="forex-chg" id="fxc_EURUSD" style="color:var(--muted)">—</div></div>
-        <div class="forex-cell"><div class="forex-pair">GBP/USD</div><div class="forex-rate" id="fx_GBPUSD">—</div><div class="forex-chg" id="fxc_GBPUSD" style="color:var(--muted)">—</div></div>
-        <div class="forex-cell"><div class="forex-pair">USD/JPY</div><div class="forex-rate" id="fx_USDJPY">—</div><div class="forex-chg" id="fxc_USDJPY" style="color:var(--muted)">—</div></div>
-        <div class="forex-cell"><div class="forex-pair">USD/TZS</div><div class="forex-rate" id="fx_USDTZS">—</div><div class="forex-chg" id="fxc_USDTZS" style="color:var(--muted)">—</div></div>
-        <div class="forex-cell"><div class="forex-pair">AUD/USD</div><div class="forex-rate" id="fx_AUDUSD">—</div><div class="forex-chg" id="fxc_AUDUSD" style="color:var(--muted)">—</div></div>
-        <div class="forex-cell"><div class="forex-pair">USD/CHF</div><div class="forex-rate" id="fx_USDCHF">—</div><div class="forex-chg" id="fxc_USDCHF" style="color:var(--muted)">—</div></div>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="pos-panel">
-        <div class="pos-title">💰 Hesabu ya Trade</div>
-        <div class="pos-grid">
-          <div class="pos-input-wrap"><label class="pos-lbl">Mtaji (USD)</label><input class="pos-input" type="number" id="psCapital" placeholder="mfano: 1000" oninput="calcPositionSize()"></div>
-          <div class="pos-input-wrap"><label class="pos-lbl">Hatari %</label><input class="pos-input" type="number" id="psRisk" value="1" min="0.1" max="10" step="0.1" oninput="calcPositionSize()"></div>
-          <div class="pos-input-wrap"><label class="pos-lbl">SL Distance</label><input class="pos-input" type="text" readonly value="${slPct}%" style="color:var(--sell)"></div>
-        </div>
-        <div class="pos-results">
-          <div class="pos-res-cell"><div class="pos-res-lbl">Hatari (USD)</div><div class="pos-res-val" id="psRiskUSD" style="color:var(--sell)">—</div></div>
-          <div class="pos-res-cell"><div class="pos-res-lbl">Saizi ya Trade</div><div class="pos-res-val" id="psPositionUSD">—</div></div>
-          <div class="pos-res-cell"><div class="pos-res-lbl">Faida Inayotarajiwa</div><div class="pos-res-val" id="psProfit">—</div></div>
-        </div>
-        <div class="pos-warning" id="psWarning">⚠ Saizi kubwa sana (>50% mtaji). Punguza hatari!</div>
-      </div>
-      <div class="sent-panel">
-        <div class="pos-title">📊 Hali ya Soko</div>
-        <div class="sent-row">
-          <div class="sent-block">
-            <div class="sent-title">Fear &amp; Greed Index</div>
-            <div class="fg-arc-wrap">
-              <div class="fg-num" style="color:${fgColor}">${fgScore}</div>
-              <div><div style="font-size:11px;font-weight:700;color:${fgColor}">${fgLabel}</div><div class="fg-label">Hisia za Soko</div></div>
-            </div>
-          </div>
-          <div class="sent-block">
-            <div class="sent-title">Long / Short Ratio</div>
-            <div class="ls-bar-wrap">
-              <div class="ls-bar-track"><div class="ls-bar-fill" id="lsFill" style="width:${longPct}%"></div></div>
-              <div class="ls-labels"><span style="color:var(--buy)" id="lsLongPct">Long ${longPct}%</span><span style="color:var(--sell)" id="lsShortPct">Short ${100-longPct}%</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="chart-panel">
-      <div class="chart-hdr">
-        <span class="chart-title-txt">📈 ${coin.id}/USDT — ${S.tf} Candles (Entry/SL/TP Lines)</span>
-        <span class="chart-meta" id="chartMeta">Inapakia...</span>
-      </div>
-      <canvas id="coinChart" height="170"></canvas>
-    </div>
-
-    <div class="ai-panel">
-      <div class="ai-panel-hdr">
-        <div class="ai-title">🤖 Uchambuzi wa AI — Claude AI <span class="ai-badge">CLAUDE LIVE</span></div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">Powered by Anthropic Claude</div>
-      </div>
-      <button class="ai-ask-btn" id="aiAskBtn" onclick="askGrokAI()">🤖 Changanua na Claude AI — ${coin.id}/USDT</button>
-      <div id="aiOutput" class="ai-output loading" style="margin-top:10px">Bonyeza kitufe hapo juu kupata uchambuzi wa kina wa ${coin.id}/USDT kutoka kwa Claude AI.</div>
-      <div class="ai-fields" id="aiFields" style="display:none">
-        <div class="ai-field-cell"><div class="ai-field-lbl">🎯 AI Entry</div><div class="ai-field-val entry" id="aiEntry">—</div></div>
-        <div class="ai-field-cell"><div class="ai-field-lbl">🛑 AI Stop Loss</div><div class="ai-field-val sl" id="aiSL">—</div></div>
-        <div class="ai-field-cell"><div class="ai-field-lbl">✅ AI Take Profit</div><div class="ai-field-val tp" id="aiTP">—</div></div>
-      </div>
-      <div class="ai-disclaimer">⚠ Si ushauri wa uwekezaji — tumia risk management kila wakati. xAI Grok inatoa maoni ya ziada tu.</div>
-    </div>`;
-
-  drawChart(coin,S.tf);
-  calcPositionSize();
-  startValidityTimer(sig);
-  // Load forex after render
-  updateForexDisplay();
-}
-
-// ═══════════════════════════════════
-//  CHART
-// ═══════════════════════════════════
-function drawChart(coin,interval){
-  if(typeof Chart==='undefined')return;
-  const key=coin.id+'_'+interval;const candles=S.candles[key];
-  if(!candles||candles.length<2)return;
-  const el=document.getElementById('coinChart');if(!el)return;
-  if(S.chartInst){S.chartInst.destroy();S.chartInst=null;}
-  const sig=S.signals[coin.id];
-  const color=!sig?'#4b6cf7':sig.type==='BUY'?'#00b87a':sig.type==='SELL'?'#e8334a':'#4b6cf7';
-  const step=Math.max(1,Math.floor(candles.length/150));
-  const data=candles.filter((_,i)=>i%step===0);
-  const labels=data.map(c=>{
-    const d=new Date(c.t);
-    return interval.endsWith('m')?d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('en',{month:'short',day:'numeric'});
+  seq.forEach((r,i)=>{
+    const bar=document.createElement('div');
+    bar.className='regime-bar';
+    const h=14+Math.round(Math.sin(i*0.6)*6)+ (r==='bear'?20:0) + Math.round(Math.random()*6);
+    bar.style.height=Math.max(8,Math.min(48,h))+'px';
+    bar.style.background=r==='bull'?'var(--bull)':'var(--bear)';
+    bar.style.opacity=i===seq.length-1?'1':(0.45+ (i/seq.length)*0.4).toFixed(2);
+    wrap.appendChild(bar);
   });
-  const datasets=[{label:'Bei',data:data.map(c=>c.c),borderColor:color,backgroundColor:color+'15',borderWidth:1.5,pointRadius:0,fill:true,tension:0.2}];
-  if(sig&&sig.entry){
-    datasets.push({label:'Entry ('+fP(sig.entry)+')',data:data.map(()=>sig.entry),borderColor:'#4b6cf7',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
-    datasets.push({label:'SL ('+fP(sig.sl)+')',data:data.map(()=>sig.sl),borderColor:'#e8334a',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
-    datasets.push({label:'TP ('+fP(sig.tp)+')',data:data.map(()=>sig.tp),borderColor:'#00b87a',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
-  }
-  S.chartInst=new Chart(el.getContext('2d'),{
-    type:'line',data:{labels,datasets},
-    options:{
-      responsive:true,animation:false,
-      plugins:{
-        legend:{display:!!sig,position:'top',labels:{color:'#7a8db3',font:{family:'IBM Plex Mono',size:9},boxWidth:20,padding:10}},
-        tooltip:{backgroundColor:'#fff',borderColor:'#dde3ef',borderWidth:1,titleColor:'#1e2d4a',bodyColor:'#7a8db3',callbacks:{label:ctx=>' '+fP(ctx.parsed.y)}}
-      },
-      scales:{
-        x:{ticks:{color:'#7a8db3',font:{family:'IBM Plex Mono',size:9},maxTicksLimit:10},grid:{color:'rgba(221,227,239,0.5)'}},
-        y:{ticks:{color:'#7a8db3',font:{family:'IBM Plex Mono',size:9}},grid:{color:'rgba(221,227,239,0.5)'}}
-      }
-    }
-  });
-  const metaEl=document.getElementById('chartMeta');
-  if(metaEl)metaEl.textContent=`${candles.length} candles · ${nowStr()}`;
 }
+buildRegimeBars();
 
-// ═══════════════════════════════════
-//  CLAUDE AI ANALYSIS — Inafanya kazi!
-// ═══════════════════════════════════
-async function askGrokAI(){
-  const outEl=document.getElementById('aiOutput');
-  const fieldsEl=document.getElementById('aiFields');
-  const btn=document.getElementById('aiAskBtn');
-  if(!outEl||!btn)return;
-
-  const coin=S.selected;const sig=S.signals[coin.id];const d=S.prices[coin.id];
-  if(!sig||!d){outEl.className='ai-output loading';outEl.textContent='⏳ Subiri data ya coin ipakiwe kwanza...';return;}
-
-  btn.disabled=true;
-  outEl.className='ai-output loading';
-  outEl.textContent='⏳ Claude AI inachambuza '+coin.id+'/USDT — tafadhali subiri...';
-  if(fieldsEl)fieldsEl.style.display='none';
-
-  const slPct=((Math.abs(sig.entry-sig.sl)/sig.entry)*100).toFixed(2);
-  const tpPct=((Math.abs(sig.tp-sig.entry)/sig.entry)*100).toFixed(2);
-
-  const prompt=`Wewe ni mtaalam wa crypto trading. Changanua ${coin.id}/USDT kwa kutumia data halisi hii na utoe maamuzi sahihi kwa Kiswahili.
-
-DATA HALISI YA SOKO (Binance Live - ${new Date().toLocaleTimeString('sw-TZ')}):
-- Bei ya Sasa: $${d.price.toFixed(8)}
-- Mabadiliko (24h): ${d.chg24h.toFixed(2)}%
-- Juu (24h): $${(d.high||d.price*1.02).toFixed(6)} | Chini: $${(d.low||d.price*0.98).toFixed(6)}
-- Volume: ${fVol(d.vol||0)}
-- Timeframe: ${S.tf.toUpperCase()}
-
-VIASHIRIA VYA KIUFUNDI:
-- RSI (14): ${sig.rsi?sig.rsi.toFixed(1):'N/A'} ${sig.rsi<30?'[OVERSOLD]':sig.rsi>70?'[OVERBOUGHT]':'[NEUTRAL]'}
-- Stoch RSI: ${sig.stochRSI?sig.stochRSI.toFixed(1):'N/A'}
-- ATR (14): $${sig.atr?sig.atr.toFixed(6):'N/A'}
-- SMA 20: $${sig.sma20?sig.sma20.toFixed(6):'N/A'}
-- EMA 12: $${sig.ema12?sig.ema12.toFixed(6):'N/A'} | EMA 26: $${sig.ema26?sig.ema26.toFixed(6):'N/A'}
-- MACD Line: ${sig.macd?sig.macd.line.toFixed(6):'N/A'} | Histogram: ${sig.macd?sig.macd.hist.toFixed(6):'N/A'}
-- BB Upper: $${sig.bb?sig.bb.upper.toFixed(6):'N/A'} | Mid: $${sig.bb?sig.bb.mid.toFixed(6):'N/A'} | Lower: $${sig.bb?sig.bb.lower.toFixed(6):'N/A'}
-- Support: $${sig.support?sig.support.toFixed(6):'N/A'}
-- Resistance: $${sig.resistance?sig.resistance.toFixed(6):'N/A'}
-- Pivot Point: $${sig.pivot?sig.pivot.toFixed(6):'N/A'}
-- Algorithm Signal: ${sig.type} (Bull: ${sig.bull}, Bear: ${sig.bear}, Uhakika: ${sig.conf}%)
-- Algorithm Entry: $${sig.entry?sig.entry.toFixed(6):'N/A'}
-- Algorithm SL: $${sig.sl?sig.sl.toFixed(6):'N/A'} (-${slPct}%)
-- Algorithm TP: $${sig.tp?sig.tp.toFixed(6):'N/A'} (+${tpPct}%)
-- Algorithm R:R: 1:${sig.rr}
-- Trend: ${sig.trend}
-
-Toa uchambuzi wako HASA kwa muundo huu (usibadilishe muundo):
-
-SIGNAL: [BUY / SELL / NEUTRAL]
-SABABU: [Sababu 2-3 za msingi kwa Kiswahili]
-ENTRY: $[bei sahihi ya kuingia - nambari tu, mfano 64500.12]
-STOP_LOSS: $[bei ya stop loss - nambari tu]
-TAKE_PROFIT: $[bei ya take profit - nambari tu]
-HATARI: [CHINI / WASTANI / JUU]
-MUHTASARI: [Sentensi 2-3 kwa Kiswahili inayoelezea hali ya soko na mapendekezo]
-
-MUHIMU: Hesabu Entry, SL, TP kwa kuzingatia ATR=$${sig.atr?sig.atr.toFixed(6):'N/A'} na bei ya sasa=$${d.price.toFixed(6)}. Toa nambari halisi za bei.`;
-
-  try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:1000,
-        messages:[
-          {role:'user',content:prompt}
-        ]
-      })
-    });
-
-    if(!resp.ok){
-      const errData=await resp.json().catch(()=>({}));
-      throw new Error(errData.error?.message||'HTTP '+resp.status);
-    }
-
-    const data=await resp.json();
-    const text=(data.content||[]).map(b=>b.type==='text'?b.text:'').join('').trim();
-    if(!text)throw new Error('Jibu tupu kutoka kwa Claude AI');
-
-    outEl.className='ai-output';
-    outEl.textContent=text;
-
-    // Parse numbers kutoka jibu la AI
-    const getField=label=>{
-      const patterns=[
-        new RegExp(label+'[:\\s]+\\$?([0-9,\\.]+)','i'),
-        new RegExp(label+'[:\\s]*\\n?\\$?([0-9,\\.]+)','i'),
-      ];
-      for(const p of patterns){const m=text.match(p);if(m)return parseFloat(m[1].replace(/,/g,''));}
-      return null;
-    };
-    const entryAI=getField('ENTRY');
-    const slAI=getField('STOP_LOSS');
-    const tpAI=getField('TAKE_PROFIT');
-
-    if(fieldsEl&&(entryAI||slAI||tpAI)){
-      fieldsEl.style.display='grid';
-      const eEl=document.getElementById('aiEntry');const sEl=document.getElementById('aiSL');const tEl=document.getElementById('aiTP');
-      if(eEl&&entryAI)eEl.textContent=fP(entryAI);
-      if(sEl&&slAI)sEl.textContent=fP(slAI);
-      if(tEl&&tpAI)tEl.textContent=fP(tpAI);
-    }
-
-    toast('✅ Claude AI amekamilisha uchambuzi wa '+coin.id);
-  }catch(e){
-    outEl.className='ai-output error';
-    outEl.textContent='❌ Hitilafu: '+e.message+'\n\nTafadhali fungua faili hili moja kwa moja kwenye claude.ai (si browser ya kawaida) ili AI ifanye kazi.';
-  }finally{
-    btn.disabled=false;
-  }
-}
-
-// ═══════════════════════════════════
-//  FOREX + GOLD DATA
-// ═══════════════════════════════════
-const forexCache={};
-
-async function fetchAllForex(){
-  // Njia 1: Twelve Data (EUR/USD, GBP/USD, nk.)
-  await fetchTwelveDataForex();
-  // Njia 2: Finnhub (Gold/Silver)
-  await fetchFinnhubGold();
-  // Njia 3: Alpha Vantage kwa TZS
-  await fetchAlphaVantageTZS();
-  updateForexDisplay();
-}
-
-async function fetchTwelveDataForex(){
-  const pairs=['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CHF','USD/TZS'];
-  const symbols=pairs.join(',');
-  try{
-    const r=await fetch(`https://api.twelvedata.com/price?symbol=${encodeURIComponent(symbols)}&apikey=${KEYS.twelvedata}`,{signal:AbortSignal.timeout(8000)});
-    if(!r.ok)return;
-    const data=await r.json();
-    pairs.forEach(pair=>{
-      const key=pair.replace('/','');
-      const d=data[pair]||data[key];
-      if(d&&d.price){
-        forexCache[key]={rate:parseFloat(d.price),chg:null,source:'12Data'};
-      }
-    });
-    // Pia pata XAUUSD kutoka Twelve Data
-    await fetchTwelveDataGold();
-  }catch(e){}
-}
-
-async function fetchTwelveDataGold(){
-  try{
-    const r=await fetch(`https://api.twelvedata.com/price?symbol=XAU/USD,XAG/USD&apikey=${KEYS.twelvedata}`,{signal:AbortSignal.timeout(8000)});
-    if(!r.ok)return;
-    const data=await r.json();
-    if(data['XAU/USD']?.price){
-      forexCache['XAUUSD']={rate:parseFloat(data['XAU/USD'].price),chg:null,source:'12Data'};
-      // Update sidebar
-      const el=document.getElementById('metal_XAU');if(el)el.textContent='$'+parseFloat(data['XAU/USD'].price).toFixed(2);
-    }
-    if(data['XAG/USD']?.price){
-      forexCache['XAGUSD']={rate:parseFloat(data['XAG/USD'].price),chg:null,source:'12Data'};
-      const el=document.getElementById('metal_XAG');if(el)el.textContent='$'+parseFloat(data['XAG/USD'].price).toFixed(2);
-    }
-  }catch(e){}
-}
-
-async function fetchFinnhubGold(){
-  // Finnhub: forex rates
-  const pairs=[{sym:'OANDA:XAU_USD',key:'XAUUSD'},{sym:'OANDA:EUR_USD',key:'EURUSD'},{sym:'OANDA:GBP_USD',key:'GBPUSD'},{sym:'OANDA:USD_JPY',key:'USDJPY'}];
-  for(const pair of pairs){
-    if(forexCache[pair.key]?.rate)continue; // tayari ipo
-    try{
-      const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${pair.sym}&token=${KEYS.finnhub}`,{signal:AbortSignal.timeout(6000)});
-      if(!r.ok)continue;
-      const data=await r.json();
-      if(data.c&&data.c>0){
-        const chg=data.pc>0?((data.c-data.pc)/data.pc*100):null;
-        forexCache[pair.key]={rate:data.c,chg,high:data.h,low:data.l,source:'Finnhub'};
-        if(pair.key==='XAUUSD'){const el=document.getElementById('metal_XAU');if(el)el.textContent='$'+data.c.toFixed(2);}
-      }
-    }catch(e){}
-  }
-}
-
-async function fetchAlphaVantageTZS(){
-  // TZS kwa Alpha Vantage
-  try{
-    if(forexCache['USDTZS']?.rate)return;
-    const r=await fetch(`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=TZS&apikey=${KEYS.alphavantage}`,{signal:AbortSignal.timeout(8000)});
-    if(!r.ok)return;
-    const data=await r.json();
-    const rate=parseFloat(data['Realtime Currency Exchange Rate']?.['5. Exchange Rate']);
-    if(rate>0)forexCache['USDTZS']={rate,chg:null,source:'AlphaVantage'};
-  }catch(e){}
-}
-
-function updateForexDisplay(){
-  const pairs=[
-    {key:'XAUUSD',id:'fx_XAUUSD',chgId:'fxc_XAUUSD',decimals:2,prefix:'$'},
-    {key:'XAGUSD',id:'fx_XAGUSD',chgId:'fxc_XAGUSD',decimals:2,prefix:'$'},
-    {key:'EURUSD',id:'fx_EURUSD',chgId:'fxc_EURUSD',decimals:5,prefix:''},
-    {key:'GBPUSD',id:'fx_GBPUSD',chgId:'fxc_GBPUSD',decimals:5,prefix:''},
-    {key:'USDJPY',id:'fx_USDJPY',chgId:'fxc_USDJPY',decimals:3,prefix:''},
-    {key:'USDTZS',id:'fx_USDTZS',chgId:'fxc_USDTZS',decimals:0,prefix:''},
-    {key:'AUDUSD',id:'fx_AUDUSD',chgId:'fxc_AUDUSD',decimals:5,prefix:''},
-    {key:'USDCHF',id:'fx_USDCHF',chgId:'fxc_USDCHF',decimals:5,prefix:''},
+/* ── Regime probability chips ── */
+function buildProbRow(activeKey){
+  const row=document.getElementById('probRow');
+  if(!row)return;
+  const states=[
+    {name:'Low Vol / BULL',cls:'bull',pct:activeKey==='low_bull'?78:6},
+    {name:'Mid Vol / BULL',cls:'neutral',pct:activeKey==='low_bull'?15:9},
+    {name:'High Vol / BULL',cls:'warn',pct:activeKey==='low_bull'?5:12},
+    {name:'High Vol / BEAR',cls:'bear',pct:activeKey==='high_bear'?81:2},
   ];
-  pairs.forEach(p=>{
-    const el=document.getElementById(p.id);const chgEl=document.getElementById(p.chgId);
-    const cache=forexCache[p.key];
-    if(el&&cache?.rate){
-      el.textContent=p.prefix+cache.rate.toFixed(p.decimals);
-      if(chgEl){
-        if(cache.chg!==null&&cache.chg!==undefined){
-          const pct=(cache.chg>=0?'+':'')+cache.chg.toFixed(2)+'%';
-          chgEl.textContent=pct+' | '+cache.source;
-          chgEl.style.color=cache.chg>=0?'var(--buy)':'var(--sell)';
-        }else{chgEl.textContent=cache.source;chgEl.style.color='var(--muted)';}
-      }
-    }
-    // Sidebar update
-    const sbMap={EURUSD:'forex_EURUSD',GBPUSD:'forex_GBPUSD',USDJPY:'forex_USDJPY'};
-    if(sbMap[p.key]&&cache?.rate){
-      const sbEl=document.getElementById(sbMap[p.key]);
-      if(sbEl)sbEl.textContent=cache.rate.toFixed(p.decimals);
-    }
+  // normalize roughly to 100 for display purposes
+  row.innerHTML=states.map(s=>`
+    <div class="prob-chip">
+      <div class="prob-chip-top">
+        <span class="prob-chip-name">${s.name}</span>
+        <span class="prob-chip-pct ${s.cls}">${s.pct}%</span>
+      </div>
+      <div class="prob-track"><div class="prob-fill ${s.cls}" style="width:${s.pct}%"></div></div>
+    </div>`).join('');
+}
+
+/* ── Apply a regime to the hero ── */
+function applyRegime(idx){
+  const r=REGIMES[idx];
+  const hero=document.getElementById('regimeHero');
+  const pill=document.getElementById('regimePill');
+  hero.classList.remove('is-bear','is-warn');
+  pill.classList.remove('bull','bear');
+  if(r.side==='bear'){hero.classList.add('is-bear');pill.classList.add('bear');}
+  else{pill.classList.add('bull');}
+
+  document.getElementById('regimeName').textContent=r.name;
+  document.getElementById('metaVol').textContent=r.vol;
+  document.getElementById('metaVol').className='regime-meta-val '+(r.side==='bear'?'bear':'bull');
+  document.getElementById('metaDrift').textContent=r.drift;
+  document.getElementById('metaDrift').className='regime-meta-val '+(r.side==='bear'?'bear':'bull');
+  document.getElementById('metaAlloc').textContent=r.alloc;
+  document.getElementById('metaDuration').textContent=r.side==='bear'?'3 bars (0.75 days)':'18 bars (4.5 days)';
+
+  buildProbRow(r.key);
+
+  // Risk + leverage adjustments
+  const riskBanner=document.getElementById('riskBanner');
+  const riskTag=document.getElementById('riskTag');
+  const riskIcon=document.getElementById('riskIcon');
+  const riskHeadline=document.getElementById('riskHeadline');
+  const riskSub=document.getElementById('riskSub');
+  const mLeverage=document.getElementById('mLeverage');
+  const mLeverageNote=document.getElementById('mLeverageNote');
+
+  riskBanner.classList.remove('warn','bear');
+  if(r.side==='bear'){
+    riskBanner.classList.add('warn');
+    riskTag.textContent='DEFENSIVE';
+    riskTag.className='card-tag tag-warn';
+    riskIcon.textContent='!';
+    riskHeadline.textContent='Defensive mode — exposure cut to High-Vol sizing';
+    riskSub.textContent='Volatility Spike Guard triggered: realized vol exceeded 35% threshold';
+    mLeverage.textContent='0.35×';
+    mLeverageNote.textContent='Target: 0.35× (High-Vol regime — defensive)';
+  }else{
+    riskTag.textContent='ALL CLEAR';
+    riskTag.className='card-tag tag-live';
+    riskIcon.textContent='✓';
+    riskHeadline.textContent='Trading enabled — all systems nominal';
+    riskSub.textContent='No breaker thresholds have been triggered today';
+    mLeverage.textContent='1.00×';
+    mLeverageNote.textContent='Target: 1.00× (Low-Vol regime)';
+  }
+}
+applyRegime(0);
+
+/* ── Sparkline renderer ── */
+function drawSpark(id,points,color){
+  const c=document.getElementById(id);
+  if(!c)return;
+  const dpr=window.devicePixelRatio||1;
+  const w=c.clientWidth||160,h=c.clientHeight||32;
+  c.width=w*dpr;c.height=h*dpr;
+  const ctx=c.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const max=Math.max(...points),min=Math.min(...points);
+  const range=(max-min)||1;
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    const x=(i/(points.length-1))*w;
+    const y=h-((p-min)/range)*h*0.85-2;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
   });
+  ctx.strokeStyle=color;ctx.lineWidth=1.6;ctx.lineJoin='round';ctx.stroke();
+  // fill
+  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+  const grad=ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,color+'33');
+  grad.addColorStop(1,color+'00');
+  ctx.fillStyle=grad;ctx.fill();
 }
 
-// ═══════════════════════════════════
-//  METAL PRICES (backup/supplement)
-// ═══════════════════════════════════
-async function fetchMetalPrices(){
-  try{
-    const r=await fetch(`https://api.metalpriceapi.com/v1/latest?api_key=${KEYS.metal}&base=USD&currencies=XAU,XAG`,{signal:AbortSignal.timeout(8000)});
-    if(!r.ok)return;
-    const data=await r.json();
-    if(!data.success)return;
-    const rates=data.rates;
-    if(rates['USDXAU']&&!forexCache['XAUUSD']?.rate){
-      const gold=1/rates['USDXAU'];
-      forexCache['XAUUSD']={rate:gold,chg:null,source:'MetalAPI'};
-      const el=document.getElementById('metal_XAU');if(el){el.textContent='$'+gold.toFixed(2);el.style.color='var(--warn)';}
-      updateForexDisplay();
-    }
-    if(rates['USDXAG']&&!forexCache['XAGUSD']?.rate){
-      const silver=1/rates['USDXAG'];
-      forexCache['XAGUSD']={rate:silver,chg:null,source:'MetalAPI'};
-      const el=document.getElementById('metal_XAG');if(el){el.textContent='$'+silver.toFixed(2);el.style.color='var(--muted)';}
-      updateForexDisplay();
-    }
-  }catch(e){}
+function genSeries(n,base,vol,trendUp){
+  const out=[base];
+  for(let i=1;i<n;i++){
+    const drift=trendUp?vol*0.18:-vol*0.12;
+    out.push(out[i-1]+(Math.random()-0.45)*vol+drift);
+  }
+  return out;
 }
 
-// ═══════════════════════════════════
-//  SIDEBAR
-// ═══════════════════════════════════
-function buildSidebar(){
-  const list=document.getElementById('coinList');if(!list)return;
-  const frag=document.createDocumentFragment();
-  COINS.forEach(coin=>{
-    const d=S.prices[coin.id],sig=S.signals[coin.id];
-    const dotColor=sig?(sig.type==='BUY'?'var(--buy)':sig.type==='SELL'?'var(--sell)':'var(--warn)'):'var(--dim)';
-    const pClass=d?(d.chg24h>=0?'up':'dn'):'';
-    const btn=document.createElement('button');
-    btn.className='coin-btn'+(S.selected.id===coin.id?' active':'');
-    btn.onclick=()=>selectCoin(coin.id);
-    btn.innerHTML=`<span style="font-size:14px">${coin.em}</span><span class="coin-sym">${coin.id}</span><span class="coin-price-sb ${pClass}" id="sbp_${coin.id}">${d?fP(d.price):'—'}</span><span class="sig-dot" style="background:${dotColor}"></span>`;
-    frag.appendChild(btn);
-  });
-  list.replaceChildren(frag);
-  // Update TF buttons
-  document.querySelectorAll('.tf-btn').forEach(b=>{b.classList.toggle('active',b.textContent===S.tf);});
+function renderSparks(){
+  drawSpark('sparkEquity',genSeries(40,247000,420,true),'#3ddc97');
+  drawSpark('sparkPnl',genSeries(40,0,140,true),'#3ddc97');
+  drawSpark('sparkLev',genSeries(40,1,0.02,false),'#5b8def');
+}
+renderSparks();
+window.addEventListener('resize',()=>{clearTimeout(window._rsT);window._rsT=setTimeout(renderSparks,150);});
+
+/* ── Signals feed (demo, simulated live) ── */
+let signalRows=[
+  {time:'09:42:11',tkr:'SPY',sig:'ENTER LONG',cls:'long',regime:'Low Vol/BULL',conf:0.91,size:'+18.2% NAV'},
+  {time:'09:38:47',tkr:'QQQ',sig:'HOLD',cls:'flat',regime:'Low Vol/BULL',conf:0.88,size:'14.0% NAV'},
+  {time:'09:31:02',tkr:'GLD',sig:'ENTER LONG',cls:'long',regime:'Low Vol/BULL',conf:0.74,size:'+6.5% NAV'},
+  {time:'09:15:30',tkr:'TLT',sig:'FLAT',cls:'flat',regime:'Low Vol/BULL',conf:0.62,size:'0.0% NAV'},
+  {time:'08:59:18',tkr:'XLE',sig:'REDUCE',cls:'exit',regime:'Mid Vol/BULL',conf:0.69,size:'−4.1% NAV'},
+  {time:'08:45:05',tkr:'BTC/USD',sig:'HOLD',cls:'flat',regime:'Low Vol/BULL',conf:0.81,size:'9.8% NAV'},
+];
+
+function renderSignals(){
+  const body=document.getElementById('signalsBody');
+  if(!body)return;
+  body.innerHTML=signalRows.map(r=>`
+    <tr>
+      <td class="mono dim">${r.time}</td>
+      <td class="tkr">${r.tkr}</td>
+      <td><span class="sig-side ${r.cls}">${r.sig}</span></td>
+      <td class="mono dim">${r.regime}</td>
+      <td><span class="conf-bar-mini"><span class="mono">${r.conf.toFixed(2)}</span><span class="conf-track-mini"><span class="conf-fill-mini" style="width:${Math.round(r.conf*100)}%"></span></span></span></td>
+      <td class="mono">${r.size}</td>
+    </tr>`).join('');
+}
+renderSignals();
+
+/* Simulate a new signal arriving periodically */
+function pushSimulatedSignal(){
+  const now=new Date();
+  const t=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  const tkr=SIGNAL_TICKERS[Math.floor(Math.random()*SIGNAL_TICKERS.length)];
+  const sig=SIGNAL_TYPES[Math.floor(Math.random()*SIGNAL_TYPES.length)];
+  const conf=(0.55+Math.random()*0.4);
+  const regimeNow=document.getElementById('regimeName').textContent;
+  let size='0.0% NAV';
+  if(sig.cls==='long')size='+'+(Math.random()*15+2).toFixed(1)+'% NAV';
+  else if(sig.cls==='exit')size='−'+(Math.random()*8+1).toFixed(1)+'% NAV';
+  else size=(Math.random()*12).toFixed(1)+'% NAV';
+
+  signalRows.unshift({time:t,tkr,sig:sig.label,cls:sig.cls,regime:regimeNow,conf,size});
+  signalRows=signalRows.slice(0,7);
+  renderSignals();
+}
+setInterval(pushSimulatedSignal,8000);
+
+/* ── Kill switch demo toggle ── */
+let killed=false;
+document.getElementById('killSwitch').addEventListener('click',function(){
+  killed=!killed;
+  const streamTag=document.getElementById('streamTag');
+  if(killed){
+    this.textContent='⏻ Resume Trading';
+    this.style.borderColor='var(--bull)';this.style.color='var(--bull)';
+    streamTag.textContent='HALTED';streamTag.className='card-tag tag-warn';
+  }else{
+    this.textContent='⏻ Kill Switch';
+    this.style.borderColor='';this.style.color='';
+    streamTag.textContent='STREAMING';streamTag.className='card-tag tag-info';
+  }
+});
+
+/* ── Occasionally flip regime to demonstrate the bear state (demo only) ── */
+let regimeIdx=0;
+setInterval(()=>{
+  regimeIdx=(regimeIdx+1)%REGIMES.length===1 && Math.random()<0.5 ? 0 : (regimeIdx+1)%REGIMES.length;
+  // Keep mostly in bull state for realism — only occasionally show bear
+  if(Math.random()<0.25){applyRegime(1);setTimeout(()=>applyRegime(0),9000);}
+},25000);
+
+/* ══════════════════════════════════════
+   LIVE DATA — Binance WebSocket (crypto) + Twelve Data (forex)
+   ══════════════════════════════════════ */
+
+/* ── BINANCE: live crypto ticker via WebSocket ── */
+const CRYPTO_SYMBOLS=['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT','DOGEUSDT'];
+const cryptoData={};
+
+function fmtPrice(p){
+  const n=parseFloat(p);
+  if(n>=1000)return n.toLocaleString('en-US',{maximumFractionDigits:2});
+  if(n>=1)return n.toFixed(4);
+  return n.toFixed(6);
+}
+function fmtVol(v){
+  const n=parseFloat(v);
+  if(n>=1e9)return (n/1e9).toFixed(2)+'B';
+  if(n>=1e6)return (n/1e6).toFixed(2)+'M';
+  if(n>=1e3)return (n/1e3).toFixed(2)+'K';
+  return n.toFixed(2);
 }
 
-function flashSidebarPrice(sym){
-  const el=document.getElementById('sbp_'+sym);if(!el)return;
-  const d=S.prices[sym];if(!d)return;
-  el.textContent=fP(d.price);el.className='coin-price-sb '+(d.chg24h>=0?'up':'dn');
-}
-
-// ═══════════════════════════════════
-//  OVERVIEW TABLE
-// ═══════════════════════════════════
-function showAll(){
-  S.view='all';
-  const rows=COINS.map(coin=>{
-    const d=S.prices[coin.id],sig=S.signals[coin.id];
-    if(!d||!sig)return '';
-    const p=d.chg24h>=0?'up-txt':'dn-txt';
-    const sc=sig.type==='BUY'?'td-buy':sig.type==='SELL'?'td-sell':'td-neut';
-    const oc=sig.type==='BUY'?'ord-buy':sig.type==='SELL'?'ord-sell':'ord-neut';
-    const cc=sig.conf>=70?'var(--buy)':sig.conf<=50?'var(--sell)':'var(--warn)';
-    const arrow=sig.type==='BUY'?'▲':sig.type==='SELL'?'▼':'→';
-    return `<tr onclick="selectCoin('${coin.id}')"><td><div class="ov-coin"><span class="ov-em">${coin.em}</span><div><div class="ov-sym2">${coin.id}</div><div class="ov-full2">${coin.name}</div></div></div></td><td id="ovp_${coin.id}">${fP(d.price)}</td><td class="${p}">${fPct(d.chg24h)}</td><td class="${sc}">${arrow} ${sig.type}</td><td><span class="ord-tag ${oc}">${sig.orderType}</span></td><td>${fP(sig.entry)}</td><td style="color:var(--sell)">${fP(sig.sl)}</td><td style="color:var(--buy)">${fP(sig.tp)}</td><td>1:${sig.rr}</td><td style="color:${cc}">${sig.conf}%</td><td class="${sig.trend==='BULLISH'?'up-txt':sig.trend==='BEARISH'?'dn-txt':''}">${sig.trend}</td></tr>`;
+function renderCrypto(){
+  const body=document.getElementById('cryptoBody');
+  if(!body)return;
+  const rows=CRYPTO_SYMBOLS.map(sym=>{
+    const d=cryptoData[sym];
+    if(!d)return `<tr><td class="tkr">${sym.replace('USDT','/USDT')}</td><td colspan="5" class="mono dim">Waiting…</td></tr>`;
+    const pct=parseFloat(d.P);
+    const pctCls=pct>=0?'long':'exit';
+    const pctSign=pct>=0?'+':'';
+    return `<tr>
+      <td class="tkr">${sym.replace('USDT','/USDT')}</td>
+      <td class="mono">${fmtPrice(d.c)}</td>
+      <td><span class="sig-side ${pctCls}">${pctSign}${pct.toFixed(2)}%</span></td>
+      <td class="mono dim">${fmtPrice(d.h)}</td>
+      <td class="mono dim">${fmtPrice(d.l)}</td>
+      <td class="mono dim">${fmtVol(d.v)}</td>
+    </tr>`;
   }).join('');
-  document.getElementById('mainArea').innerHTML=`
-    <div class="disclaimer"><strong>⚠ Tahadhari:</strong> Signals zinatokana na data halisi za Binance. Si ushauri wa uwekezaji.</div>
-    <div class="ov-panel">
-      <div class="ov-hdr"><span class="ov-title">📊 Muhtasari — Coins Zote (${COINS.length}) · Binance Live</span><span style="font-family:var(--mono);font-size:10px;color:var(--muted)">Bonyeza coin kuona details</span></div>
-      <div style="overflow-x:auto"><table class="ov-table">
-        <thead><tr><th>Coin</th><th>Bei</th><th>24h%</th><th>Signal</th><th>Order</th><th>Entry</th><th>SL</th><th>TP</th><th>R:R</th><th>Uhakika</th><th>Trend</th></tr></thead>
-        <tbody id="ovBody">${rows||'<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--muted)">Inapakia...</td></tr>'}</tbody>
-      </table></div>
-    </div>`;
-  const ovTimer=setInterval(()=>{
-    if(S.view!=='all'){clearInterval(ovTimer);return;}
-    COINS.forEach(c=>{const el=document.getElementById('ovp_'+c.id);if(el&&S.prices[c.id])el.textContent=fP(S.prices[c.id].price);});
+  body.innerHTML=rows;
+}
+
+let cryptoWs=null;
+let cryptoReconnectDelay=2000;
+function connectBinanceWS(){
+  const streams=CRYPTO_SYMBOLS.map(s=>s.toLowerCase()+'@ticker').join('/');
+  const url=`wss://stream.binance.com:9443/stream?streams=${streams}`;
+  const tag=document.getElementById('cryptoStreamTag');
+  try{
+    cryptoWs=new WebSocket(url);
+  }catch(e){
+    if(tag){tag.textContent='OFFLINE';tag.className='card-tag tag-warn';}
+    return;
+  }
+  cryptoWs.onopen=()=>{
+    if(tag){tag.textContent='STREAMING';tag.className='card-tag tag-live';}
+    cryptoReconnectDelay=2000;
+  };
+  cryptoWs.onmessage=(ev)=>{
+    try{
+      const msg=JSON.parse(ev.data);
+      const d=msg.data;
+      if(!d||!d.s)return;
+      cryptoData[d.s]={c:d.c,P:d.P,h:d.h,l:d.l,v:d.q}; // c=last, P=24h%, h/l=24h high/low, q=quote volume
+      renderCrypto();
+    }catch(e){/* ignore malformed frame */}
+  };
+  cryptoWs.onerror=()=>{
+    if(tag){tag.textContent='ERROR';tag.className='card-tag tag-warn';}
+  };
+  cryptoWs.onclose=()=>{
+    if(tag){tag.textContent='RECONNECTING';tag.className='card-tag tag-warn';}
+    setTimeout(connectBinanceWS,cryptoReconnectDelay);
+    cryptoReconnectDelay=Math.min(cryptoReconnectDelay*1.5,30000);
+  };
+}
+connectBinanceWS();
+
+/* ── TWELVE DATA: forex quotes via REST polling ── */
+// NOTE: Free-tier Twelve Data keys are rate-limited (8 req/min, 800/day).
+// Replace TWELVE_DATA_KEY with your own key — keys embedded in client-side
+// code are visible to anyone viewing source, so use a low-privilege /
+// rotateable key for browser-based apps.
+const TWELVE_DATA_KEY='d8mmfd1r01qn3045iro0d8mmfd1r01qn3045irog';
+const FOREX_PAIRS=['EUR/USD','GBP/USD','USD/JPY','USD/TZS','AUD/USD','USD/ZAR'];
+const FOREX_POLL_MS=60000;
+
+function renderForex(data){
+  const body=document.getElementById('forexBody');
+  if(!body)return;
+  const rows=FOREX_PAIRS.map(pair=>{
+    const d=data[pair];
+    if(!d||d.status==='error'){
+      return `<tr><td class="tkr">${pair}</td><td colspan="5" class="mono dim">Unavailable</td></tr>`;
+    }
+    const chg=parseFloat(d.percent_change);
+    const chgCls=chg>=0?'long':'exit';
+    const chgSign=chg>=0?'+':'';
+    return `<tr>
+      <td class="tkr">${pair}</td>
+      <td class="mono">${parseFloat(d.close).toFixed(pair.includes('JPY')||pair.includes('TZS')?2:5)}</td>
+      <td class="mono ${chg>=0?'dim':'dim'}">${chgSign}${parseFloat(d.change).toFixed(5)}</td>
+      <td><span class="sig-side ${chgCls}">${chgSign}${chg.toFixed(2)}%</span></td>
+      <td class="mono dim">${parseFloat(d.high).toFixed(pair.includes('JPY')||pair.includes('TZS')?2:5)}</td>
+      <td class="mono dim">${parseFloat(d.low).toFixed(pair.includes('JPY')||pair.includes('TZS')?2:5)}</td>
+    </tr>`;
+  }).join('');
+  body.innerHTML=rows;
+}
+
+async function fetchForex(){
+  const tag=document.getElementById('forexStreamTag');
+  const symbols=FOREX_PAIRS.join(',');
+  const url=`https://api.twelvedata.com/quote?symbol=${encodeURIComponent(symbols)}&apikey=${TWELVE_DATA_KEY}`;
+  try{
+    const res=await fetch(url);
+    const json=await res.json();
+    // Twelve Data returns either a single object (1 symbol) or {SYMBOL: {...}, ...} for multiple
+    let data={};
+    if(json.symbol){
+      data[json.symbol]=json;
+    }else{
+      data=json;
+    }
+    // detect API-level error (e.g. invalid key, plan limit)
+    const firstVal=Object.values(data)[0];
+    if(firstVal && firstVal.code && firstVal.status==='error'){
+      if(tag){tag.textContent='API ERROR';tag.className='card-tag tag-warn';}
+      document.getElementById('forexBody').innerHTML=
+        `<tr><td colspan="6" class="mono dim">Twelve Data error: ${firstVal.message||'check API key / plan limits'}</td></tr>`;
+      return;
+    }
+    renderForex(data);
+    if(tag){tag.textContent='LIVE';tag.className='card-tag tag-live';}
+  }catch(e){
+    if(tag){tag.textContent='OFFLINE';tag.className='card-tag tag-warn';}
+    document.getElementById('forexBody').innerHTML=
+      `<tr><td colspan="6" class="mono dim">Failed to reach Twelve Data API</td></tr>`;
+  }
+}
+
+function startForexPolling(){
+  fetchForex();
+  let remaining=FOREX_POLL_MS/1000;
+  const noteEl=document.getElementById('forexNextUpdate');
+  setInterval(()=>{
+    remaining--;
+    if(remaining<=0){
+      remaining=FOREX_POLL_MS/1000;
+      fetchForex();
+    }
+    if(noteEl)noteEl.textContent=`Next update in ${remaining}s`;
   },1000);
 }
-
-function selectCoin(id){
-  const coin=COINS.find(c=>c.id===id);if(!coin)return;
-  S.selected=coin;S.view='single';
-  localStorage.setItem('st_selected',id); // PERSIST
-  buildSidebar();renderSingle(coin);fetchKlines(coin,S.tf);connectKlineWS(coin,S.tf);
-}
-
-function setTF(btn,tf){
-  document.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  S.tf=tf;
-  localStorage.setItem('st_tf',tf); // PERSIST
-  fetchKlines(S.selected,tf);connectKlineWS(S.selected,tf);
-}
-
-// ═══════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════
-function toast(msg,isErr=false){
-  const tc=document.getElementById('toasts');if(!tc)return;
-  const el=document.createElement('div');el.className='toast';
-  if(isErr)el.style.borderColor='rgba(232,51,74,0.4)';
-  el.textContent=msg;tc.appendChild(el);
-  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.3s';setTimeout(()=>el.remove(),300);},4000);
-}
-
-// ═══════════════════════════════════
-//  INIT
-// ═══════════════════════════════════
-// 1. Sidebar mara moja
-buildSidebar();
-
-// 2. Pata bei
-preloadPricesREST();
-
-// 3. Backup Binance WS
-setTimeout(openBinanceWSIfNeeded,6000);
-
-// 4. Forex + Gold
-setTimeout(()=>{
-  fetchAllForex();
-  fetchMetalPrices();
-  setInterval(fetchAllForex,3*60*1000); // Sasisisha kila dakika 3
-  setInterval(fetchMetalPrices,5*60*1000);
-},1500);
+startForexPolling();
 </script>
 </body>
 </html>
