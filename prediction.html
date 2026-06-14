@@ -84,12 +84,14 @@
     padding: 0 20px;
     display: grid;
     grid-template-columns: 220px 1fr 340px;
+    grid-template-areas: "sidebar center right";
     gap: 18px;
     align-items: start;
   }
 
   /* SIDEBAR (left) */
   .sidebar{
+    grid-area: sidebar;
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 14px;
@@ -145,7 +147,7 @@
   }
 
   /* CENTER COLUMN */
-  .center-col{ display:flex; flex-direction: column; gap: 16px; }
+  .center-col{ grid-area: center; display:flex; flex-direction: column; gap: 16px; }
 
   .price-card{
     background: var(--panel);
@@ -280,7 +282,7 @@
   .tag-oversold{ background: rgba(0,211,167,0.15); color: var(--buy); }
 
   /* RIGHT COLUMN - AI SIGNAL */
-  .right-col{ display:flex; flex-direction: column; gap: 16px; position: sticky; top: 90px; }
+  .right-col{ grid-area: right; display:flex; flex-direction: column; gap: 16px; position: sticky; top: 90px; }
 
   .signal-card{
     background: linear-gradient(160deg, var(--panel2), var(--panel));
@@ -465,14 +467,88 @@
   }
   .overall-pill .s-val{ font-size: 1.2rem; }
 
-  /* ================= RESPONSIVE (mobile fallback) ================= */
+  /* ================= RESPONSIVE ================= */
+
+  /* Tablet / small desktop: drop to 2 columns, sidebar spans full width on top */
   @media (max-width: 1100px){
     .layout{
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "sidebar sidebar"
+        "center right";
     }
-    .sidebar{ position: static; }
+    .sidebar{ grid-area: sidebar; position: static; }
+    .center-col{ grid-area: center; }
+    .right-col{ grid-area: right; position: static; }
     .selector{ flex-direction: row; overflow-x:auto; }
-    .right-col{ position: static; }
+    .chip{ min-width: 90px; }
+  }
+
+  /* Phone: single column stack */
+  @media (max-width: 760px){
+    header{ padding: 14px 14px 10px; }
+    header h1{ font-size: 1.2rem; }
+    header p{ font-size: 0.72rem; }
+
+    .layout{
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "sidebar"
+        "center"
+        "right";
+      padding: 0 12px;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .sidebar{ padding: 10px; }
+    .sidebar h3{ margin-bottom: 6px; }
+    .selector{
+      flex-direction: row;
+      overflow-x: auto;
+      gap: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .chip{
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      min-width: auto;
+    }
+    .chip .mini-price{ display:none; }
+
+    .price-card{ padding: 14px 16px; }
+    .price-card .price{ font-size: 1.8rem; }
+    .stat-row{ gap: 12px; width:100%; justify-content:space-between; }
+    .stat-item{ text-align:left; flex: 1 1 30%; }
+
+    .summary-bar{ gap: 6px; padding: 10px; }
+    .summary-pill{ min-width: 90px; padding: 6px 4px; }
+    .summary-pill .s-val{ font-size: 0.82rem; }
+    .overall-pill .s-val{ font-size: 1rem; }
+
+    .chart-card{ padding: 12px; }
+    .chart-wrap{ height: 240px; }
+    .chart-wrap.small{ height: 120px; }
+    .tf-selector{ gap: 4px; }
+    .tf-btn{ padding: 4px 8px; font-size: 0.68rem; }
+
+    .ind-grid{ grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .ind-box{ padding: 8px 10px; }
+    .ind-box .ind-val{ font-size: 0.9rem; }
+
+    .right-col{ gap: 10px; }
+    .signal-card{ padding: 14px; }
+    .signal-badge{ font-size: 1.6rem; }
+    .ladder{ padding: 10px; }
+    .rung{ font-size: 0.85rem; padding: 6px 0; }
+
+    .disclaimer{ font-size: 0.66rem; padding: 0 14px; margin-top: 14px; }
+  }
+
+  /* Very small phones */
+  @media (max-width: 380px){
+    .ind-grid{ grid-template-columns: 1fr; }
+    .price-card .price{ font-size: 1.5rem; }
   }
 </style>
 </head>
@@ -571,7 +647,7 @@
 <script>
   // ====== WEKA API KEYS HAPA ======
   const FINNHUB_API_KEY = "d8mmfd1r01qn3045iro0d8mmfd1r01qn3045irog";
-  const GROQ_API_KEY = "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";
+  const GROQ_API_KEY = "WEKA_GROQ_KEY_YAKO_HAPA";
   // =================================
 
   const BINANCE_BASE = "https://api.binance.com/api/v3";
@@ -1292,8 +1368,66 @@
   // ================= GROQ AI SIGNAL =================
   document.getElementById("generateBtn").addEventListener("click", generateSignal);
 
+  const GROQ_MODELS = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
+
+  async function callGroq(systemPrompt, promptData){
+    let lastErr = null;
+    for(const model of GROQ_MODELS){
+      try{
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + GROQ_API_KEY
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: promptData }
+            ],
+            temperature: 0.4
+          })
+        });
+
+        const data = await res.json();
+
+        if(!res.ok){
+          const msg = (data && data.error && data.error.message) ? data.error.message : ("HTTP " + res.status);
+          lastErr = new Error("[" + model + "] " + msg);
+          // If it's an auth error, no point trying other models
+          if(res.status === 401 || res.status === 403) throw lastErr;
+          // model not found / decommissioned -> try next model
+          continue;
+        }
+
+        if(!data.choices || !data.choices[0] || !data.choices[0].message){
+          lastErr = new Error("[" + model + "] Jibu lisilo sahihi kutoka Groq.");
+          continue;
+        }
+
+        return data.choices[0].message.content;
+      }catch(e){
+        lastErr = e;
+        if(e.message && (e.message.includes("401") || e.message.includes("403"))) throw e;
+      }
+    }
+    throw lastErr || new Error("Hakuna model iliyofanya kazi.");
+  }
+
   async function generateSignal(){
     const btn = document.getElementById("generateBtn");
+
+    // Basic key validation before calling the API
+    if(!GROQ_API_KEY || GROQ_API_KEY.trim() === "" || GROQ_API_KEY.includes("WEKA_GROQ_KEY")){
+      setStatus("⚠️ Hujaweka GROQ API KEY. Fungua faili, tafuta GROQ_API_KEY na uweke key yako halisi kutoka console.groq.com (inaanza na 'gsk_').");
+      return;
+    }
+    if(!GROQ_API_KEY.startsWith("gsk_")){
+      setStatus("⚠️ GROQ API KEY haina muundo sahihi (inatakiwa kuanza na 'gsk_'). Tafadhali angalia umeweka key sahihi.");
+      return;
+    }
+
     btn.disabled = true;
     setStatus("");
     btn.innerHTML = '<span class="spinner"></span> AI inachambua soko...';
@@ -1303,6 +1437,9 @@
 
       if(activeTab === "crypto"){
         if(!lastCryptoData || !lastIndicators) await fetchCryptoCandles();
+        if(!lastCryptoData || !lastIndicators){
+          throw new Error("Data ya bei haipo bado. Subiri kidogo bei ipakuliwe kisha bonyeza tena.");
+        }
         pairLabel = lastCryptoData.symbol + "/USD";
         currentPrice = lastCryptoData.price;
 
@@ -1343,6 +1480,9 @@ Muhtasari wa Indicators (BUY/SELL count): BUY=${ind._summary ? ind._summary.buyC
 
       }else{
         if(!lastForexData) await fetchForexPrice();
+        if(!lastForexData){
+          throw new Error("Data ya forex haipo bado. Subiri kidogo bei ipakuliwe kisha bonyeza tena.");
+        }
         pairLabel = lastForexData.pair;
         currentPrice = lastForexData.rate;
         promptData = `Jozi: ${pairLabel}
@@ -1372,33 +1512,34 @@ Kanuni za kuhesabu SL na TP:
 - Kwa WAIT: entry, stop_loss, take_profit zote ziwe sawa na bei ya sasa.
 - Pale data za kiufundi hazipo (mfano Forex), tumia asilimia ndogo (0.5% - 3%) kuhesabu umbali wa SL/TP kulingana na "volatility" ya mabadiliko ya bei uliyopewa.`;
 
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + GROQ_API_KEY
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: promptData }
-          ],
-          temperature: 0.4
-        })
-      });
+      let raw = await callGroq(systemPrompt, promptData);
+      raw = raw.trim().replace(/```json|```/g, "").trim();
 
-      const data = await res.json();
-      let raw = data.choices[0].message.content.trim();
-      raw = raw.replace(/```json|```/g, "").trim();
-      const signal = JSON.parse(raw);
+      let signal;
+      try{
+        signal = JSON.parse(raw);
+      }catch(parseErr){
+        throw new Error("AI ilijibu kwa muundo usiosomeka (siyo JSON). Jaribu tena.");
+      }
 
       renderSignal(signal, pairLabel, currentPrice);
       setStatus("✅ Ishara imetengenezwa — " + new Date().toLocaleTimeString("sw-TZ"));
 
     }catch(err){
       console.error(err);
-      setStatus("⚠️ Imeshindikana kupata jibu kutoka AI. Angalia GROQ API KEY.");
+      let msg = err && err.message ? err.message : String(err);
+
+      if(msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("networkerror")){
+        msg = "Imeshindikana kuwasiliana na Groq (mtandao/CORS). Angalia internet yako au jaribu tena.";
+      }else if(msg.includes("401") || msg.toLowerCase().includes("invalid api key") || msg.toLowerCase().includes("invalid_api_key")){
+        msg = "GROQ API KEY si sahihi (401 Unauthorized). Tengeneza key mpya kwenye console.groq.com na uiweke kwenye faili.";
+      }else if(msg.includes("429") || msg.toLowerCase().includes("rate limit")){
+        msg = "Umezidisha kiwango cha maombi (rate limit) cha Groq. Subiri kidogo na ujaribu tena.";
+      }else if(msg.toLowerCase().includes("decommissioned") || msg.toLowerCase().includes("model_not_found") || msg.toLowerCase().includes("does not exist")){
+        msg = "Model ya AI iliyotumika haipo tena Groq. (Tatizo: " + msg + ")";
+      }
+
+      setStatus("⚠️ " + msg);
     }
 
     btn.disabled = false;
